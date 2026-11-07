@@ -180,7 +180,20 @@ body {
 /* Pages with a full-screen image behind the text */
 .photo .cover { z-index: 0; }
 .photo .scroller { background: rgba(0, 0, 0, .34); }
-.photo .page { padding-top: 40vh; }   /* About and Contact text starts at the same height */
+/* About, Contact, Login: the text box's bottom edge meets the top of HOME (see site.js) */
+.stacked {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-top: calc(var(--header-h) + var(--gutter));
+  padding-bottom: calc(100vh - var(--nav-top, 85vh));
+}
+.stack { display: grid; }
+.stack > * { grid-area: 1 / 1; align-self: start; }
+.stack-sizer { visibility: hidden; }
+.stack .page-h, .stack h1 { margin-top: 0; }
+.stack p:last-child { margin-bottom: 0; }
 .photo .page p { color: rgba(255,255,255,.9); }
 .photo .page { text-shadow: 0 1px 14px rgba(0,0,0,.3); }
 
@@ -251,6 +264,8 @@ body {
   }
   .inner .nav a { flex-direction: row-reverse; gap: 8px; }
   .inner .site-footer { top: auto; bottom: 20px; left: var(--gutter); transform: none; writing-mode: horizontal-tb; z-index: 4; }
+  .stack-sizer { display: none; }
+  .stacked { min-height: 0; display: block; }
   .page, .photo .page { margin: 0; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--gutter) 90px; max-width: none; }
   .pager { font-size: 11px; letter-spacing: .12em; }
 }

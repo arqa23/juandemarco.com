@@ -32,7 +32,8 @@ ABOUT = [
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
 NAV = [("home", "Home", "/"), ("work", "Work", "/work/"),
-       ("contact", "Contact", "/contact/"), ("about", "About", "/about/")]
+       ("contact", "Contact", "/contact/"), ("about", "About", "/about/"),
+       ("login", "Login", "/login/")]
 
 
 def page(title, section, body, body_class="", head_extra=""):
@@ -47,7 +48,7 @@ def page(title, section, body, body_class="", head_extra=""):
         cover = HOME_BODY if "photo" in body_class else ""
         body = f'{cover}  <div class="scroller">\n{body}  </div>\n'
         if "photo" in body_class:
-            head_extra = HOME_HEAD
+            head_extra = HOME_HEAD + '  <script src="/site.js" defer></script>\n'
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -156,25 +157,33 @@ def main():
 """
         write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner"))
 
-    about = "\n".join(f"    <p>{html.escape(t)}</p>" for t in ABOUT)
-    write("about/index.html", page("About", "about",
-        f'  <main class="page">\n    <h1>About</h1>\n{about}\n  </main>\n', "inner photo"))
+    about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
+    about_block = f"      <h1>About</h1>\n{about}\n"
 
-    contact = f"""  <main class="page">
-    <h1>Contact</h1>
-    <p>For commissions, collaborations and studio inquiries:</p>
-    <p class="email"><a id="email" href="/contact/">{EMAIL_USER} [at] {EMAIL_DOMAIN}</a></p>
-    <script>
+    def stacked(content):
+        # Every text page sits in a box the size of the About text, so titles
+        # and text land in the same place on About, Contact and Login.
+        return (f'  <main class="page stacked">\n    <div class="stack">\n'
+                f'    <div class="stack-sizer" aria-hidden="true">\n{about_block}    </div>\n'
+                f'    <div class="stack-content">\n{content}    </div>\n    </div>\n  </main>\n')
+
+    write("about/index.html", page("About", "about", stacked(about_block), "inner photo"))
+    write("login/index.html", page("Login", "login", stacked(
+        "      <h1>Login</h1>\n      <p>A private area for shared documents is coming soon.</p>\n"), "inner photo"))
+
+    contact = f"""      <h1>Contact</h1>
+      <p>For commissions, collaborations and studio inquiries:</p>
+      <p class="email"><a id="email" href="/contact/">{EMAIL_USER} [at] {EMAIL_DOMAIN}</a></p>
+      <script>
       // Assemble the address in the browser so simple spam bots can't read it from the page.
       (function () {{
         var a = document.getElementById('email'), e = {json.dumps(EMAIL_USER)} + '@' + {json.dumps(EMAIL_DOMAIN)};
         a.href = 'mailto:' + e; a.textContent = e;
       }})();
-    </script>
-  </main>
+      </script>
 """
-    write("contact/index.html", page("Contact", "contact", contact, "inner photo"))
-    print("built", 4 + len(PROJECTS), "pages")
+    write("contact/index.html", page("Contact", "contact", stacked(contact), "inner photo"))
+    print("built", 5 + len(PROJECTS), "pages")
 
 
 if __name__ == "__main__":
