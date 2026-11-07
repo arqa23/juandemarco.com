@@ -73,6 +73,8 @@ body {
   position: fixed;
   top: 0; left: 0;
   padding: var(--gutter);
+  /* pulls the name up so the space above the letters equals the space to their left */
+  padding-top: calc(var(--gutter) - var(--logo-size) * .28);
   z-index: 3;
 }
 .logo {
@@ -189,8 +191,9 @@ body {
 /* Pages with a full-screen image behind the text */
 .photo .cover { z-index: 0; }
 .photo .scroller { background: rgba(0, 0, 0, .34); }
-/* About, Contact, Login: the text box's bottom edge meets the bottom of LOGIN (see site.js) */
-.stacked {
+/* About, Contact, Login. Default: text under the name. With TEXT_POSITION = "bottom"
+   in tools/build.py the text box's bottom edge meets the bottom of the menu (see site.js). */
+.stacked.at-bottom {
   min-height: 100vh;
   display: flex;
   flex-direction: column;

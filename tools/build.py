@@ -46,6 +46,11 @@ ABOUT = [
     "worked at Snøhetta, Reiser + Umemoto and FXCollaborative. He is a licensed architect.",
 ]
 
+# Where the About / Contact / Login text sits on desktop:
+#   "top"    = under the name (current)
+#   "bottom" = text block's bottom edge lines up with the bottom of the menu
+TEXT_POSITION = "top"
+
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
 NAV = [("home", "Home", "/"), ("work", "Work", "/work/"),
@@ -64,8 +69,6 @@ def page(title, section, body, body_class="", head_extra=""):
         # copyright never move when a scroll bar appears.
         cover = HOME_BODY if "photo" in body_class else ""
         body = f'{cover}  <div class="scroller">\n{body}  </div>\n'
-        if "photo" in body_class:
-            head_extra = HOME_HEAD
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -74,9 +77,10 @@ def page(title, section, body, body_class="", head_extra=""):
   <title>{html.escape(full_title)}</title>
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css?v={ASSET_V}">
   <script>try{{if(localStorage.getItem('jdm-theme')==='light')document.documentElement.dataset.theme='light'}}catch(e){{}}</script>
-  <script src="/site.js" defer></script>
+  <script src="/images.js?v={ASSET_V}"></script>
+  <script src="/site.js?v={ASSET_V}" defer></script>
 {head_extra}</head>
 <body class="{body_class}">
 {body}
@@ -110,28 +114,14 @@ def page(title, section, body, body_class="", head_extra=""):
 """
 
 
-HOME_HEAD = """  <script src="/images.js"></script>
-  <script>
-    // Pick one image at random before the page draws, so there is no flash.
-    (function () {
-      var list = window.COVER_IMAGES || [];
-      if (!list.length) return;
-      var pick = list[Math.floor(Math.random() * list.length)];
-      window.COVER_PICK = pick;
-      var l = document.createElement('link');
-      l.rel = 'preload'; l.as = 'image'; l.href = pick;
-      document.head.appendChild(l);
-    })();
-  </script>
-"""
-
 HOME_BODY = """  <img id="cover" class="cover" alt="" decoding="async" fetchpriority="high">
   <script>
+    // Pick one cover image at random on every visit.
     (function () {
-      var img = document.getElementById('cover');
-      if (!window.COVER_PICK) { img.remove(); return; }
+      var img = document.getElementById('cover'), list = window.COVER_IMAGES || [];
+      if (!list.length) { img.remove(); return; }
       img.onload = function () { img.classList.add('loaded'); };
-      img.src = window.COVER_PICK;
+      img.src = list[Math.floor(Math.random() * list.length)];
     })();
   </script>
 """
@@ -162,9 +152,19 @@ def img_tag(path, alt, eager=False):
     return f'<img src="{path}" width="{w}" height="{h}" alt="{html.escape(alt)}" {load} decoding="async">'
 
 
+def asset_version():
+    import hashlib
+    h = hashlib.md5()
+    for f in ("style.css", "site.js", "images.js"):
+        h.update((ROOT / f).read_bytes())
+    return h.hexdigest()[:8]
+
+
 def main():
+    global ASSET_V
+    ASSET_V = asset_version()
     thumbs()
-    write("index.html", page("Home", "home", HOME_BODY, "home", HOME_HEAD))
+    write("index.html", page("Home", "home", HOME_BODY, "home"))
 
     cards = "\n".join(
         f'      <a class="card" href="/work/{p["slug"]}/">\n'
@@ -222,7 +222,7 @@ def main():
     def stacked(content):
         # Every text page sits in a box the size of the About text, so titles
         # and text land in the same place on About, Contact and Login.
-        return (f'  <main class="page stacked">\n    <div class="stack">\n'
+        return (f'  <main class="page stacked{" at-bottom" if TEXT_POSITION == "bottom" else ""}">\n    <div class="stack">\n'
                 f'    <div class="stack-sizer" aria-hidden="true">\n{about_block}    </div>\n'
                 f'    <div class="stack-content">\n{content}    </div>\n    </div>\n  </main>\n')
 
