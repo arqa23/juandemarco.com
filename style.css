@@ -1,9 +1,12 @@
+@font-face { font-family: "Jost"; src: url("/fonts/jost-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Jost"; src: url("/fonts/jost-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+
 *, *::before, *::after { box-sizing: border-box; }
 
 :root {
   --ink: #ffffff;
   --bg: #111111;
-  --font: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --font: "Jost", "Futura", "Helvetica Neue", Arial, sans-serif;
   --gutter: clamp(18px, 3.5vw, 44px);
 }
 
@@ -58,9 +61,9 @@ body {
 .logo {
   color: var(--ink);
   text-decoration: none;
-  font-size: clamp(18px, 2vw, 26px);
-  font-weight: 500;
-  letter-spacing: .18em;
+  font-size: clamp(17px, 1.7vw, 24px);
+  font-weight: 300;
+  letter-spacing: .42em;
   white-space: nowrap;
 }
 
@@ -69,7 +72,8 @@ body {
   color: var(--ink);
   text-decoration: none;
   font-size: 13px;
-  letter-spacing: .12em;
+  font-weight: 400;
+  letter-spacing: .2em;
   text-transform: uppercase;
   opacity: .85;
 }
@@ -81,7 +85,8 @@ body {
   bottom: 0; left: 0; right: 0;
   padding: 0 var(--gutter) calc(var(--gutter) * .7);
   font-size: 11px;
-  letter-spacing: .06em;
+  font-weight: 400;
+  letter-spacing: .1em;
   text-align: center;
   opacity: .85;
   z-index: 2;
@@ -89,13 +94,13 @@ body {
 
 /* Inner pages (Work, Contact) */
 .page { padding: calc(var(--gutter) * 4) var(--gutter) 100px; max-width: 900px; margin: 0 auto; }
-.page h1 { font-weight: 400; letter-spacing: .14em; font-size: 20px; text-transform: uppercase; }
+.page h1 { font-weight: 300; letter-spacing: .3em; font-size: 20px; text-transform: uppercase; }
 .page p, .page a { color: #ddd; line-height: 1.6; }
 
 /* Phones: stack logo and links if space is tight */
 @media (max-width: 480px) {
   .site-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .logo { font-size: 18px; }
+  .logo { font-size: 17px; letter-spacing: .34em; }
   .nav a { font-size: 12px; }
   .site-footer { font-size: 10px; }
 }
