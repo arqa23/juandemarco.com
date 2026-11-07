@@ -14,6 +14,7 @@ YEAR = "2026"
 # Each project's images live in images/work/<slug>/ as 01.webp, 02.webp, ...
 # shown in that order on its page; the first one is the grid thumbnail.
 PROJECTS = [
+    {"slug": "soma", "title": "SOMA"},
     {"slug": "julius-ii", "title": "Julius II"},
     {"slug": "parnell-residence", "title": "Parnell Residence"},
     {"slug": "talbot-road-residence", "title": "Talbot Road Residence"},
@@ -23,14 +24,14 @@ PROJECTS = [
     {"slug": "march-of-the-silhouettes", "title": "March of the Silhouettes"},
     {"slug": "wedges", "title": "Wedges"},
     {"slug": "frankls-purposive-intention", "title": "Frankl\u2019s Purposive Intention"},
-    {"slug": "soma", "title": "SOMA"},
 ]
 # Optional text per project: add "meta" (e.g. "2024 · Pigment print") and
 # "text" (a list of paragraphs) to any entry above. Placeholders show until then.
-# Optional crop per image: "focus": {"03.webp": "50% 30%"} (left/right %, top/bottom %).
+# How each image is trimmed, fitted and cropped: tools/image_rules.json, applied by tools/images.py.
 
 
-FIT = json.loads((ROOT / "images" / "work" / "fit.json").read_text()) if (ROOT / "images" / "work" / "fit.json").exists() else {}
+# Written by tools/images.py: how each image sits in the frame (fit, focus).
+DISPLAY = json.loads((ROOT / "images" / "work" / "display.json").read_text())
 
 
 def project_images(slug):
@@ -52,6 +53,9 @@ ABOUT = [
 TEXT_POSITION = "top"
 
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
+
+LOGIN_TEXT = ("A closer view for clients, collaborators and partners: work in progress, "
+              "studies and documents shared as a conversation develops. Access is by invitation.")
 
 NAV = [("home", "Home", "/"), ("work", "Work", "/work/"),
        ("contact", "Contact", "/contact/"), ("about", "About", "/about/"),
@@ -78,7 +82,7 @@ def page(title, section, body, body_class="", head_extra=""):
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css?v={ASSET_V}">
-  <script>try{{if(localStorage.getItem('jdm-theme')==='light')document.documentElement.dataset.theme='light'}}catch(e){{}}</script>
+  <script>try{{var t=localStorage.getItem('jdm-theme');if(t&&t!=='dark')document.documentElement.dataset.theme=t}}catch(e){{}}</script>
   <script src="/images.js?v={ASSET_V}"></script>
   <script src="/site.js?v={ASSET_V}" defer></script>
 {head_extra}</head>
@@ -96,8 +100,10 @@ def page(title, section, body, body_class="", head_extra=""):
   <div class="settings" id="settings" hidden>
     <div class="settings-row">
       <span class="settings-label">Mode</span>
-      <button type="button" data-theme-set="dark">Dark</button>
       <button type="button" data-theme-set="light">Light</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="white">White</button>
+      <button type="button" data-theme-set="black">Black</button>
     </div>
     <div class="settings-row">
       <span class="settings-label">Screen</span>
@@ -178,9 +184,9 @@ def main():
     for i, p in enumerate(PROJECTS):
         prev_p, next_p = PROJECTS[i - 1], PROJECTS[(i + 1) % len(PROJECTS)]
         files = project_images(p["slug"])
-        focus = p.get("focus", {})
+        focus = {f: DISPLAY[p["slug"] + "/" + f]["focus"] for f in files if DISPLAY.get(p["slug"] + "/" + f, {}).get("focus")}
         slides = "\n".join(
-            f'        <img class="slide{" is-on" if k == 0 else ""}{" contain" if FIT.get(p["slug"] + "/" + f) == "contain" else ""}" '
+            f'        <img class="slide{" is-on" if k == 0 else ""}{" contain" if DISPLAY.get(p["slug"] + "/" + f, {}).get("fit") == "contain" else ""}" '
             f'{"src" if k == 0 else "data-src"}="/images/work/{p["slug"]}/{f}" '
             f'alt="{html.escape(p["title"])}, image {k + 1}" decoding="async"'
             f'{f" style=\"object-position:{focus[f]}\"" if f in focus else ""}>'
@@ -227,8 +233,25 @@ def main():
                 f'    <div class="stack-content">\n{content}    </div>\n    </div>\n  </main>\n')
 
     write("about/index.html", page("About", "about", stacked(about_block), "inner photo"))
-    write("login/index.html", page("Login", "login", stacked(
-        "      <h1>Login</h1>\n      <p>A private area for shared documents is coming soon.</p>\n"), "inner photo"))
+    login = f"""      <h1>Login</h1>
+      <p>{html.escape(LOGIN_TEXT)}</p>
+      <form class="login-form" id="login-form" autocomplete="off">
+        <label class="visually-hidden" for="login-pass">Password</label>
+        <input id="login-pass" type="password" placeholder="Password" required>
+        <button type="submit">Enter</button>
+      </form>
+      <p class="login-note" id="login-note" hidden>Access is shared by invitation. To request it, write to
+        <a class="login-mail" href="/contact/">{EMAIL_USER} [at] {EMAIL_DOMAIN}</a>.</p>
+      <script>
+        (function () {{
+          var f = document.getElementById('login-form'), n = document.getElementById('login-note');
+          var m = n.querySelector('.login-mail'), e = {json.dumps(EMAIL_USER)} + '@' + {json.dumps(EMAIL_DOMAIN)};
+          m.href = 'mailto:' + e; m.textContent = e;
+          f.addEventListener('submit', function (ev) {{ ev.preventDefault(); n.hidden = false; f.reset(); }});
+        }})();
+      </script>
+"""
+    write("login/index.html", page("Login", "login", stacked(login), "inner photo"))
 
     contact = f"""      <h1>Contact</h1>
       <p>For commissions, collaborations and studio inquiries:</p>

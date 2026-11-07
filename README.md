@@ -10,6 +10,9 @@ A plain HTML/CSS site hosted for free on GitHub Pages, with the domain staying a
 | `index.html` | The landing page: a random full-screen image, the name, the links, the footer (generated) |
 | `images.js` | **The list of cover images.** Add or remove a line to change which images can show up |
 | `images/` | The image files themselves |
+| `images/originals/` | **Untouched project images.** Never edited, so we can always go back |
+| `tools/image_rules.json` | Per-image display rules (trim white margins, cover or contain, focus point) |
+| `tools/images.py` | Rebuilds `images/work/` from the originals using the rules. Run it, then `tools/build.py` |
 | `style.css` | All the look and feel (fonts, sizes, spacing) |
 | `work/`, `about/`, `contact/` | Generated pages; `work/project-N/` is one page per project |
 | `CNAME` | Tells GitHub Pages the site lives at juandemarco.com |

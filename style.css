@@ -257,7 +257,7 @@ body {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: var(--frame-bg);
+  background: var(--bg);   /* rule: the frame is always the page colour */
   overflow: hidden;
 }
 .slide {
@@ -386,20 +386,60 @@ body {
 .settings button:hover { border-color: #fff; }
 .settings button.is-on { background: #fff; color: #111; border-color: #fff; }
 
-/* Light mode: pages without a full-screen image (Work and projects) */
-:root[data-theme="light"] .inner:not(.photo) {
+/* Colour modes (Settings). They apply to pages without a full-screen image:
+   Work and the project pages. Light = cream, White = true white, Black = true black. */
+:root:is([data-theme="light"], [data-theme="white"]) .inner:not(.photo) {
   --bg: #f3f2ef;
   --ink: #141414;
   --ink-dim: rgba(20, 20, 20, .72);
   --legal-ink: rgba(20, 20, 20, .45);
-  --frame-bg: #e6e5e1;
   --scroll-thumb: #c4c3bf;
   --fade: rgba(243,242,239,.5);
   --fade-0: rgba(243,242,239,0);
   --shadow: none;
 }
-:root[data-theme="light"] .inner:not(.photo) .nav a:hover .nav-dot,
-:root[data-theme="light"] .inner:not(.photo) .settings-btn:hover .nav-dot { background: rgba(20,20,20,.45); }
-:root[data-theme="light"] .inner:not(.photo) .card img { background: #e6e5e1; }
+:root[data-theme="white"] .inner:not(.photo) {
+  --bg: #ffffff;
+  --fade: rgba(255,255,255,.5);
+  --fade-0: rgba(255,255,255,0);
+  --scroll-thumb: #cfcfcf;
+}
+:root[data-theme="black"] .inner:not(.photo) {
+  --bg: #000000;
+  --fade: rgba(0,0,0,.5);
+  --fade-0: rgba(0,0,0,0);
+  --scroll-thumb: #333;
+}
+:root:is([data-theme="light"], [data-theme="white"]) .inner:not(.photo) .nav a:hover .nav-dot,
+:root:is([data-theme="light"], [data-theme="white"]) .inner:not(.photo) .settings-btn:hover .nav-dot { background: rgba(20,20,20,.45); }
+:root:is([data-theme="light"], [data-theme="white"]) .inner:not(.photo) .card img { background: #e6e5e1; }
+
+/* Login form */
+.login-form { display: flex; gap: 10px; margin: 1.6em 0 1em; max-width: 420px; }
+.login-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  background: rgba(0,0,0,.28);
+  border: 1px solid rgba(255,255,255,.35);
+  color: #fff;
+  font: 300 var(--text-size) var(--font);
+  letter-spacing: .08em;
+}
+.login-form input::placeholder { color: rgba(255,255,255,.55); letter-spacing: .16em; text-transform: uppercase; font-size: var(--nav-size); }
+.login-form input:focus { outline: none; border-color: #fff; }
+.login-form button {
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.35);
+  color: #fff;
+  font: 400 var(--nav-size) var(--font);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.login-form button:hover { border-color: #fff; }
+.login-note { font-size: calc(var(--text-size) * .92) !important; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) { .cover, .card img { transition: none; } }
