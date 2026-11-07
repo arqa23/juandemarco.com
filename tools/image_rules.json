@@ -1,3 +1,58 @@
 {
- "default": {"trim": false, "fit": "contain"}
+ "default": {
+  "trim": false,
+  "fit": "contain"
+ },
+ "parnell-residence/02": {
+  "scale": 0.95
+ },
+ "julius/03": {
+  "clear": "lr"
+ },
+ "julius/04": {
+  "clear": "lr"
+ },
+ "julius/12": {
+  "skip": true
+ },
+ "american-promise/02": {
+  "clear": "tb"
+ },
+ "american-promise/03": {
+  "scale": 0.9
+ },
+ "american-promise/06": {
+  "scale": 0.9,
+  "fill": "#ffffff"
+ },
+ "the-conflicted-icon/03": {
+  "clear": "lr"
+ },
+ "the-conflicted-icon/04": {
+  "clear": "lr"
+ },
+ "the-conflicted-icon/05": {
+  "clear": "lr"
+ },
+ "the-conflicted-icon/09": {
+  "scale": 0.9
+ },
+ "march-of-the-silhouettes/06": {
+  "scale": 0.9
+ },
+ "frankls-purposive-intention/03": {
+  "scale": 0.9
+ },
+ "frankls-purposive-intention/04": {
+  "scale": 0.9
+ },
+ "frankls-purposive-intention/05": {
+  "scale": 0.9
+ },
+ "frankls-purposive-intention/06": {
+  "scale": 0.9
+ },
+ "frankls-purposive-intention/08": {
+  "clear": "lr"
+ }
 }
