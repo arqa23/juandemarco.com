@@ -7,8 +7,31 @@
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <script src="/images.js"></script>
+  <script>
+    // Pick one image at random before the page draws, so there is no flash.
+    (function () {
+      var list = window.COVER_IMAGES || [];
+      if (!list.length) return;
+      var pick = list[Math.floor(Math.random() * list.length)];
+      window.COVER_PICK = pick;
+      var l = document.createElement('link');
+      l.rel = 'preload'; l.as = 'image'; l.href = pick;
+      document.head.appendChild(l);
+    })();
+  </script>
 </head>
-<body class="inner">
+<body class="inner photo">
+  <img id="cover" class="cover" alt="" decoding="async" fetchpriority="high">
+  <script>
+    (function () {
+      var img = document.getElementById('cover');
+      if (!window.COVER_PICK) { img.remove(); return; }
+      img.onload = function () { img.classList.add('loaded'); };
+      img.src = window.COVER_PICK;
+    })();
+  </script>
+  <div class="scroller">
   <main class="page">
     <h1>Contact</h1>
     <p>For commissions, collaborations and studio inquiries:</p>
@@ -21,6 +44,7 @@
       })();
     </script>
   </main>
+  </div>
 
   <header class="site-header">
     <a class="logo" href="/">JUAN DE MARCO</a>

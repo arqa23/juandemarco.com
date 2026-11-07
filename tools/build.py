@@ -41,6 +41,13 @@ def page(title, section, body, body_class="", head_extra=""):
         f'<span class="nav-label">{label}</span><span class="nav-dot" aria-hidden="true"></span></a>'
         for key, label, href in NAV)
     full_title = "Juan De Marco" if section == "home" else f"{title} | Juan De Marco"
+    if "inner" in body_class:
+        # Inner pages scroll inside their own box, so the fixed name, menu and
+        # copyright never move when a scroll bar appears.
+        cover = HOME_BODY if "photo" in body_class else ""
+        body = f'{cover}  <div class="scroller">\n{body}  </div>\n'
+        if "photo" in body_class:
+            head_extra = HOME_HEAD
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -151,7 +158,7 @@ def main():
 
     about = "\n".join(f"    <p>{html.escape(t)}</p>" for t in ABOUT)
     write("about/index.html", page("About", "about",
-        f'  <main class="page">\n    <h1>About</h1>\n{about}\n  </main>\n', "inner"))
+        f'  <main class="page">\n    <h1>About</h1>\n{about}\n  </main>\n', "inner photo"))
 
     contact = f"""  <main class="page">
     <h1>Contact</h1>
@@ -166,7 +173,7 @@ def main():
     </script>
   </main>
 """
-    write("contact/index.html", page("Contact", "contact", contact, "inner"))
+    write("contact/index.html", page("Contact", "contact", contact, "inner photo"))
     print("built", 4 + len(PROJECTS), "pages")
 
 

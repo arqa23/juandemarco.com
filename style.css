@@ -6,6 +6,7 @@
 :root {
   --ink: #ffffff;
   --ink-dim: rgba(255, 255, 255, .72);
+  --header-h: calc(var(--gutter) * 2 + var(--logo-size) * 1.4);
   --bg: #0f0f10;
   --font: "Jost", "Futura", "Helvetica Neue", Arial, sans-serif;
 
@@ -19,7 +20,8 @@
   --logo-size: max(20px, calc(36 * var(--s)));
   --nav-size: max(11px, calc(13 * var(--s)));
   --nav-gap: max(12px, calc(16 * var(--s)));
-  --dot: max(7px, calc(8 * var(--s)));
+  --dot: max(5px, calc(6 * var(--s)));
+  --legal-ink: rgba(255, 255, 255, .42);
   --legal-size: max(8px, calc(8.25 * var(--s)));
   --text-size: max(15px, calc(17 * var(--s)));
 }
@@ -37,7 +39,7 @@ body {
 .site-header, .nav, .site-footer { text-shadow: 0 1px 12px rgba(0,0,0,.25); }
 
 /* ---------- Home: full-screen cover image ---------- */
-.home { height: 100%; overflow: hidden; }
+.home, .inner { height: 100%; overflow: hidden; }
 .cover {
   position: fixed;
   inset: 0;
@@ -52,14 +54,14 @@ body {
 .cover.loaded { opacity: 1; }
 
 /* Soft shading so white text stays readable on light images */
-.home::before, .home::after {
+.home::before, .home::after, .photo::before, .photo::after {
   content: "";
   position: fixed;
   pointer-events: none;
   z-index: 1;
 }
-.home::before { top: 0; left: 0; right: 0; height: max(160px, calc(260 * var(--s))); background: linear-gradient(rgba(0,0,0,.30), rgba(0,0,0,.16) 40%, rgba(0,0,0,.05) 75%, transparent); }
-.home::after  { right: 0; bottom: 0; width: max(260px, calc(420 * var(--s))); height: max(220px, calc(320 * var(--s))); background: radial-gradient(farthest-side at 100% 100%, rgba(0,0,0,.30), rgba(0,0,0,.12) 55%, transparent); }
+.home::before, .photo::before { top: 0; left: 0; right: 0; height: max(160px, calc(260 * var(--s))); background: linear-gradient(rgba(0,0,0,.30), rgba(0,0,0,.16) 40%, rgba(0,0,0,.05) 75%, transparent); }
+.home::after, .photo::after { right: 0; bottom: 0; width: max(260px, calc(420 * var(--s))); height: max(220px, calc(320 * var(--s))); background: radial-gradient(farthest-side at 100% 100%, rgba(0,0,0,.30), rgba(0,0,0,.12) 55%, transparent); }
 
 /* ---------- Name, top left ---------- */
 .site-header {
@@ -91,7 +93,7 @@ body {
 .nav a {
   display: flex;
   align-items: center;
-  gap: calc(var(--nav-size) * 1.1);
+  gap: calc(var(--nav-size) * .7);
   color: var(--ink);
   text-decoration: none;
   font-size: var(--nav-size);
@@ -99,7 +101,7 @@ body {
   letter-spacing: .2em;
   text-transform: uppercase;
 }
-.nav-label { opacity: .78; transition: opacity .15s ease; }
+.nav-label { opacity: .78; transition: opacity .15s ease; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: .45em; text-decoration-thickness: 1px; }
 .nav-dot {
   width: var(--dot);
   height: var(--dot);
@@ -110,15 +112,16 @@ body {
   box-shadow: 0 0 10px rgba(0,0,0,.18);
 }
 .nav a:hover .nav-label, .nav a:focus-visible .nav-label, .nav a[aria-current="page"] .nav-label { opacity: 1; }
+.nav a:hover .nav-label, .nav a:focus-visible .nav-label { text-decoration-color: currentColor; }
 .nav a:hover .nav-dot, .nav a:focus-visible .nav-dot { background: rgba(255,255,255,.55); }
 .nav a[aria-current="page"] .nav-dot { background: var(--ink); }
 
-/* ---------- Copyright: vertical, left edge, two lines ---------- */
+/* ---------- Copyright: vertical, bottom left, two lines, mirrors the menu ---------- */
 .site-footer {
   position: fixed;
-  left: calc(var(--gutter) * .6);
-  top: 50%;
-  transform: translateY(-50%) rotate(180deg);
+  left: max(8px, calc(var(--gutter) * .22));
+  bottom: var(--gutter);
+  transform: rotate(180deg);
   writing-mode: vertical-rl;
   display: flex;
   flex-direction: column;
@@ -127,17 +130,41 @@ body {
   font-weight: 400;
   letter-spacing: .14em;
   text-transform: uppercase;
-  opacity: .8;
+  color: var(--legal-ink);
+  text-shadow: none;
   white-space: nowrap;
   z-index: 3;
 }
 
 /* ---------- Inner pages (Work, Project, Contact, About) ---------- */
+/* Content scrolls inside .scroller, so the fixed name, menu and copyright never shift. */
+.scroller {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 2;
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3d transparent;
+}
+.scroller::-webkit-scrollbar { width: 6px; }
+.scroller::-webkit-scrollbar-track { background: transparent; }
+.scroller::-webkit-scrollbar-thumb { background: #3a3a3d; border-radius: 3px; }
+.scroller::-webkit-scrollbar-thumb:hover { background: #55555a; }
+/* Content fades out under the name as it scrolls up */
+.inner:not(.photo) .site-header::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 10px;
+  height: calc(var(--header-h) + var(--gutter));
+  background: linear-gradient(var(--bg) 0, var(--bg) 62%, rgba(15,15,16,0));
+  z-index: -1;
+  pointer-events: none;
+}
 .page {
-  padding: calc(var(--gutter) * 2 + var(--logo-size) * 2) var(--gutter) calc(var(--gutter) * 3);
-  margin-left: calc(var(--gutter) * 2);
-  margin-right: max(150px, calc(230 * var(--s)));   /* keeps clear of the nav stack */
-  max-width: max(560px, calc(760 * var(--s)));
+  padding: calc(var(--header-h) + var(--gutter) * 1.2) var(--gutter) calc(var(--gutter) * 3);
+  margin-right: max(160px, calc(240 * var(--s)));   /* keeps clear of the menu */
+  max-width: max(600px, calc(820 * var(--s)));
 }
 .page-wide { max-width: none; }
 .page h1 {
@@ -149,6 +176,12 @@ body {
 }
 .page p { font-size: var(--text-size); line-height: 1.65; color: var(--ink-dim); margin: 0 0 1.2em; }
 .page a { color: var(--ink); }
+
+/* Pages with a full-screen image behind the text */
+.photo .cover { z-index: 0; }
+.photo .scroller { background: rgba(0, 0, 0, .34); }
+.photo .page p { color: rgba(255,255,255,.9); }
+.photo .page { text-shadow: 0 1px 14px rgba(0,0,0,.3); }
 
 /* Work grid */
 .grid {
@@ -199,22 +232,25 @@ body {
 /* ---------- Phones ---------- */
 @media (max-width: 700px) {
   .logo { letter-spacing: .3em; }
-  .site-footer { left: 8px; }
-  /* Inner pages: links sit in a row under the name instead of floating over content */
-  .inner .site-header { position: absolute; }
+  .site-footer { left: 6px; bottom: 18px; }
+  /* Inner pages: the name and links scroll with the page instead of floating over content */
+  .inner .site-header, .inner .nav, .inner .site-footer { position: absolute; }
+  .inner .site-header::before { display: none; }
+  .inner { height: auto; min-height: 100%; overflow: visible; position: relative; }
+  .inner .scroller { position: relative; inset: auto; overflow: visible; min-height: 100vh; }
+  .inner .site-header { z-index: 4; }
   .inner .nav {
-    position: absolute;
     top: calc(var(--gutter) + var(--logo-size) * 2);
     left: var(--gutter);
     right: auto; bottom: auto;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 14px 20px;
+    z-index: 4;
   }
   .inner .nav a { flex-direction: row-reverse; gap: 8px; }
-  .inner .site-footer { position: absolute; top: auto; bottom: 24px; left: var(--gutter); transform: none; writing-mode: horizontal-tb; }
+  .inner .site-footer { top: auto; bottom: 20px; left: var(--gutter); transform: none; writing-mode: horizontal-tb; z-index: 4; }
   .page { margin: 0; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--gutter) 90px; max-width: none; }
-  .inner { position: relative; min-height: 100vh; }
   .pager { font-size: 11px; letter-spacing: .12em; }
 }
 
