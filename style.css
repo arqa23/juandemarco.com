@@ -16,6 +16,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+.site-header, .site-footer { text-shadow: 0 1px 12px rgba(0,0,0,.25); }
+
 /* Full-screen cover image */
 .cover {
   position: fixed;
@@ -38,8 +40,8 @@ body {
   pointer-events: none;
   z-index: 1;
 }
-.home::before { top: 0; height: 160px; background: linear-gradient(rgba(0,0,0,.35), transparent); }
-.home::after  { bottom: 0; height: 110px; background: linear-gradient(transparent, rgba(0,0,0,.35)); }
+.home::before { top: 0; height: 240px; background: linear-gradient(rgba(0,0,0,.30), rgba(0,0,0,.16) 40%, rgba(0,0,0,.05) 75%, transparent); }
+.home::after  { bottom: 0; height: 160px; background: linear-gradient(transparent, rgba(0,0,0,.05) 25%, rgba(0,0,0,.16) 60%, rgba(0,0,0,.30)); }
 
 /* Header */
 .site-header {

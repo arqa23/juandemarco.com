@@ -4,5 +4,7 @@
 window.COVER_IMAGES = [
   "/images/cover-01.webp",
   "/images/cover-02.webp",
-  "/images/cover-03.webp"
+  "/images/cover-03.webp",
+  "/images/cover-04.webp",
+  "/images/cover-05.webp"
 ];
