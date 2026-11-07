@@ -22,7 +22,7 @@
   --nav-gap: max(12px, calc(16 * var(--s)));
   --dot: max(5px, calc(6 * var(--s)));
   --legal-ink: rgba(255, 255, 255, .42);
-  --legal-size: max(8px, calc(8.25 * var(--s)));
+  --legal-size: max(6px, calc(6.2 * var(--s)));
   --text-size: max(15px, calc(17 * var(--s)));
 }
 
@@ -125,7 +125,7 @@ body {
   writing-mode: vertical-rl;
   display: flex;
   flex-direction: column;
-  gap: .5em;
+  gap: .25em;
   font-size: var(--legal-size);
   font-weight: 400;
   letter-spacing: .14em;
@@ -157,7 +157,7 @@ body {
   position: fixed;
   top: 0; left: 0; right: 10px;
   height: calc(var(--header-h) + var(--gutter));
-  background: linear-gradient(var(--bg) 0, var(--bg) 62%, rgba(15,15,16,0));
+  background: linear-gradient(rgba(15,15,16,.5), rgba(15,15,16,0));
   z-index: -1;
   pointer-events: none;
 }
@@ -180,6 +180,7 @@ body {
 /* Pages with a full-screen image behind the text */
 .photo .cover { z-index: 0; }
 .photo .scroller { background: rgba(0, 0, 0, .34); }
+.photo .page { padding-top: 40vh; }   /* About and Contact text starts at the same height */
 .photo .page p { color: rgba(255,255,255,.9); }
 .photo .page { text-shadow: 0 1px 14px rgba(0,0,0,.3); }
 
@@ -250,7 +251,7 @@ body {
   }
   .inner .nav a { flex-direction: row-reverse; gap: 8px; }
   .inner .site-footer { top: auto; bottom: 20px; left: var(--gutter); transform: none; writing-mode: horizontal-tb; z-index: 4; }
-  .page { margin: 0; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--gutter) 90px; max-width: none; }
+  .page, .photo .page { margin: 0; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--gutter) 90px; max-width: none; }
   .pager { font-size: 11px; letter-spacing: .12em; }
 }
 
