@@ -11,14 +11,24 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 YEAR = "2026"
 
 # Projects, in the order they appear on the Work page.
-# image = the full-size picture in images/, shown on the project page and as the grid thumbnail.
+# Each project's images live in images/work/<slug>/ as 01.webp, 02.webp, ...
+# shown in that order on its page; the first one is the grid thumbnail.
 PROJECTS = [
-    {"slug": "project-1", "title": "Project 1", "image": "cover-01.webp"},
-    {"slug": "project-2", "title": "Project 2", "image": "cover-02.webp"},
-    {"slug": "project-3", "title": "Project 3", "image": "cover-03.webp"},
-    {"slug": "project-4", "title": "Project 4", "image": "cover-04.webp"},
-    {"slug": "project-5", "title": "Project 5", "image": "cover-05.webp"},
+    {"slug": "julius-ii", "title": "Julius II"},
+    {"slug": "parnell-residence", "title": "Parnell Residence"},
+    {"slug": "talbot-road-residence", "title": "Talbot Road Residence"},
+    {"slug": "julius", "title": "Julius"},
+    {"slug": "american-promise", "title": "American Promise"},
+    {"slug": "the-conflicted-icon", "title": "The Conflicted Icon"},
+    {"slug": "march-of-the-silhouettes", "title": "March of the Silhouettes"},
+    {"slug": "wedges", "title": "Wedges"},
+    {"slug": "frankls-purposive-intention", "title": "Frankl\u2019s Purposive Intention"},
 ]
+
+
+def project_images(slug):
+    return sorted(f.name for f in (ROOT / "images" / "work" / slug).glob("[0-9]*.webp"))
+
 
 ABOUT = [
     "Juan De Marco makes images, objects and software. The work moves between drawing, "
@@ -113,15 +123,21 @@ def write(rel, text):
 
 def thumbs():
     from PIL import Image
-    out = ROOT / "images" / "thumbs"
-    out.mkdir(exist_ok=True)
     for pr in PROJECTS:
-        src, dst = ROOT / "images" / pr["image"], out / pr["image"]
+        folder = ROOT / "images" / "work" / pr["slug"]
+        src, dst = folder / project_images(pr["slug"])[0], folder / "thumb.webp"
         if dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime:
             continue
         im = Image.open(src).convert("RGB")
         im.thumbnail((1200, 1200), Image.LANCZOS)
         im.save(dst, "WEBP", quality=84, method=6)
+
+
+def img_tag(path, alt, eager=False):
+    from PIL import Image
+    w, h = Image.open(ROOT / path.lstrip("/")).size
+    load = 'fetchpriority="high"' if eager else 'loading="lazy"'
+    return f'<img src="{path}" width="{w}" height="{h}" alt="{html.escape(alt)}" {load} decoding="async">'
 
 
 def main():
@@ -130,7 +146,7 @@ def main():
 
     cards = "\n".join(
         f'      <a class="card" href="/work/{p["slug"]}/">\n'
-        f'        <img src="/images/thumbs/{p["image"]}" alt="{html.escape(p["title"])}" loading="lazy" decoding="async">\n'
+        f'        <img src="/images/work/{p["slug"]}/thumb.webp" alt="{html.escape(p["title"])}" loading="lazy" decoding="async">\n'
         f'        <span class="card-title">{html.escape(p["title"])}</span>\n'
         f'      </a>' for p in PROJECTS)
     write("work/index.html", page("Work", "work",
@@ -139,14 +155,13 @@ def main():
 
     for i, p in enumerate(PROJECTS):
         prev_p, next_p = PROJECTS[i - 1], PROJECTS[(i + 1) % len(PROJECTS)]
+        figs = "\n".join(
+            f'      <figure class="project-figure">{img_tag(f"/images/work/{p['slug']}/{f}", p["title"], k == 0)}</figure>'
+            for k, f in enumerate(project_images(p["slug"])))
         body = f"""  <main class="page page-wide project">
     <h1>{html.escape(p["title"])}</h1>
-    <figure class="project-figure">
-      <img src="/images/{p["image"]}" alt="{html.escape(p["title"])}" decoding="async">
-    </figure>
-    <div class="project-text">
-      <p class="meta">Year &middot; Medium</p>
-      <p>Description coming soon.</p>
+    <div class="gallery">
+{figs}
     </div>
     <div class="pager">
       <a href="/work/{prev_p["slug"]}/">&larr; {html.escape(prev_p["title"])}</a>

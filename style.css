@@ -223,8 +223,9 @@ body {
 }
 
 /* Project page */
-.project-figure { margin: 0 0 2em; }
-.project-figure img { display: block; width: 100%; height: auto; max-height: 82vh; object-fit: contain; object-position: left top; }
+.gallery { display: flex; flex-direction: column; gap: max(18px, calc(36 * var(--s))); }
+.project-figure { margin: 0; }
+.project-figure img { display: block; width: auto; max-width: 100%; height: auto; max-height: 86vh; }
 .project-text { max-width: max(560px, calc(760 * var(--s))); }
 .meta { font-size: var(--nav-size) !important; letter-spacing: .2em; text-transform: uppercase; }
 .pager {
