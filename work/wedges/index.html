@@ -7,14 +7,24 @@
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <script>try{if(localStorage.getItem('jdm-theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}</script>
   <script src="/site.js" defer></script>
 </head>
 <body class="inner">
   <div class="scroller">
   <main class="page page-wide project">
-    <h1>Wedges</h1>
-    <div class="slideshow" data-count="10">
-      <div class="frame">
+    <div class="project-layout">
+      <div class="project-main">
+        <div class="project-head">
+          <h1>Wedges</h1>
+          <nav class="project-nav" aria-label="Projects">
+            <a href="/work/march-of-the-silhouettes/" title="March of the Silhouettes">&lsaquo; Prev</a>
+            <a href="/work/">All</a>
+            <a href="/work/frankls-purposive-intention/" title="Frankl’s Purposive Intention">Next &rsaquo;</a>
+          </nav>
+        </div>
+        <div class="slideshow" data-count="10">
+          <div class="frame">
         <img class="slide is-on" src="/images/work/wedges/01.webp" alt="Wedges, image 1" decoding="async">
         <img class="slide" data-src="/images/work/wedges/02.webp" alt="Wedges, image 2" decoding="async">
         <img class="slide" data-src="/images/work/wedges/03.webp" alt="Wedges, image 3" decoding="async">
@@ -25,19 +35,16 @@
         <img class="slide" data-src="/images/work/wedges/08.webp" alt="Wedges, image 8" decoding="async">
         <img class="slide" data-src="/images/work/wedges/09.webp" alt="Wedges, image 9" decoding="async">
         <img class="slide" data-src="/images/work/wedges/10.webp" alt="Wedges, image 10" decoding="async">
-        <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
-        <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
+            <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
+            <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
+          </div>
+          <div class="slide-count"><span class="slide-i">1</span> / 10</div>
+        </div>
       </div>
-      <div class="slide-count"><span class="slide-i">1</span> / 10</div>
-    </div>
-    <div class="project-text">
-      <p class="meta">Year · Medium</p>
+      <div class="project-text">
+        <p class="meta">Year · Medium</p>
       <p>Description coming soon.</p>
-    </div>
-    <div class="pager">
-      <a href="/work/march-of-the-silhouettes/">&larr; March of the Silhouettes</a>
-      <a href="/work/">All work</a>
-      <a href="/work/frankls-purposive-intention/">Frankl’s Purposive Intention &rarr;</a>
+      </div>
     </div>
   </main>
   </div>
@@ -52,7 +59,20 @@
       <a href="/contact/"><span class="nav-label">Contact</span><span class="nav-dot" aria-hidden="true"></span></a>
       <a href="/about/"><span class="nav-label">About</span><span class="nav-dot" aria-hidden="true"></span></a>
       <a href="/login/"><span class="nav-label">Login</span><span class="nav-dot" aria-hidden="true"></span></a>
+      <button class="settings-btn" type="button" aria-expanded="false" aria-controls="settings"><span class="nav-label">Settings</span><span class="nav-dot" aria-hidden="true"></span></button>
   </nav>
+
+  <div class="settings" id="settings" hidden>
+    <div class="settings-row">
+      <span class="settings-label">Mode</span>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Screen</span>
+      <button type="button" data-fullscreen>Full screen</button>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <span>&copy; 2026 Juan De Marco</span>

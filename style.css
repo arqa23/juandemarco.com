@@ -18,12 +18,17 @@
   --s: calc(100vw / var(--design-width));
   --gutter: max(18px, calc(44 * var(--s)));
   --logo-size: max(22px, calc(39.6 * var(--s)));
-  --nav-size: max(11px, calc(13 * var(--s)));
+  --nav-size: max(10px, calc(11.7 * var(--s)));
   --nav-gap: max(12px, calc(16 * var(--s)));
   --dot: max(5px, calc(6 * var(--s)));
   --legal-ink: rgba(255, 255, 255, .42);
+  --frame-bg: #000;
+  --scroll-thumb: #3a3a3d;
+  --fade: rgba(15,15,16,.5);
+  --fade-0: rgba(15,15,16,0);
+  --shadow: 0 1px 12px rgba(0,0,0,.25);
   --legal-size: max(6px, calc(6.2 * var(--s)));
-  --text-size: max(15px, calc(17 * var(--s)));
+  --text-size: max(13.5px, calc(15.3 * var(--s)));
 }
 
 html, body { margin: 0; min-height: 100%; }
@@ -36,7 +41,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.site-header, .nav, .site-footer { text-shadow: 0 1px 12px rgba(0,0,0,.25); }
+.site-header, .nav, .site-footer { text-shadow: var(--shadow); }
 
 /* ---------- Home: full-screen cover image ---------- */
 .home, .inner { height: 100%; overflow: hidden; }
@@ -90,7 +95,7 @@ body {
   gap: var(--nav-gap);
   z-index: 3;
 }
-.nav a {
+.nav a, .settings-btn {
   display: flex;
   align-items: center;
   gap: calc(var(--nav-size) * .7);
@@ -111,7 +116,11 @@ body {
   transition: background-color .15s ease, transform .15s ease;
   box-shadow: 0 0 10px rgba(0,0,0,.18);
 }
-.nav a:hover .nav-label, .nav a:focus-visible .nav-label, .nav a[aria-current="page"] .nav-label { opacity: 1; }
+.settings-btn { border: 0; background: none; padding: 0; cursor: pointer; font-family: inherit; text-shadow: inherit; }
+.nav a:hover .nav-label, .nav a:focus-visible .nav-label, .nav a[aria-current="page"] .nav-label, .settings-btn:hover .nav-label, .settings-btn.is-open .nav-label { opacity: 1; }
+.settings-btn:hover .nav-label, .settings-btn:focus-visible .nav-label { text-decoration-color: currentColor; }
+.settings-btn:hover .nav-dot { background: rgba(255,255,255,.55); }
+.settings-btn.is-open .nav-dot { background: var(--ink); }
 .nav a:hover .nav-label, .nav a:focus-visible .nav-label { text-decoration-color: currentColor; }
 .nav a:hover .nav-dot, .nav a:focus-visible .nav-dot { background: rgba(255,255,255,.55); }
 .nav a[aria-current="page"] .nav-dot { background: var(--ink); }
@@ -145,11 +154,11 @@ body {
   overflow-x: hidden;
   z-index: 2;
   scrollbar-width: thin;
-  scrollbar-color: #3a3a3d transparent;
+  scrollbar-color: var(--scroll-thumb) transparent;
 }
 .scroller::-webkit-scrollbar { width: 6px; }
 .scroller::-webkit-scrollbar-track { background: transparent; }
-.scroller::-webkit-scrollbar-thumb { background: #3a3a3d; border-radius: 3px; }
+.scroller::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 3px; }
 .scroller::-webkit-scrollbar-thumb:hover { background: #55555a; }
 /* Content fades out under the name as it scrolls up */
 .inner:not(.photo) .site-header::before {
@@ -157,7 +166,7 @@ body {
   position: fixed;
   top: 0; left: 0; right: 10px;
   height: calc(var(--header-h) + var(--gutter));
-  background: linear-gradient(rgba(15,15,16,.5), rgba(15,15,16,0));
+  background: linear-gradient(var(--fade), var(--fade-0));
   z-index: -1;
   pointer-events: none;
 }
@@ -222,13 +231,30 @@ body {
   text-transform: uppercase;
 }
 
-/* Project page: one fixed frame, images step through with < > */
+/* Project page: title + small project links above a fixed frame, text to the right */
+.project-layout {
+  --side-w: max(200px, calc(300 * var(--s)));
+  --gap: max(28px, calc(48 * var(--s)));
+  --frame-w: min(
+    calc(100vw - var(--gutter) * 2 - max(160px, calc(240 * var(--s))) - var(--side-w) - var(--gap)),
+    calc((100vh - var(--header-h) - var(--gutter) * 3.4 - var(--logo-size)) * 16 / 9));
+  display: flex;
+  gap: var(--gap);
+  align-items: flex-start;
+}
+.project-main { width: var(--frame-w); flex-shrink: 0; }
+.page.project { padding-bottom: var(--gutter); }
+.project-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 1.2em; }
+.project .project-head h1 { margin: 0; }
+.project-nav { display: flex; gap: 1.6em; font-size: var(--nav-size); letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
+.project-nav a { text-decoration: none; opacity: .72; text-underline-offset: .45em; }
+.project-nav a:hover { opacity: 1; text-decoration: underline; text-decoration-thickness: 1px; }
 .slideshow { position: relative; }
 .frame {
   position: relative;
-  width: min(100%, calc((100vh - var(--header-h) - var(--gutter) * 4.5) * 16 / 9));
+  width: 100%;
   aspect-ratio: 16 / 9;
-  background: #18181a;
+  background: var(--frame-bg);
   overflow: hidden;
 }
 .slide {
@@ -241,6 +267,7 @@ body {
   transition: opacity .35s ease;
 }
 .slide.is-on { opacity: 1; }
+.slide.contain { object-fit: contain; }   /* drawings and sheets: shown whole on the frame */
 .slide-btn {
   position: absolute;
   top: 0; bottom: 0;
@@ -268,7 +295,8 @@ body {
   letter-spacing: .2em;
   color: var(--ink-dim);
 }
-.project-text { max-width: max(560px, calc(760 * var(--s))); margin-top: 2.2em; }
+.project-text { width: var(--side-w); padding-top: calc(var(--logo-size) * .55 * 1.2 + 1.2em); }
+.project-text p { font-size: var(--text-size); }
 .meta { font-size: var(--nav-size) !important; letter-spacing: .2em; text-transform: uppercase; }
 .pager {
   display: flex;
@@ -305,14 +333,70 @@ body {
     gap: 14px 20px;
     z-index: 4;
   }
-  .inner .nav a { flex-direction: row-reverse; gap: 8px; }
+  .inner .nav a, .settings-btn { flex-direction: row-reverse; gap: 8px; }
   .inner .site-footer { top: auto; bottom: 20px; left: var(--gutter); transform: none; writing-mode: horizontal-tb; z-index: 4; }
   .stack-sizer { display: none; }
   .stacked { min-height: 0; display: block; }
   .page, .photo .page { margin: 0; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--gutter) 90px; max-width: none; }
   .pager { font-size: 11px; letter-spacing: .12em; }
   .slide-btn { opacity: .8; }
-  .frame { width: 100%; }
+  .settings { right: var(--gutter); bottom: calc(var(--gutter) + 210px); }
+  .inner .settings { position: absolute; top: calc(var(--gutter) + var(--logo-size) * 2 + 40px); bottom: auto; left: var(--gutter); right: auto; }
+  .project-layout { display: block; }
+  .project-main { width: 100%; }
+  .project-text { width: auto; padding-top: 1.4em; }
+  .project-head { flex-wrap: wrap; }
 }
+
+/* Settings panel, opens to the left of the menu */
+.settings {
+  position: fixed;
+  right: calc(var(--gutter) + max(110px, calc(140 * var(--s))));
+  bottom: var(--gutter);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  background: rgba(20, 20, 22, .82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,.12);
+  color: #fff;
+  font-size: var(--nav-size);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.settings[hidden] { display: none; }
+.settings-row { display: flex; align-items: center; gap: 14px; }
+.settings-label { width: 6.5em; opacity: .55; }
+.settings button {
+  border: 1px solid rgba(255,255,255,.25);
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+.settings button:hover { border-color: #fff; }
+.settings button.is-on { background: #fff; color: #111; border-color: #fff; }
+
+/* Light mode: pages without a full-screen image (Work and projects) */
+:root[data-theme="light"] .inner:not(.photo) {
+  --bg: #f3f2ef;
+  --ink: #141414;
+  --ink-dim: rgba(20, 20, 20, .72);
+  --legal-ink: rgba(20, 20, 20, .45);
+  --frame-bg: #e6e5e1;
+  --scroll-thumb: #c4c3bf;
+  --fade: rgba(243,242,239,.5);
+  --fade-0: rgba(243,242,239,0);
+  --shadow: none;
+}
+:root[data-theme="light"] .inner:not(.photo) .nav a:hover .nav-dot,
+:root[data-theme="light"] .inner:not(.photo) .settings-btn:hover .nav-dot { background: rgba(20,20,20,.45); }
+:root[data-theme="light"] .inner:not(.photo) .card img { background: #e6e5e1; }
 
 @media (prefers-reduced-motion: reduce) { .cover, .card img { transition: none; } }

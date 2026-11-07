@@ -30,6 +30,9 @@ PROJECTS = [
 # Optional crop per image: "focus": {"03.webp": "50% 30%"} (left/right %, top/bottom %).
 
 
+FIT = json.loads((ROOT / "images" / "work" / "fit.json").read_text()) if (ROOT / "images" / "work" / "fit.json").exists() else {}
+
+
 def project_images(slug):
     return sorted(f.name for f in (ROOT / "images" / "work" / slug).glob("[0-9]*.webp"))
 
@@ -62,7 +65,7 @@ def page(title, section, body, body_class="", head_extra=""):
         cover = HOME_BODY if "photo" in body_class else ""
         body = f'{cover}  <div class="scroller">\n{body}  </div>\n'
         if "photo" in body_class:
-            head_extra = HOME_HEAD + '  <script src="/site.js" defer></script>\n'
+            head_extra = HOME_HEAD
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -72,6 +75,8 @@ def page(title, section, body, body_class="", head_extra=""):
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <script>try{{if(localStorage.getItem('jdm-theme')==='light')document.documentElement.dataset.theme='light'}}catch(e){{}}</script>
+  <script src="/site.js" defer></script>
 {head_extra}</head>
 <body class="{body_class}">
 {body}
@@ -81,7 +86,20 @@ def page(title, section, body, body_class="", head_extra=""):
 
   <nav class="nav" aria-label="Main">
 {nav}
+      <button class="settings-btn" type="button" aria-expanded="false" aria-controls="settings"><span class="nav-label">Settings</span><span class="nav-dot" aria-hidden="true"></span></button>
   </nav>
+
+  <div class="settings" id="settings" hidden>
+    <div class="settings-row">
+      <span class="settings-label">Mode</span>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Screen</span>
+      <button type="button" data-fullscreen>Full screen</button>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <span>&copy; {YEAR} Juan De Marco</span>
@@ -162,7 +180,7 @@ def main():
         files = project_images(p["slug"])
         focus = p.get("focus", {})
         slides = "\n".join(
-            f'        <img class="slide{" is-on" if k == 0 else ""}" '
+            f'        <img class="slide{" is-on" if k == 0 else ""}{" contain" if FIT.get(p["slug"] + "/" + f) == "contain" else ""}" '
             f'{"src" if k == 0 else "data-src"}="/images/work/{p["slug"]}/{f}" '
             f'alt="{html.escape(p["title"])}, image {k + 1}" decoding="async"'
             f'{f" style=\"object-position:{focus[f]}\"" if f in focus else ""}>'
@@ -170,28 +188,33 @@ def main():
         meta = html.escape(p.get("meta", "Year \u00b7 Medium"))
         text = "\n".join(f"      <p>{html.escape(t)}</p>" for t in p.get("text", ["Description coming soon."]))
         body = f"""  <main class="page page-wide project">
-    <h1>{html.escape(p["title"])}</h1>
-    <div class="slideshow" data-count="{len(files)}">
-      <div class="frame">
+    <div class="project-layout">
+      <div class="project-main">
+        <div class="project-head">
+          <h1>{html.escape(p["title"])}</h1>
+          <nav class="project-nav" aria-label="Projects">
+            <a href="/work/{prev_p["slug"]}/" title="{html.escape(prev_p["title"])}">&lsaquo; Prev</a>
+            <a href="/work/">All</a>
+            <a href="/work/{next_p["slug"]}/" title="{html.escape(next_p["title"])}">Next &rsaquo;</a>
+          </nav>
+        </div>
+        <div class="slideshow" data-count="{len(files)}">
+          <div class="frame">
 {slides}
-        <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
-        <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
+            <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
+            <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
+          </div>
+          <div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
+        </div>
       </div>
-      <div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
-    </div>
-    <div class="project-text">
-      <p class="meta">{meta}</p>
+      <div class="project-text">
+        <p class="meta">{meta}</p>
 {text}
-    </div>
-    <div class="pager">
-      <a href="/work/{prev_p["slug"]}/">&larr; {html.escape(prev_p["title"])}</a>
-      <a href="/work/">All work</a>
-      <a href="/work/{next_p["slug"]}/">{html.escape(next_p["title"])} &rarr;</a>
+      </div>
     </div>
   </main>
 """
-        write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner",
-                                                     '  <script src="/site.js" defer></script>\n'))
+        write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner"))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
     about_block = f"      <h1>About</h1>\n{about}\n"
