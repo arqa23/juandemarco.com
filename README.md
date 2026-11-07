@@ -6,11 +6,12 @@ A plain HTML/CSS site hosted for free on GitHub Pages, with the domain staying a
 
 | File | What it does |
 |---|---|
-| `index.html` | The landing page: a random full-screen image, the name, the links, the footer |
+| `tools/build.py` | **Builds every page** from one shared layout. The About text, the Contact email and the list of projects live here. Run `python3 tools/build.py` after editing |
+| `index.html` | The landing page: a random full-screen image, the name, the links, the footer (generated) |
 | `images.js` | **The list of cover images.** Add or remove a line to change which images can show up |
 | `images/` | The image files themselves |
 | `style.css` | All the look and feel (fonts, sizes, spacing) |
-| `work/`, `contact/` | Placeholder pages so the links work |
+| `work/`, `about/`, `contact/` | Generated pages; `work/project-N/` is one page per project |
 | `CNAME` | Tells GitHub Pages the site lives at juandemarco.com |
 
 ## Adding a cover image
