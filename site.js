@@ -20,6 +20,10 @@
     panel.querySelectorAll('[data-theme-set]').forEach(function (b) {
       b.classList.toggle('is-on', b.dataset.themeSet === t);
     });
+    var defaults = { dots: 'on', dotsize: 'normal' };
+    panel.querySelectorAll('[data-pref]').forEach(function (b) {
+      b.classList.toggle('is-on', (root.dataset[b.dataset.pref] || defaults[b.dataset.pref]) === b.dataset.val);
+    });
     var fs = panel.querySelector('[data-fullscreen]');
     if (fs) fs.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
   }
@@ -45,6 +49,14 @@
       b.addEventListener('click', function () {
         if (b.dataset.themeSet === 'dark') delete root.dataset.theme; else root.dataset.theme = b.dataset.themeSet;
         try { localStorage.setItem('jdm-theme', b.dataset.themeSet); } catch (err) {}
+        markSettings();
+      });
+    });
+    panel.querySelectorAll('[data-pref]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var k = b.dataset.pref, v = b.dataset.val;
+        if (v === 'on' || v === 'normal') delete root.dataset[k]; else root.dataset[k] = v;
+        try { localStorage.setItem('jdm-' + k, v); } catch (err) {}
         markSettings();
       });
     });

@@ -17,7 +17,7 @@ Options
 
 Run:  python3 tools/images.py   then   python3 tools/build.py
 """
-import json, pathlib
+import json, pathlib, shutil
 import numpy as np
 from PIL import Image
 
@@ -53,7 +53,10 @@ def main():
             fit = "contain" if box else "cover"
         dst = OUT / src.parent.name / src.name
         dst.parent.mkdir(parents=True, exist_ok=True)
-        im.save(dst, "WEBP", quality=88, method=6)
+        if box:
+            im.save(dst, "WEBP", quality=88, method=6)
+        else:
+            shutil.copyfile(src, dst)   # untouched: an exact copy of the original
         entry = {"fit": fit}
         if rule.get("focus"):
             entry["focus"] = rule["focus"]

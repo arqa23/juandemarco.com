@@ -82,7 +82,7 @@ def page(title, section, body, body_class="", head_extra=""):
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css?v={ASSET_V}">
-  <script>try{{var t=localStorage.getItem('jdm-theme');if(t&&t!=='dark')document.documentElement.dataset.theme=t}}catch(e){{}}</script>
+  <script>try{{var d=document.documentElement.dataset,t=localStorage.getItem('jdm-theme'),o=localStorage.getItem('jdm-dots'),z=localStorage.getItem('jdm-dotsize');if(t&&t!=='dark')d.theme=t;if(o==='off')d.dots=o;if(z==='small')d.dotsize=z}}catch(e){{}}</script>
   <script src="/images.js?v={ASSET_V}"></script>
   <script src="/site.js?v={ASSET_V}" defer></script>
 {head_extra}</head>
@@ -104,6 +104,16 @@ def page(title, section, body, body_class="", head_extra=""):
       <button type="button" data-theme-set="dark">Dark</button>
       <button type="button" data-theme-set="white">White</button>
       <button type="button" data-theme-set="black">Black</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Dots</span>
+      <button type="button" data-pref="dots" data-val="on">On</button>
+      <button type="button" data-pref="dots" data-val="off">Off</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Dot size</span>
+      <button type="button" data-pref="dotsize" data-val="normal">Normal</button>
+      <button type="button" data-pref="dotsize" data-val="small">Small</button>
     </div>
     <div class="settings-row">
       <span class="settings-label">Screen</span>

@@ -6,7 +6,7 @@
 :root {
   --ink: #ffffff;
   --ink-dim: rgba(255, 255, 255, .72);
-  --header-h: calc(var(--gutter) * 2 + var(--logo-size) * 1.4);
+  --header-h: calc(var(--edge) * 2 + var(--logo-size) * 1.4);
   --bg: #0f0f10;
   --font: "Jost", "Futura", "Helvetica Neue", Arial, sans-serif;
 
@@ -17,7 +17,9 @@
   --design-width: 1920;
   --s: calc(100vw / var(--design-width));
   --gutter: max(18px, calc(44 * var(--s)));
-  --logo-size: max(22px, calc(39.6 * var(--s)));
+  --edge: max(20.7px, calc(50.6 * var(--s)));       /* name corner margin and left edge of page content */
+  --logo-size: max(16.5px, calc(29.7 * var(--s)));
+  --title-size: max(12.1px, calc(21.8 * var(--s)));  /* page titles (About, Work, project names) */
   --nav-size: max(10px, calc(11.7 * var(--s)));
   --nav-gap: max(12px, calc(16 * var(--s)));
   --dot: max(5px, calc(6 * var(--s)));
@@ -72,9 +74,9 @@ body {
 .site-header {
   position: fixed;
   top: 0; left: 0;
-  padding: var(--gutter);
+  padding: var(--edge);
   /* pulls the name up so the space above the letters equals the space to their left */
-  padding-top: calc(var(--gutter) - var(--logo-size) * .28);
+  padding-top: calc(var(--edge) - var(--logo-size) * .28);
   z-index: 3;
 }
 .logo {
@@ -173,7 +175,7 @@ body {
   pointer-events: none;
 }
 .page {
-  padding: calc(var(--header-h) + var(--gutter) * 1.2) var(--gutter) calc(var(--gutter) * 3);
+  padding: calc(var(--header-h) + var(--edge) * .35) var(--gutter) calc(var(--gutter) * 3) var(--edge);
   margin-right: max(160px, calc(240 * var(--s)));   /* keeps clear of the menu */
   max-width: max(600px, calc(820 * var(--s)));
 }
@@ -181,7 +183,7 @@ body {
 .page h1 {
   margin: 0 0 1.6em;
   font-weight: 300;
-  font-size: calc(var(--logo-size) * .55);
+  font-size: var(--title-size);
   letter-spacing: .3em;
   text-transform: uppercase;
 }
@@ -239,8 +241,8 @@ body {
   --side-w: max(200px, calc(300 * var(--s)));
   --gap: max(28px, calc(48 * var(--s)));
   --frame-w: min(
-    calc(100vw - var(--gutter) * 2 - max(160px, calc(240 * var(--s))) - var(--side-w) - var(--gap)),
-    calc((100vh - var(--header-h) - var(--gutter) * 3.4 - var(--logo-size)) * 16 / 9));
+    calc(100vw - var(--gutter) - var(--edge) - max(160px, calc(240 * var(--s))) - var(--side-w) - var(--gap)),
+    calc((100vh - var(--header-h) - var(--edge) * .35 - var(--gutter) * 2.2 - var(--title-size) * 1.8) * 16 / 9));
   display: flex;
   gap: var(--gap);
   align-items: flex-start;
@@ -298,7 +300,7 @@ body {
   letter-spacing: .2em;
   color: var(--ink-dim);
 }
-.project-text { width: var(--side-w); padding-top: calc(var(--logo-size) * .55 * 1.2 + 1.2em); }
+.project-text { width: var(--side-w); padding-top: calc(var(--title-size) * 1.2 + 1.2em); }
 .project-text p { font-size: var(--text-size); }
 .meta { font-size: var(--nav-size) !important; letter-spacing: .2em; text-transform: uppercase; }
 .pager {
@@ -443,3 +445,7 @@ body {
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) { .cover, .card img { transition: none; } }
+
+/* Settings: menu dots on/off and size */
+:root[data-dots="off"] .nav-dot { display: none; }
+:root[data-dotsize="small"] { --dot: max(3px, calc(3 * var(--s))); }

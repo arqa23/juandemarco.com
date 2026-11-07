@@ -1,7 +1,3 @@
 {
- "default": {"trim": "auto", "fit": "auto"},
- "wedges/01": {"trim": false, "fit": "cover"},
- "wedges/02": {"trim": false, "fit": "cover"},
- "julius/01": {"trim": false, "fit": "cover"},
- "julius/02": {"trim": false, "fit": "cover"}
+ "default": {"trim": false, "fit": "contain"}
 }

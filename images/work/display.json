@@ -1,6 +1,6 @@
 {
  "american-promise/01.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "american-promise/02.webp": {
   "fit": "contain"
@@ -9,19 +9,19 @@
   "fit": "contain"
  },
  "american-promise/04.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "american-promise/05.webp": {
   "fit": "contain"
  },
  "american-promise/06.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "frankls-purposive-intention/01.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "frankls-purposive-intention/02.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "frankls-purposive-intention/03.webp": {
   "fit": "contain"
@@ -36,19 +36,19 @@
   "fit": "contain"
  },
  "frankls-purposive-intention/07.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "frankls-purposive-intention/08.webp": {
   "fit": "contain"
  },
  "frankls-purposive-intention/09.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "julius/01.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "julius/02.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "julius/03.webp": {
   "fit": "contain"
@@ -57,7 +57,7 @@
   "fit": "contain"
  },
  "julius/05.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "julius/06.webp": {
   "fit": "contain"
@@ -75,16 +75,16 @@
   "fit": "contain"
  },
  "julius/11.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "julius/12.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "julius-ii/01.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "julius-ii/02.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "march-of-the-silhouettes/01.webp": {
   "fit": "contain"
@@ -108,7 +108,7 @@
   "fit": "contain"
  },
  "parnell-residence/01.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "parnell-residence/02.webp": {
   "fit": "contain"
@@ -120,40 +120,40 @@
   "fit": "contain"
  },
  "parnell-residence/05.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "parnell-residence/06.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "parnell-residence/07.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "parnell-residence/08.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "parnell-residence/09.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "parnell-residence/10.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "soma/01.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "soma/02.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "soma/03.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "soma/04.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "soma/05.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "talbot-road-residence/01.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "talbot-road-residence/02.webp": {
   "fit": "contain"
@@ -162,25 +162,25 @@
   "fit": "contain"
  },
  "talbot-road-residence/04.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "talbot-road-residence/05.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "talbot-road-residence/06.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "talbot-road-residence/07.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "talbot-road-residence/08.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "the-conflicted-icon/01.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "the-conflicted-icon/02.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "the-conflicted-icon/03.webp": {
   "fit": "contain"
@@ -204,33 +204,33 @@
   "fit": "contain"
  },
  "wedges/01.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "wedges/02.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "wedges/03.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "wedges/04.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "wedges/05.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "wedges/06.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "wedges/07.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "wedges/08.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "wedges/09.webp": {
-  "fit": "cover"
+  "fit": "contain"
  },
  "wedges/10.webp": {
-  "fit": "cover"
+  "fit": "contain"
  }
 }
