@@ -23,7 +23,11 @@ PROJECTS = [
     {"slug": "march-of-the-silhouettes", "title": "March of the Silhouettes"},
     {"slug": "wedges", "title": "Wedges"},
     {"slug": "frankls-purposive-intention", "title": "Frankl\u2019s Purposive Intention"},
+    {"slug": "soma", "title": "SOMA"},
 ]
+# Optional text per project: add "meta" (e.g. "2024 · Pigment print") and
+# "text" (a list of paragraphs) to any entry above. Placeholders show until then.
+# Optional crop per image: "focus": {"03.webp": "50% 30%"} (left/right %, top/bottom %).
 
 
 def project_images(slug):
@@ -155,13 +159,29 @@ def main():
 
     for i, p in enumerate(PROJECTS):
         prev_p, next_p = PROJECTS[i - 1], PROJECTS[(i + 1) % len(PROJECTS)]
-        figs = "\n".join(
-            f'      <figure class="project-figure">{img_tag(f"/images/work/{p['slug']}/{f}", p["title"], k == 0)}</figure>'
-            for k, f in enumerate(project_images(p["slug"])))
+        files = project_images(p["slug"])
+        focus = p.get("focus", {})
+        slides = "\n".join(
+            f'        <img class="slide{" is-on" if k == 0 else ""}" '
+            f'{"src" if k == 0 else "data-src"}="/images/work/{p["slug"]}/{f}" '
+            f'alt="{html.escape(p["title"])}, image {k + 1}" decoding="async"'
+            f'{f" style=\"object-position:{focus[f]}\"" if f in focus else ""}>'
+            for k, f in enumerate(files))
+        meta = html.escape(p.get("meta", "Year \u00b7 Medium"))
+        text = "\n".join(f"      <p>{html.escape(t)}</p>" for t in p.get("text", ["Description coming soon."]))
         body = f"""  <main class="page page-wide project">
     <h1>{html.escape(p["title"])}</h1>
-    <div class="gallery">
-{figs}
+    <div class="slideshow" data-count="{len(files)}">
+      <div class="frame">
+{slides}
+        <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
+        <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
+      </div>
+      <div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
+    </div>
+    <div class="project-text">
+      <p class="meta">{meta}</p>
+{text}
     </div>
     <div class="pager">
       <a href="/work/{prev_p["slug"]}/">&larr; {html.escape(prev_p["title"])}</a>
@@ -170,7 +190,8 @@ def main():
     </div>
   </main>
 """
-        write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner"))
+        write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner",
+                                                     '  <script src="/site.js" defer></script>\n'))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
     about_block = f"      <h1>About</h1>\n{about}\n"

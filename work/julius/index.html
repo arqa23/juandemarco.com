@@ -7,24 +7,34 @@
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <script src="/site.js" defer></script>
 </head>
 <body class="inner">
   <div class="scroller">
   <main class="page page-wide project">
     <h1>Julius</h1>
-    <div class="gallery">
-      <figure class="project-figure"><img src="/images/work/julius/01.webp" width="2400" height="1350" alt="Julius" fetchpriority="high" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/02.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/03.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/04.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/05.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/06.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/07.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/08.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/09.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/10.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/11.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/julius/12.webp" width="2400" height="1350" alt="Julius" loading="lazy" decoding="async"></figure>
+    <div class="slideshow" data-count="12">
+      <div class="frame">
+        <img class="slide is-on" src="/images/work/julius/01.webp" alt="Julius, image 1" decoding="async">
+        <img class="slide" data-src="/images/work/julius/02.webp" alt="Julius, image 2" decoding="async">
+        <img class="slide" data-src="/images/work/julius/03.webp" alt="Julius, image 3" decoding="async">
+        <img class="slide" data-src="/images/work/julius/04.webp" alt="Julius, image 4" decoding="async">
+        <img class="slide" data-src="/images/work/julius/05.webp" alt="Julius, image 5" decoding="async">
+        <img class="slide" data-src="/images/work/julius/06.webp" alt="Julius, image 6" decoding="async">
+        <img class="slide" data-src="/images/work/julius/07.webp" alt="Julius, image 7" decoding="async">
+        <img class="slide" data-src="/images/work/julius/08.webp" alt="Julius, image 8" decoding="async">
+        <img class="slide" data-src="/images/work/julius/09.webp" alt="Julius, image 9" decoding="async">
+        <img class="slide" data-src="/images/work/julius/10.webp" alt="Julius, image 10" decoding="async">
+        <img class="slide" data-src="/images/work/julius/11.webp" alt="Julius, image 11" decoding="async">
+        <img class="slide" data-src="/images/work/julius/12.webp" alt="Julius, image 12" decoding="async">
+        <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
+        <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
+      </div>
+      <div class="slide-count"><span class="slide-i">1</span> / 12</div>
+    </div>
+    <div class="project-text">
+      <p class="meta">Year · Medium</p>
+      <p>Description coming soon.</p>
     </div>
     <div class="pager">
       <a href="/work/talbot-road-residence/">&larr; Talbot Road Residence</a>

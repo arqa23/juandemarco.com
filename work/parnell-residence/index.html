@@ -7,22 +7,32 @@
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <script src="/site.js" defer></script>
 </head>
 <body class="inner">
   <div class="scroller">
   <main class="page page-wide project">
     <h1>Parnell Residence</h1>
-    <div class="gallery">
-      <figure class="project-figure"><img src="/images/work/parnell-residence/01.webp" width="2400" height="1200" alt="Parnell Residence" fetchpriority="high" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/parnell-residence/02.webp" width="2400" height="1227" alt="Parnell Residence" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/parnell-residence/03.webp" width="2400" height="1227" alt="Parnell Residence" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/parnell-residence/04.webp" width="2400" height="1227" alt="Parnell Residence" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/parnell-residence/05.webp" width="2400" height="1200" alt="Parnell Residence" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/parnell-residence/06.webp" width="2400" height="1200" alt="Parnell Residence" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/parnell-residence/07.webp" width="2400" height="1200" alt="Parnell Residence" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/parnell-residence/08.webp" width="2400" height="1200" alt="Parnell Residence" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/parnell-residence/09.webp" width="2400" height="1200" alt="Parnell Residence" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/parnell-residence/10.webp" width="2400" height="1200" alt="Parnell Residence" loading="lazy" decoding="async"></figure>
+    <div class="slideshow" data-count="10">
+      <div class="frame">
+        <img class="slide is-on" src="/images/work/parnell-residence/01.webp" alt="Parnell Residence, image 1" decoding="async">
+        <img class="slide" data-src="/images/work/parnell-residence/02.webp" alt="Parnell Residence, image 2" decoding="async">
+        <img class="slide" data-src="/images/work/parnell-residence/03.webp" alt="Parnell Residence, image 3" decoding="async">
+        <img class="slide" data-src="/images/work/parnell-residence/04.webp" alt="Parnell Residence, image 4" decoding="async">
+        <img class="slide" data-src="/images/work/parnell-residence/05.webp" alt="Parnell Residence, image 5" decoding="async">
+        <img class="slide" data-src="/images/work/parnell-residence/06.webp" alt="Parnell Residence, image 6" decoding="async">
+        <img class="slide" data-src="/images/work/parnell-residence/07.webp" alt="Parnell Residence, image 7" decoding="async">
+        <img class="slide" data-src="/images/work/parnell-residence/08.webp" alt="Parnell Residence, image 8" decoding="async">
+        <img class="slide" data-src="/images/work/parnell-residence/09.webp" alt="Parnell Residence, image 9" decoding="async">
+        <img class="slide" data-src="/images/work/parnell-residence/10.webp" alt="Parnell Residence, image 10" decoding="async">
+        <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
+        <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
+      </div>
+      <div class="slide-count"><span class="slide-i">1</span> / 10</div>
+    </div>
+    <div class="project-text">
+      <p class="meta">Year · Medium</p>
+      <p>Description coming soon.</p>
     </div>
     <div class="pager">
       <a href="/work/julius-ii/">&larr; Julius II</a>

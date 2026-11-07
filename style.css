@@ -17,7 +17,7 @@
   --design-width: 1920;
   --s: calc(100vw / var(--design-width));
   --gutter: max(18px, calc(44 * var(--s)));
-  --logo-size: max(20px, calc(36 * var(--s)));
+  --logo-size: max(22px, calc(39.6 * var(--s)));
   --nav-size: max(11px, calc(13 * var(--s)));
   --nav-gap: max(12px, calc(16 * var(--s)));
   --dot: max(5px, calc(6 * var(--s)));
@@ -180,14 +180,14 @@ body {
 /* Pages with a full-screen image behind the text */
 .photo .cover { z-index: 0; }
 .photo .scroller { background: rgba(0, 0, 0, .34); }
-/* About, Contact, Login: the text box's bottom edge meets the top of HOME (see site.js) */
+/* About, Contact, Login: the text box's bottom edge meets the bottom of LOGIN (see site.js) */
 .stacked {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding-top: calc(var(--header-h) + var(--gutter));
-  padding-bottom: calc(100vh - var(--nav-top, 85vh));
+  padding-bottom: calc(100vh - var(--nav-bottom, 96vh));
 }
 .stack { display: grid; }
 .stack > * { grid-area: 1 / 1; align-self: start; }
@@ -222,11 +222,53 @@ body {
   text-transform: uppercase;
 }
 
-/* Project page */
-.gallery { display: flex; flex-direction: column; gap: max(18px, calc(36 * var(--s))); }
-.project-figure { margin: 0; }
-.project-figure img { display: block; width: auto; max-width: 100%; height: auto; max-height: 86vh; }
-.project-text { max-width: max(560px, calc(760 * var(--s))); }
+/* Project page: one fixed frame, images step through with < > */
+.slideshow { position: relative; }
+.frame {
+  position: relative;
+  width: min(100%, calc((100vh - var(--header-h) - var(--gutter) * 4.5) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  background: #18181a;
+  overflow: hidden;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.slide.is-on { opacity: 1; }
+.slide-btn {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 18%;
+  display: flex;
+  align-items: center;
+  padding: 0 max(14px, calc(22 * var(--s)));
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: 300 max(30px, calc(46 * var(--s))) / 1 var(--font);
+  text-shadow: 0 1px 12px rgba(0,0,0,.35);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.slide-btn.prev { left: 0; justify-content: flex-start; }
+.slide-btn.next { right: 0; justify-content: flex-end; }
+.frame:hover .slide-btn { opacity: .75; }
+.slide-btn:hover, .slide-btn:focus-visible { opacity: 1 !important; outline: none; }
+.single .slide-btn, .single .slide-count { display: none; }
+.slide-count {
+  margin-top: .9em;
+  font-size: var(--nav-size);
+  letter-spacing: .2em;
+  color: var(--ink-dim);
+}
+.project-text { max-width: max(560px, calc(760 * var(--s))); margin-top: 2.2em; }
 .meta { font-size: var(--nav-size) !important; letter-spacing: .2em; text-transform: uppercase; }
 .pager {
   display: flex;
@@ -240,7 +282,7 @@ body {
 .pager a { text-decoration: none; opacity: .78; }
 .pager a:hover { opacity: 1; }
 
-.email { font-size: calc(var(--text-size) * 1.25) !important; letter-spacing: .04em; }
+.email { font-size: calc(var(--text-size) * 1.25) !important; letter-spacing: .04em; margin-top: -.55em !important; }
 .email a { text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.4); }
 .email a:hover { border-bottom-color: var(--ink); }
 
@@ -269,6 +311,8 @@ body {
   .stacked { min-height: 0; display: block; }
   .page, .photo .page { margin: 0; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--gutter) 90px; max-width: none; }
   .pager { font-size: 11px; letter-spacing: .12em; }
+  .slide-btn { opacity: .8; }
+  .frame { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) { .cover, .card img { transition: none; } }

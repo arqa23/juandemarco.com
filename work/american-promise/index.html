@@ -7,18 +7,28 @@
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css">
+  <script src="/site.js" defer></script>
 </head>
 <body class="inner">
   <div class="scroller">
   <main class="page page-wide project">
     <h1>American Promise</h1>
-    <div class="gallery">
-      <figure class="project-figure"><img src="/images/work/american-promise/01.webp" width="2400" height="1350" alt="American Promise" fetchpriority="high" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/american-promise/02.webp" width="2400" height="1350" alt="American Promise" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/american-promise/03.webp" width="2400" height="1350" alt="American Promise" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/american-promise/04.webp" width="2400" height="1350" alt="American Promise" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/american-promise/05.webp" width="2400" height="1350" alt="American Promise" loading="lazy" decoding="async"></figure>
-      <figure class="project-figure"><img src="/images/work/american-promise/06.webp" width="2400" height="1350" alt="American Promise" loading="lazy" decoding="async"></figure>
+    <div class="slideshow" data-count="6">
+      <div class="frame">
+        <img class="slide is-on" src="/images/work/american-promise/01.webp" alt="American Promise, image 1" decoding="async">
+        <img class="slide" data-src="/images/work/american-promise/02.webp" alt="American Promise, image 2" decoding="async">
+        <img class="slide" data-src="/images/work/american-promise/03.webp" alt="American Promise, image 3" decoding="async">
+        <img class="slide" data-src="/images/work/american-promise/04.webp" alt="American Promise, image 4" decoding="async">
+        <img class="slide" data-src="/images/work/american-promise/05.webp" alt="American Promise, image 5" decoding="async">
+        <img class="slide" data-src="/images/work/american-promise/06.webp" alt="American Promise, image 6" decoding="async">
+        <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
+        <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
+      </div>
+      <div class="slide-count"><span class="slide-i">1</span> / 6</div>
+    </div>
+    <div class="project-text">
+      <p class="meta">Year · Medium</p>
+      <p>Description coming soon.</p>
     </div>
     <div class="pager">
       <a href="/work/julius/">&larr; Julius</a>
