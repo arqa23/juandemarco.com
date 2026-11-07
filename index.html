@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Juan De Marco</title>
+  <meta name="description" content="Juan De Marco">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/images.js"></script>
+  <script>
+    // Pick one image at random before the page draws, so there is no flash.
+    (function () {
+      var list = window.COVER_IMAGES || [];
+      if (!list.length) return;
+      var pick = list[Math.floor(Math.random() * list.length)];
+      window.COVER_PICK = pick;
+      var l = document.createElement('link');
+      l.rel = 'preload'; l.as = 'image'; l.href = pick;
+      document.head.appendChild(l);
+    })();
+  </script>
+</head>
+<body class="home">
+  <img id="cover" class="cover" alt="" decoding="async" fetchpriority="high">
+  <script>
+    (function () {
+      var img = document.getElementById('cover');
+      if (!window.COVER_PICK) { img.remove(); return; }
+      img.onload = function () { img.classList.add('loaded'); };
+      img.src = window.COVER_PICK;
+    })();
+  </script>
+
+  <header class="site-header">
+    <a class="logo" href="/">JUAN DE MARCO</a>
+    <nav class="nav">
+      <a href="/" aria-current="page">Home</a>
+      <a href="/work/">Work</a>
+      <a href="/contact/">Contact</a>
+    </nav>
+  </header>
+
+  <footer class="site-footer">
+    All Content Copyright &copy; Juan De Marco. All Rights Reserved.
+  </footer>
+</body>
+</html>
