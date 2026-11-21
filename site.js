@@ -13,6 +13,8 @@
   }
 
   /* ---------- Settings: light / dark and full screen ---------- */
+  // Default value of each Settings choice; the default leaves no attribute on <html>.
+  var PREF_DEFAULTS = { dots: 'on', dotsize: 'normal', font: 'jost', weight: 'light', spacing: 'wide', 'case': 'caps' };
   function markSettings() {
     var panel = document.getElementById('settings');
     if (!panel) return;
@@ -20,7 +22,7 @@
     panel.querySelectorAll('[data-theme-set]').forEach(function (b) {
       b.classList.toggle('is-on', b.dataset.themeSet === t);
     });
-    var defaults = { dots: 'on', dotsize: 'normal' };
+    var defaults = PREF_DEFAULTS;
     panel.querySelectorAll('[data-pref]').forEach(function (b) {
       b.classList.toggle('is-on', (root.dataset[b.dataset.pref] || defaults[b.dataset.pref]) === b.dataset.val);
     });
@@ -55,7 +57,7 @@
     panel.querySelectorAll('[data-pref]').forEach(function (b) {
       b.addEventListener('click', function () {
         var k = b.dataset.pref, v = b.dataset.val;
-        if (v === 'on' || v === 'normal') delete root.dataset[k]; else root.dataset[k] = v;
+        if (v === PREF_DEFAULTS[k]) delete root.dataset[k]; else root.dataset[k] = v;
         try { localStorage.setItem('jdm-' + k, v); } catch (err) {}
         markSettings();
       });

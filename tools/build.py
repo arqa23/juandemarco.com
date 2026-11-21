@@ -139,14 +139,14 @@ def page(title, section, body, body_class="", head_extra=""):
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css?v={ASSET_V}">
-  <script>try{{var d=document.documentElement.dataset,t=localStorage.getItem('jdm-theme'),o=localStorage.getItem('jdm-dots'),z=localStorage.getItem('jdm-dotsize');if(t&&t!=='dark')d.theme=t;if(o==='off')d.dots=o;if(z==='small')d.dotsize=z}}catch(e){{}}</script>
+  <script>try{{var d=document.documentElement.dataset,t=localStorage.getItem('jdm-theme'),o=localStorage.getItem('jdm-dots'),z=localStorage.getItem('jdm-dotsize');if(t&&t!=='dark')d.theme=t;if(o==='off')d.dots=o;if(z==='small')d.dotsize=z;var D={{font:'jost',weight:'light',spacing:'wide','case':'caps'}};for(var k in D){{var v=localStorage.getItem('jdm-'+k);if(v&&v!==D[k])d[k]=v}}}}catch(e){{}}</script>
   <script src="/images.js?v={ASSET_V}"></script>
   <script src="/site.js?v={ASSET_V}" defer></script>
 {head_extra}</head>
 <body class="{body_class}">
 {body}
   <header class="site-header">
-    <a class="logo" href="/">JUAN DE MARCO</a>
+    <a class="logo" href="/">Juan De Marco</a>
   </header>
 
   <nav class="nav" aria-label="Main">
@@ -155,6 +155,33 @@ def page(title, section, body, body_class="", head_extra=""):
   </nav>
 
   <div class="settings" id="settings" hidden>
+    <div class="settings-row">
+      <span class="settings-label">Font</span>
+      <button type="button" data-pref="font" data-val="jost">Jost (now)</button>
+      <button type="button" data-pref="font" data-val="inter">Inter</button>
+      <button type="button" data-pref="font" data-val="instrument">Instrument Sans</button>
+      <button type="button" data-pref="font" data-val="geist">Geist</button>
+      <button type="button" data-pref="font" data-val="host">Host Grotesk</button>
+      <button type="button" data-pref="font" data-val="franklin">Libre Franklin</button>
+      <button type="button" data-pref="font" data-val="albert">Albert Sans</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Weight</span>
+      <button type="button" data-pref="weight" data-val="light">Light</button>
+      <button type="button" data-pref="weight" data-val="regular">Regular</button>
+      <button type="button" data-pref="weight" data-val="medium">Medium</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Spacing</span>
+      <button type="button" data-pref="spacing" data-val="wide">Wide (now)</button>
+      <button type="button" data-pref="spacing" data-val="medium">Medium</button>
+      <button type="button" data-pref="spacing" data-val="tight">Tight</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Case</span>
+      <button type="button" data-pref="case" data-val="caps">Capitals (now)</button>
+      <button type="button" data-pref="case" data-val="sentence">Sentence case</button>
+    </div>
     <div class="settings-row">
       <span class="settings-label">Mode</span>
       <button type="button" data-theme-set="light">Light</button>
