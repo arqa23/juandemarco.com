@@ -54,5 +54,11 @@
  },
  "frankls-purposive-intention/08": {
   "clear": "lr"
+ },
+ "julius/10": {
+  "skip": true
+ },
+ "julius/11": {
+  "skip": true
  }
 }

@@ -1,37 +1,38 @@
-@font-face { font-family: "Jost"; src: url("/fonts/jost-latin-300-normal.woff2") format("woff2"); font-weight: var(--w-light); font-display: swap; }
-@font-face { font-family: "Jost"; src: url("/fonts/jost-latin-400-normal.woff2") format("woff2"); font-weight: var(--w-regular); font-display: swap; }
+@font-face { font-family: "Jost"; src: url("/fonts/jost-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Jost"; src: url("/fonts/jost-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 /* Font test (Settings > Font): free OFL fonts, self-hosted in /fonts. Temporary, for choosing a font. */
-@font-face { font-family: "inter"; src: url("/fonts/inter-latin-300-normal.woff2") format("woff2"); font-weight: var(--w-light); font-display: swap; }
-@font-face { font-family: "inter"; src: url("/fonts/inter-latin-400-normal.woff2") format("woff2"); font-weight: var(--w-regular); font-display: swap; }
+@font-face { font-family: "inter"; src: url("/fonts/inter-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "inter"; src: url("/fonts/inter-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "inter"; src: url("/fonts/inter-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "inter"; src: url("/fonts/inter-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "instrument-sans"; src: url("/fonts/instrument-sans-latin-400-normal.woff2") format("woff2"); font-weight: var(--w-regular); font-display: swap; }
+@font-face { font-family: "instrument-sans"; src: url("/fonts/instrument-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "instrument-sans"; src: url("/fonts/instrument-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "instrument-sans"; src: url("/fonts/instrument-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "geist-sans"; src: url("/fonts/geist-sans-latin-300-normal.woff2") format("woff2"); font-weight: var(--w-light); font-display: swap; }
-@font-face { font-family: "geist-sans"; src: url("/fonts/geist-sans-latin-400-normal.woff2") format("woff2"); font-weight: var(--w-regular); font-display: swap; }
+@font-face { font-family: "geist-sans"; src: url("/fonts/geist-sans-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "geist-sans"; src: url("/fonts/geist-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "geist-sans"; src: url("/fonts/geist-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "geist-sans"; src: url("/fonts/geist-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "host-grotesk"; src: url("/fonts/host-grotesk-latin-300-normal.woff2") format("woff2"); font-weight: var(--w-light); font-display: swap; }
-@font-face { font-family: "host-grotesk"; src: url("/fonts/host-grotesk-latin-400-normal.woff2") format("woff2"); font-weight: var(--w-regular); font-display: swap; }
+@font-face { font-family: "host-grotesk"; src: url("/fonts/host-grotesk-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "host-grotesk"; src: url("/fonts/host-grotesk-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "host-grotesk"; src: url("/fonts/host-grotesk-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "host-grotesk"; src: url("/fonts/host-grotesk-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "libre-franklin"; src: url("/fonts/libre-franklin-latin-300-normal.woff2") format("woff2"); font-weight: var(--w-light); font-display: swap; }
-@font-face { font-family: "libre-franklin"; src: url("/fonts/libre-franklin-latin-400-normal.woff2") format("woff2"); font-weight: var(--w-regular); font-display: swap; }
+@font-face { font-family: "libre-franklin"; src: url("/fonts/libre-franklin-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "libre-franklin"; src: url("/fonts/libre-franklin-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "libre-franklin"; src: url("/fonts/libre-franklin-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "libre-franklin"; src: url("/fonts/libre-franklin-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-@font-face { font-family: "albert-sans"; src: url("/fonts/albert-sans-latin-300-normal.woff2") format("woff2"); font-weight: var(--w-light); font-display: swap; }
-@font-face { font-family: "albert-sans"; src: url("/fonts/albert-sans-latin-400-normal.woff2") format("woff2"); font-weight: var(--w-regular); font-display: swap; }
+@font-face { font-family: "albert-sans"; src: url("/fonts/albert-sans-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "albert-sans"; src: url("/fonts/albert-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "albert-sans"; src: url("/fonts/albert-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "albert-sans"; src: url("/fonts/albert-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
 
 *, *::before, *::after { box-sizing: border-box; }
 
 :root {
-  --ink: #ffffff;
-  --ink-dim: rgba(255, 255, 255, .72);
+  --ink: #efebe3;
+  --ink-dim: rgba(239, 235, 227, .74);
   --header-h: calc(var(--edge) * 2 + var(--logo-size) * 1.4);
-  --bg: #0f0f10;
+  --bg: #2a2a28;      /* Dark mode: charcoal graphite, not black */
+  --mat: #2a2a28;     /* margin colour around full-screen images (follows the mode) */
   --font: "Jost", "Futura", "Helvetica Neue", Arial, sans-serif;
 
   /* Proportional scaling: the layout is designed at a 1920px-wide screen
@@ -49,9 +50,9 @@
   --dot: max(5px, calc(6 * var(--s)));
   --legal-ink: rgba(255, 255, 255, .42);
   --frame-bg: #000;
-  --scroll-thumb: #3a3a3d;
-  --fade: rgba(15,15,16,.5);
-  --fade-0: rgba(15,15,16,0);
+  --scroll-thumb: #4a4a46;
+  --fade: rgba(42,42,40,.5);
+  --fade-0: rgba(42,42,40,0);
   --shadow: 0 1px 12px rgba(0,0,0,.25);
   --legal-size: max(6px, calc(6.2 * var(--s)));
   --text-size: max(13.5px, calc(15.3 * var(--s)));
@@ -413,63 +414,22 @@ body {
 .settings button:hover { border-color: #fff; }
 .settings button.is-on { background: #fff; color: #111; border-color: #fff; }
 
-/* Colour modes (Settings). They apply to pages without a full-screen image:
-   Work and the project pages. Light = cream, White = true white, Black = true black. */
-:root:is([data-theme="light"], [data-theme="white"]) .inner:not(.photo) {
+/* Colour modes (Settings): Dark (default) = charcoal graphite, Light = warm paper.
+   They colour Work, the project pages and the margin around full-screen images. */
+:root[data-theme="light"] { --mat: #f3f2ef; }
+:root[data-theme="light"] .inner:not(.photo) {
   --bg: #f3f2ef;
-  --ink: #141414;
-  --ink-dim: rgba(20, 20, 20, .72);
-  --legal-ink: rgba(20, 20, 20, .45);
+  --ink: #242321;
+  --ink-dim: rgba(36, 35, 33, .74);
+  --legal-ink: rgba(36, 35, 33, .45);
   --scroll-thumb: #c4c3bf;
   --fade: rgba(243,242,239,.5);
   --fade-0: rgba(243,242,239,0);
   --shadow: none;
 }
-:root[data-theme="white"] .inner:not(.photo) {
-  --bg: #ffffff;
-  --fade: rgba(255,255,255,.5);
-  --fade-0: rgba(255,255,255,0);
-  --scroll-thumb: #cfcfcf;
-}
-:root[data-theme="black"] .inner:not(.photo) {
-  --bg: #000000;
-  --fade: rgba(0,0,0,.5);
-  --fade-0: rgba(0,0,0,0);
-  --scroll-thumb: #333;
-}
-:root:is([data-theme="light"], [data-theme="white"]) .inner:not(.photo) .nav a:hover .nav-dot,
-:root:is([data-theme="light"], [data-theme="white"]) .inner:not(.photo) .settings-btn:hover .nav-dot { background: rgba(20,20,20,.45); }
-:root:is([data-theme="light"], [data-theme="white"]) .inner:not(.photo) .card img { background: #e6e5e1; }
-
-/* Login form */
-.login-form { display: flex; gap: 10px; margin: 1.6em 0 1em; max-width: 420px; }
-.login-form input {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 12px;
-  background: rgba(0,0,0,.28);
-  border: 1px solid rgba(255,255,255,.35);
-  color: #fff;
-  font: var(--w-light) var(--text-size) var(--font);
-  letter-spacing: calc(.08em * var(--track));
-}
-.login-form input::placeholder { color: rgba(255,255,255,.55); letter-spacing: calc(.16em * var(--track)); text-transform: var(--case); font-size: var(--nav-size); }
-.login-form input:focus { outline: none; border-color: #fff; }
-.login-form button {
-  padding: 10px 16px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,.35);
-  color: #fff;
-  font: var(--w-regular) var(--nav-size) var(--font);
-  letter-spacing: calc(.2em * var(--track));
-  text-transform: var(--case);
-  cursor: pointer;
-}
-.login-form button:hover { border-color: #fff; }
-.login-note { font-size: calc(var(--text-size) * .92) !important; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-
-@media (prefers-reduced-motion: reduce) { .cover, .card img { transition: none; } }
+:root[data-theme="light"] .inner:not(.photo) .nav a:hover .nav-dot,
+:root[data-theme="light"] .inner:not(.photo) .settings-btn:hover .nav-dot { background: rgba(20,20,20,.45); }
+:root[data-theme="light"] .inner:not(.photo) .card img { background: #e6e5e1; }
 
 /* Settings: menu dots on/off and size */
 :root[data-dots="off"] .nav-dot { display: none; }
@@ -491,3 +451,12 @@ body {
 .settings-row { flex-wrap: wrap; }
 .settings { max-width: min(560px, calc(100vw - 2 * var(--gutter))); }
 .settings .settings-label { flex: none; }
+
+/* Full-screen image pages (Home, About, Contact): the image sits inside a margin
+   of the page colour, half the menu's distance from the edge, like a mat. */
+:root { --mat-w: calc(var(--gutter) / 2); }
+.home, .photo { background: var(--mat); }
+.home .cover, .photo .cover { inset: var(--mat-w); width: calc(100% - 2 * var(--mat-w)); height: calc(100dvh - 2 * var(--mat-w)); }
+.home::before, .photo::before { top: var(--mat-w); left: var(--mat-w); right: var(--mat-w); }
+.home::after, .photo::after { right: var(--mat-w); bottom: var(--mat-w); }
+.home .site-footer, .photo .site-footer { left: calc(var(--mat-w) + max(8px, calc(var(--gutter) * .22))); }

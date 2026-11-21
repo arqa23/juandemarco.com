@@ -111,12 +111,8 @@ TEXT_POSITION = "top"
 
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
-LOGIN_TEXT = ("A closer view for clients, collaborators and partners: work in progress, "
-              "studies and documents shared as a conversation develops. Access is by invitation.")
-
 NAV = [("home", "Home", "/"), ("work", "Work", "/work/"),
-       ("contact", "Contact", "/contact/"), ("about", "About", "/about/"),
-       ("login", "Login", "/login/")]
+       ("contact", "Contact", "/contact/"), ("about", "About", "/about/")]
 
 
 def page(title, section, body, body_class="", head_extra=""):
@@ -139,7 +135,7 @@ def page(title, section, body, body_class="", head_extra=""):
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css?v={ASSET_V}">
-  <script>try{{var d=document.documentElement.dataset,t=localStorage.getItem('jdm-theme'),o=localStorage.getItem('jdm-dots'),z=localStorage.getItem('jdm-dotsize');if(t&&t!=='dark')d.theme=t;if(o==='off')d.dots=o;if(z==='small')d.dotsize=z;var D={{font:'jost',weight:'light',spacing:'wide','case':'caps'}};for(var k in D){{var v=localStorage.getItem('jdm-'+k);if(v&&v!==D[k])d[k]=v}}}}catch(e){{}}</script>
+  <script>try{{var d=document.documentElement.dataset,t=localStorage.getItem('jdm-theme'),o=localStorage.getItem('jdm-dots'),z=localStorage.getItem('jdm-dotsize');if(t==='light')d.theme=t;if(o==='off')d.dots=o;if(z==='small')d.dotsize=z;var D={{font:'jost',weight:'light',spacing:'wide','case':'caps'}};for(var k in D){{var v=localStorage.getItem('jdm-'+k);if(v&&v!==D[k])d[k]=v}}}}catch(e){{}}</script>
   <script src="/images.js?v={ASSET_V}"></script>
   <script src="/site.js?v={ASSET_V}" defer></script>
 {head_extra}</head>
@@ -186,9 +182,7 @@ def page(title, section, body, body_class="", head_extra=""):
       <span class="settings-label">Mode</span>
       <button type="button" data-theme-set="light">Light</button>
       <button type="button" data-theme-set="dark">Dark</button>
-      <button type="button" data-theme-set="white">White</button>
-      <button type="button" data-theme-set="black">Black</button>
-    </div>
+          </div>
     <div class="settings-row">
       <span class="settings-label">Dots</span>
       <button type="button" data-pref="dots" data-val="on">On</button>
@@ -327,25 +321,6 @@ def main():
                 f'    <div class="stack-content">\n{content}    </div>\n    </div>\n  </main>\n')
 
     write("about/index.html", page("About", "about", stacked(about_block), "inner photo"))
-    login = f"""      <h1>Login</h1>
-      <p>{html.escape(LOGIN_TEXT)}</p>
-      <form class="login-form" id="login-form" autocomplete="off">
-        <label class="visually-hidden" for="login-pass">Password</label>
-        <input id="login-pass" type="password" placeholder="Password" required>
-        <button type="submit">Enter</button>
-      </form>
-      <p class="login-note" id="login-note" hidden>Access is shared by invitation. To request it, write to
-        <a class="login-mail" href="/contact/">{EMAIL_USER} [at] {EMAIL_DOMAIN}</a>.</p>
-      <script>
-        (function () {{
-          var f = document.getElementById('login-form'), n = document.getElementById('login-note');
-          var m = n.querySelector('.login-mail'), e = {json.dumps(EMAIL_USER)} + '@' + {json.dumps(EMAIL_DOMAIN)};
-          m.href = 'mailto:' + e; m.textContent = e;
-          f.addEventListener('submit', function (ev) {{ ev.preventDefault(); n.hidden = false; f.reset(); }});
-        }})();
-      </script>
-"""
-    write("login/index.html", page("Login", "login", stacked(login), "inner photo"))
 
     contact = f"""      <h1>Contact</h1>
       <p>For commissions, collaborations and studio inquiries:</p>
