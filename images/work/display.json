@@ -6,13 +6,15 @@
   "fit": "contain"
  },
  "american-promise/03.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "american-promise/04.webp": {
   "fit": "contain"
  },
  "american-promise/05.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "american-promise/06.webp": {
   "fit": "contain"
@@ -24,16 +26,20 @@
   "fit": "contain"
  },
  "frankls-purposive-intention/03.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "frankls-purposive-intention/04.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "frankls-purposive-intention/05.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "frankls-purposive-intention/06.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "frankls-purposive-intention/07.webp": {
   "fit": "contain"
@@ -60,16 +66,20 @@
   "fit": "contain"
  },
  "julius/06.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "julius/07.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "julius/08.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "julius/09.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "julius-ii/01.webp": {
   "fit": "contain"
@@ -78,37 +88,47 @@
   "fit": "contain"
  },
  "march-of-the-silhouettes/01.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "march-of-the-silhouettes/02.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "march-of-the-silhouettes/03.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "march-of-the-silhouettes/04.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "march-of-the-silhouettes/05.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "march-of-the-silhouettes/06.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "march-of-the-silhouettes/07.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "parnell-residence/01.webp": {
   "fit": "contain"
  },
  "parnell-residence/02.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "parnell-residence/03.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "parnell-residence/04.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "parnell-residence/05.webp": {
   "fit": "contain"
@@ -147,10 +167,12 @@
   "fit": "contain"
  },
  "talbot-road-residence/02.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "talbot-road-residence/03.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "talbot-road-residence/04.webp": {
   "fit": "contain"
@@ -183,16 +205,20 @@
   "fit": "contain"
  },
  "the-conflicted-icon/06.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "the-conflicted-icon/07.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "the-conflicted-icon/08.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "the-conflicted-icon/09.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "wedges/01.webp": {
   "fit": "contain"

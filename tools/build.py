@@ -111,7 +111,7 @@ TEXT_POSITION = "top"
 
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
-NAV = [("home", "Home", "/"), ("work", "Work", "/work/"),
+NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Prints", "/prints/"),
        ("contact", "Contact", "/contact/"), ("about", "About", "/about/")]
 
 
@@ -135,7 +135,7 @@ def page(title, section, body, body_class="", head_extra=""):
   <meta name="description" content="Juan De Marco">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css?v={ASSET_V}">
-  <script>try{{var d=document.documentElement.dataset,t=localStorage.getItem('jdm-theme'),o=localStorage.getItem('jdm-dots'),z=localStorage.getItem('jdm-dotsize');if(t==='light')d.theme=t;if(o==='off')d.dots=o;if(z==='small')d.dotsize=z;var D={{font:'jost',weight:'light',spacing:'wide','case':'caps'}};for(var k in D){{var v=localStorage.getItem('jdm-'+k);if(v&&v!==D[k])d[k]=v}}}}catch(e){{}}</script>
+  <script src="/type.js?v={ASSET_V}"></script>
   <script src="/images.js?v={ASSET_V}"></script>
   <script src="/site.js?v={ASSET_V}" defer></script>
 {head_extra}</head>
@@ -151,52 +151,42 @@ def page(title, section, body, body_class="", head_extra=""):
   </nav>
 
   <div class="settings" id="settings" hidden>
+    <p class="settings-note">Test panel. Choices are kept in this browser only.</p>
+    <div class="settings-row"><label class="settings-label" for="ts-style">Text style</label>
+      <select id="ts-style"><option value="name">Name</option><option value="title">Title</option><option value="text">Text</option><option value="label">Label</option></select></div>
+    <div class="settings-row"><label class="settings-label" for="ts-font">Font</label>
+      <select id="ts-font" data-k="font"><option value="jost">Jost (old)</option><option value="inter">Inter</option><option value="instrument">Instrument Sans</option><option value="geist">Geist</option><option value="host">Host Grotesk</option><option value="franklin">Libre Franklin</option><option value="albert">Albert Sans</option></select></div>
+    <div class="settings-row"><label class="settings-label" for="ts-w">Weight</label>
+      <select id="ts-w" data-k="w"><option value="300">Light</option><option value="400">Regular</option><option value="500">Medium</option><option value="600">Semibold</option></select></div>
+    <div class="settings-row"><label class="settings-label" for="ts-size">Size</label>
+      <input id="ts-size" data-k="size" type="range" min="50" max="250" step="5"><output id="ts-size-out" for="ts-size"></output></div>
+    <div class="settings-row"><label class="settings-label" for="ts-track">Spacing</label>
+      <select id="ts-track" data-k="track"><option value="0">None</option><option value="0.02">Very tight</option><option value="0.05">Tight</option><option value="0.1">Medium</option><option value="0.2">Wide</option><option value="0.3">Wider</option><option value="0.42">Widest</option></select></div>
+    <div class="settings-row"><label class="settings-label" for="ts-case">Case</label>
+      <select id="ts-case" data-k="case"><option value="uppercase">Capitals</option><option value="none">As written</option></select></div>
+    <div class="settings-rule"></div>
     <div class="settings-row">
-      <span class="settings-label">Font</span>
-      <button type="button" data-pref="font" data-val="jost">Jost (now)</button>
-      <button type="button" data-pref="font" data-val="inter">Inter</button>
-      <button type="button" data-pref="font" data-val="instrument">Instrument Sans</button>
-      <button type="button" data-pref="font" data-val="geist">Geist</button>
-      <button type="button" data-pref="font" data-val="host">Host Grotesk</button>
-      <button type="button" data-pref="font" data-val="franklin">Libre Franklin</button>
-      <button type="button" data-pref="font" data-val="albert">Albert Sans</button>
+      <span class="settings-label">Colour</span>
+      <button type="button" data-pref="colour" data-val="guidelines">Warm (guidelines)</button>
+      <button type="button" data-pref="colour" data-val="original">Black &amp; white</button>
     </div>
     <div class="settings-row">
-      <span class="settings-label">Weight</span>
-      <button type="button" data-pref="weight" data-val="light">Light</button>
-      <button type="button" data-pref="weight" data-val="regular">Regular</button>
-      <button type="button" data-pref="weight" data-val="medium">Medium</button>
+      <span class="settings-label">Image margin</span>
+      <button type="button" data-pref="mat" data-val="on">On</button>
+      <button type="button" data-pref="mat" data-val="off">Off</button>
     </div>
     <div class="settings-row">
-      <span class="settings-label">Spacing</span>
-      <button type="button" data-pref="spacing" data-val="wide">Wide (now)</button>
-      <button type="button" data-pref="spacing" data-val="medium">Medium</button>
-      <button type="button" data-pref="spacing" data-val="tight">Tight</button>
+      <span class="settings-label">About / Contact image</span>
+      <button type="button" data-pref="photos" data-val="on">On</button>
+      <button type="button" data-pref="photos" data-val="off">Off</button>
     </div>
+    <div class="settings-rule"></div>
     <div class="settings-row">
-      <span class="settings-label">Case</span>
-      <button type="button" data-pref="case" data-val="caps">Capitals (now)</button>
-      <button type="button" data-pref="case" data-val="sentence">Sentence case</button>
+      <button type="button" id="ts-copy">Copy my settings</button>
+      <button type="button" id="ts-download">Download</button>
+      <button type="button" id="ts-reset">Reset all</button>
     </div>
-    <div class="settings-row">
-      <span class="settings-label">Mode</span>
-      <button type="button" data-theme-set="light">Light</button>
-      <button type="button" data-theme-set="dark">Dark</button>
-          </div>
-    <div class="settings-row">
-      <span class="settings-label">Dots</span>
-      <button type="button" data-pref="dots" data-val="on">On</button>
-      <button type="button" data-pref="dots" data-val="off">Off</button>
-    </div>
-    <div class="settings-row">
-      <span class="settings-label">Dot size</span>
-      <button type="button" data-pref="dotsize" data-val="normal">Normal</button>
-      <button type="button" data-pref="dotsize" data-val="small">Small</button>
-    </div>
-    <div class="settings-row">
-      <span class="settings-label">Screen</span>
-      <button type="button" data-fullscreen>Full screen</button>
-    </div>
+    <textarea id="ts-out" class="settings-out" rows="4" readonly hidden aria-label="Settings to copy"></textarea>
   </div>
 
   <footer class="site-footer">
@@ -249,7 +239,7 @@ def img_tag(path, alt, eager=False):
 def asset_version():
     import hashlib
     h = hashlib.md5()
-    for f in ("style.css", "site.js", "images.js"):
+    for f in ("style.css", "site.js", "images.js", "type.js"):
         h.update((ROOT / f).read_bytes())
     return h.hexdigest()[:8]
 
@@ -309,6 +299,24 @@ def main():
   </main>
 """
         write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner"))
+
+    # Prints: selected document-mode drawings in a free, staggered layout.
+    # (slug, image) pairs; captions come from PROJECTS. Placement repeats every 6.
+    PRINTS = [('american-promise', '03'), ('march-of-the-silhouettes', '02'), ('parnell-residence', '03'), ('the-conflicted-icon', '07'), ('julius', '07'), ('frankls-purposive-intention', '04'), ('march-of-the-silhouettes', '05'), ('talbot-road-residence', '02'), ('american-promise', '05'), ('the-conflicted-icon', '09'), ('march-of-the-silhouettes', '07'), ('frankls-purposive-intention', '06')]
+    PLACE = [(1, 5, 0), (7, 4, 9), (2, 4, 2), (7, 5, 6), (1, 6, 0), (8, 4, 11)]   # (start column, span, top offset)
+    by = {p["slug"]: p for p in PROJECTS}
+    items = []
+    for n, (slug, num) in enumerate(PRINTS):
+        p = by[slug]; c, span, top = PLACE[n % len(PLACE)]
+        year = p.get("meta", "").split(" \u00b7 ")[0]
+        items.append(
+            f'      <a class="print" href="/work/{slug}/" style="grid-column:{c} / span {span};margin-top:calc({top} * var(--s) * 10)">\n'
+            f'        <img src="/images/work/{slug}/{num}.webp" alt="{html.escape(p["title"])}, drawing" loading="lazy" decoding="async">\n'
+            f'        <span class="print-cap"><em>{html.escape(p["title"])}</em>, {year}</span>\n      </a>')
+    write("prints/index.html", page("Prints", "prints",
+        '  <main class="page page-wide prints-page">\n    <h1>Prints</h1>\n'
+        '    <p class="prints-intro">Selected drawings, shown as sheets. Editions, papers and sizes to come.</p>\n'
+        '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n', "inner"))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
     about_block = f"      <h1>About</h1>\n{about}\n"

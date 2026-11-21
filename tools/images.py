@@ -18,6 +18,11 @@ Options
   scale  0.9    shrink the image to 90% and fill the freed edge with its own
                 background colour, so the canvas keeps its size
   fill   "auto" (sample the image's edge colour) or a colour like "#ffffff"
+  mode   "document"  a drawing shown as an archival sheet: its white margins are
+                trimmed and replaced by an even white margin (margin x the
+                longest side, default 0.06), keeping the drawing's true
+                proportions; it sits whole on the page colour
+  margin 0.06   sheet margin for document mode
   clear  "lr" / "tb" / "all"  make the solid white bands on those sides
                 see-through, so the page colour shows instead (Light, Dark,
                 White, Black). Size and zoom stay exactly as before.
@@ -44,6 +49,17 @@ def white_margins(im):
     if max(t / h, b / h, l / w, r / w) <= 0.03:
         return None
     return (int(l), int(t), int(w - r), int(h - b))
+
+
+def sheet(im, k):
+    """Document mode: trim the white paper, then add an even white margin back."""
+    box = white_margins(im)
+    if box:
+        im = im.crop(box)
+    m = round(max(im.size) * k)
+    out = Image.new("RGB", (im.width + 2 * m, im.height + 2 * m), (255, 255, 255))
+    out.paste(im, (m, m))
+    return out
 
 
 def edge_colour(im):
@@ -98,10 +114,12 @@ def main():
         if rule.get("skip"):
             continue
         im = Image.open(src).convert("RGB")
+        if rule.get("mode") == "document":
+            im, rule = sheet(im, rule.get("margin", 0.06)), {**rule, "fit": "contain", "trim": False}
         box = white_margins(im) if rule.get("trim") == "auto" else None
         if box:
             im = im.crop(box)
-        changed = bool(box)
+        changed = bool(box) or rule.get("mode") == "document"
         if rule.get("scale"):
             im, changed = scale_down(im, rule["scale"], rule.get("fill")), True
         if rule.get("clear"):
@@ -117,6 +135,8 @@ def main():
         else:
             shutil.copyfile(src, dst)   # untouched: an exact copy of the original
         entry = {"fit": fit}
+        if rule.get("mode"):
+            entry["mode"] = rule["mode"]
         if rule.get("focus"):
             entry["focus"] = rule["focus"]
         display[f"{src.parent.name}/{src.name}"] = entry
