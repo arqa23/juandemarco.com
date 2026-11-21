@@ -115,10 +115,25 @@ NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Prints", "
        ("contact", "Contact", "/contact/"), ("about", "About", "/about/")]
 
 
+# Print series (MOCKUP names and text). slug, name, source, short text.
+PRINT_SERIES = [
+    ("silhouettes", "Silhouettes", "From March of the Silhouettes, 2014",
+     "Ink figures cut from the March of the Silhouettes drawings. Series text to come."),
+    ("elevations", "Elevations", "From American Promise, 2016",
+     "Street elevations of the American Promise monument, with sky and trees in line. Series text to come."),
+    ("lines", "Lines", "From The Conflicted Icon and Frankl\u2019s Purposive Intention",
+     "Line drawings of towers and rooms, drawn in axonometric. Series text to come."),
+    ("fields", "Fields", "From Julius, 2017",
+     "The Julius figure in a landscape of drawn trees and ground. Series text to come."),
+    ("plans", "Plans", "From the Parnell and Talbot Road Residences",
+     "Plans of two houses, read as drawings in their own right. Series text to come."),
+]
+
+
 def page(title, section, body, body_class="", head_extra=""):
     nav = "\n".join(
         f'      <a href="{href}"{" aria-current=\"page\"" if key == section else ""}>'
-        f'<span class="nav-label">{label}</span><span class="nav-dot" aria-hidden="true"></span></a>'
+        f'<span class="nav-label">{label}</span></a>'
         for key, label, href in NAV)
     full_title = "Juan De Marco" if section == "home" else f"{title} | Juan De Marco"
     if "inner" in body_class:
@@ -147,7 +162,7 @@ def page(title, section, body, body_class="", head_extra=""):
 
   <nav class="nav" aria-label="Main">
 {nav}
-      <button class="settings-btn" type="button" aria-expanded="false" aria-controls="settings"><span class="nav-label">Settings</span><span class="nav-dot" aria-hidden="true"></span></button>
+      <button class="settings-btn" type="button" aria-expanded="false" aria-controls="settings"><span class="nav-label">Settings</span></button>
   </nav>
 
   <div class="settings" id="settings" hidden>
@@ -300,22 +315,49 @@ def main():
 """
         write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner"))
 
-    # Prints: selected document-mode drawings in a free, staggered layout.
-    # (slug, image) pairs; captions come from PROJECTS. Placement repeats every 6.
-    PRINTS = [('american-promise', '03'), ('march-of-the-silhouettes', '02'), ('parnell-residence', '03'), ('the-conflicted-icon', '07'), ('julius', '07'), ('frankls-purposive-intention', '04'), ('march-of-the-silhouettes', '05'), ('talbot-road-residence', '02'), ('american-promise', '05'), ('the-conflicted-icon', '09'), ('march-of-the-silhouettes', '07'), ('frankls-purposive-intention', '06')]
-    PLACE = [(1, 5, 0), (7, 4, 9), (2, 4, 2), (7, 5, 6), (1, 6, 0), (8, 4, 11)]   # (start column, span, top offset)
-    by = {p["slug"]: p for p in PROJECTS}
-    items = []
-    for n, (slug, num) in enumerate(PRINTS):
-        p = by[slug]; c, span, top = PLACE[n % len(PLACE)]
-        year = p.get("meta", "").split(" \u00b7 ")[0]
-        items.append(
-            f'      <a class="print" href="/work/{slug}/" style="grid-column:{c} / span {span};margin-top:calc({top} * var(--s) * 10)">\n'
-            f'        <img src="/images/work/{slug}/{num}.webp" alt="{html.escape(p["title"])}, drawing" loading="lazy" decoding="async">\n'
-            f'        <span class="print-cap"><em>{html.escape(p["title"])}</em>, {year}</span>\n      </a>')
+    # Prints. MOCKUP: 2:3 sheets cut from existing drawings by tools/print_mockups.py.
+    # Each series opens as its own "room": one print at a time, text to the side.
+    PLACE = [(1, 3, 0), (5, 3, 9), (9, 3, 3), (2, 3, 1), (6, 3, 11), (10, 3, 5)]   # (start column, span, top offset)
+    items, n = [], 0
+    for slug, name, source, blurb in PRINT_SERIES:
+        files = sorted(f.name for f in (ROOT / "images" / "prints" / slug).glob("[0-9]*.webp"))
+        for k, f in enumerate(files):
+            c, span, top = PLACE[n % len(PLACE)]; n += 1
+            items.append(
+                f'      <a class="print" href="/prints/{slug}/#{k + 1}" style="grid-column:{c} / span {span};margin-top:calc({top} * var(--s) * 10)">\n'
+                f'        <img src="/images/prints/{slug}/{f}" width="1067" height="1600" alt="{name}, print {k + 1}" loading="lazy" decoding="async">\n'
+                f'        <span class="print-cap"><em>{name}</em>, No. {k + 1}</span>\n      </a>')
+        slides = "\n".join(
+            f'        <img class="slide contain{" is-on" if k == 0 else ""}" {"src" if k == 0 else "data-src"}="/images/prints/{slug}/{f}" '
+            f'alt="{name}, print {k + 1} of {len(files)}" decoding="async">' for k, f in enumerate(files))
+        room = f"""  <main class="room-page">
+    <div class="room-top">
+      <span class="room-where"><a href="/prints/">Prints</a> / {name}</span>
+      <a class="room-close" href="/prints/" aria-label="Close and go back to Prints">&times;</a>
+    </div>
+    <div class="room-layout">
+      <div class="slideshow room-show" data-count="{len(files)}">
+        <div class="frame">
+{slides}
+          <button class="slide-btn prev" type="button" aria-label="Previous print">&lsaquo;</button>
+          <button class="slide-btn next" type="button" aria-label="Next print">&rsaquo;</button>
+        </div>
+        <div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
+      </div>
+      <div class="room-text">
+        <h1>{name}</h1>
+        <p class="meta">Series of {len(files)} &middot; {source}</p>
+        <p>{blurb}</p>
+        <p class="room-buy">Print options coming soon</p>
+        <p class="room-mock">Mockup: sections of existing drawings stand in for the final prints.</p>
+      </div>
+    </div>
+  </main>
+"""
+        write(f"prints/{slug}/index.html", page(f"{name} \u00b7 Prints", "prints", room, "inner room"))
     write("prints/index.html", page("Prints", "prints",
         '  <main class="page page-wide prints-page">\n    <h1>Prints</h1>\n'
-        '    <p class="prints-intro">Selected drawings, shown as sheets. Editions, papers and sizes to come.</p>\n'
+        '    <p class="prints-intro">Drawings in series, as archival prints. Select one to enter its series.</p>\n'
         '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n', "inner"))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)

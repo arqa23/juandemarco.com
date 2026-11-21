@@ -119,6 +119,8 @@
       load(i + 1); load(i - 1);
     }
     load(1); load(-1);
+    var start = parseInt(location.hash.slice(1), 10);
+    if (start > 1 && start <= slides.length) { load(start - 1); go(start - 1); }
     show.querySelector('.prev').addEventListener('click', function () { go(i - 1); });
     show.querySelector('.next').addEventListener('click', function () { go(i + 1); });
     slideStep = function (d) { go(i + d); };
@@ -177,6 +179,7 @@
     if (!slideStep || (e.target.closest && e.target.closest('input, textarea, select'))) return;
     if (e.key === 'ArrowRight') slideStep(1);
     if (e.key === 'ArrowLeft') slideStep(-1);
+    if (e.key === 'Escape' && document.body.classList.contains('room')) { var x = document.querySelector('.room-close'); if (x) x.click(); }
   });
 
   init();
