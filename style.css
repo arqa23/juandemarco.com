@@ -414,18 +414,28 @@ body {
 .settings button:hover { border-color: #fff; }
 .settings button.is-on { background: #fff; color: #111; border-color: #fff; }
 
-/* Colour modes (Settings): Dark (default) = charcoal graphite, Light = warm paper.
-   They colour Work, the project pages and the margin around full-screen images. */
-:root[data-theme="light"] { --mat: #f3f2ef; }
+/* Colour (Settings): the site is Light. Warm = design guidelines (paper #F5F2EA,
+   ink #242321, graphite #6A6761); Black & white = the original cream and black. */
+:root[data-theme="light"] { --mat: #F5F2EA; }
+:root[data-theme="light"][data-colour="original"] { --mat: #f3f2ef; }
 :root[data-theme="light"] .inner:not(.photo) {
-  --bg: #f3f2ef;
+  --bg: #F5F2EA;
   --ink: #242321;
-  --ink-dim: rgba(36, 35, 33, .74);
+  --ink-dim: #6A6761;
   --legal-ink: rgba(36, 35, 33, .45);
+  --scroll-thumb: #c9c4b8;
+  --fade: rgba(245,242,234,.5);
+  --fade-0: rgba(245,242,234,0);
+  --shadow: none;
+}
+:root[data-theme="light"][data-colour="original"] .inner:not(.photo) {
+  --bg: #f3f2ef;
+  --ink: #141414;
+  --ink-dim: rgba(20, 20, 20, .72);
+  --legal-ink: rgba(20, 20, 20, .45);
   --scroll-thumb: #c4c3bf;
   --fade: rgba(243,242,239,.5);
   --fade-0: rgba(243,242,239,0);
-  --shadow: none;
 }
 :root[data-theme="light"] .inner:not(.photo) .nav a:hover .nav-dot,
 :root[data-theme="light"] .inner:not(.photo) .settings-btn:hover .nav-dot { background: rgba(20,20,20,.45); }
@@ -453,10 +463,57 @@ body {
 .settings .settings-label { flex: none; }
 
 /* Full-screen image pages (Home, About, Contact): the image sits inside a margin
-   of the page colour, half the menu's distance from the edge, like a mat. */
+   of the page colour, half the menu's distance from the edge, like a mat. Settings > Image margin (off by default). */
 :root { --mat-w: calc(var(--gutter) / 2); }
-.home, .photo { background: var(--mat); }
-.home .cover, .photo .cover { inset: var(--mat-w); width: calc(100% - 2 * var(--mat-w)); height: calc(100dvh - 2 * var(--mat-w)); }
-.home::before, .photo::before { top: var(--mat-w); left: var(--mat-w); right: var(--mat-w); }
-.home::after, .photo::after { right: var(--mat-w); bottom: var(--mat-w); }
-.home .site-footer, .photo .site-footer { left: calc(var(--mat-w) + max(8px, calc(var(--gutter) * .22))); }
+:root[data-mat="on"] :is(.home, .photo) { background: var(--mat); }
+:root[data-mat="on"] .home .cover, :root[data-mat="on"] .photo .cover { inset: var(--mat-w); width: calc(100% - 2 * var(--mat-w)); height: calc(100dvh - 2 * var(--mat-w)); }
+:root[data-mat="on"] .home::before, :root[data-mat="on"] .photo::before { top: var(--mat-w); left: var(--mat-w); right: var(--mat-w); }
+:root[data-mat="on"] .home::after, :root[data-mat="on"] .photo::after { right: var(--mat-w); bottom: var(--mat-w); }
+:root[data-mat="on"] .home .site-footer, :root[data-mat="on"] .photo .site-footer { left: calc(var(--mat-w) + max(8px, calc(var(--gutter) * .22))); }
+
+/* About / Contact with their image switched off (Settings): the cover hides */
+.inner:not(.photo) .cover { display: none; }
+
+/* Text styles (Settings > Text style). Defaults match the original site. */
+.logo { font-family: var(--name-font, var(--font)); font-weight: var(--name-w, 300); font-size: calc(var(--logo-size) * var(--name-scale, 1)); letter-spacing: var(--name-track, .42em); text-transform: var(--name-case, uppercase); }
+.page h1 { font-family: var(--title-font, var(--font)); font-weight: var(--title-w, 300); font-size: calc(var(--title-size) * var(--title-scale, 1)); letter-spacing: var(--title-track, .3em); text-transform: var(--title-case, uppercase); }
+.page p:not(.meta):not(.email):not(.settings-note) { font-family: var(--text-font, var(--font)); font-weight: var(--text-w, 300); font-size: calc(var(--text-size) * var(--text-scale, 1)); letter-spacing: var(--text-track, 0); text-transform: var(--text-case, none); }
+.page .email { font-family: var(--text-font, var(--font)); font-weight: var(--text-w, 300); font-size: calc(var(--text-size) * 1.25 * var(--text-scale, 1)) !important; }
+.nav a, .settings-btn, .project-nav, .meta, .slide-count, .card-title, .print-cap {
+  font-family: var(--label-font, var(--font));
+  font-weight: var(--label-w, 400);
+  font-size: calc(var(--nav-size) * var(--label-scale, 1)) !important;
+  letter-spacing: var(--label-track, .2em);
+  text-transform: var(--label-case, uppercase);
+}
+
+/* Settings panel controls */
+.settings { max-height: calc(100vh - 2 * var(--gutter)); overflow-y: auto; }
+.settings-note { margin: 0; opacity: .55; text-transform: none; letter-spacing: .02em; }
+.settings-rule { border-top: 1px solid rgba(255,255,255,.14); }
+.settings select, .settings input[type="range"] { font: inherit; letter-spacing: .04em; text-transform: none; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.3); padding: 5px 8px; min-width: 13em; }
+.settings select option { color: #111; }
+.settings input[type="range"] { padding: 0; min-width: 10em; accent-color: #fff; }
+.settings output { min-width: 3.5em; }
+.settings-out { width: 100%; font: 11px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #fff; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.2); text-transform: none; letter-spacing: 0; }
+.settings-label { width: 10em; }
+
+/* Prints: drawings as sheets, placed freely on a 12-column grid */
+.prints-intro { margin: -0.6em 0 3em !important; color: var(--ink-dim); }
+.prints {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: max(16px, calc(32 * var(--s)));
+  row-gap: max(28px, calc(56 * var(--s)));
+  align-items: start;
+  padding-bottom: calc(var(--gutter) * 3);
+}
+.print { display: block; color: var(--ink); text-decoration: none; }
+.print img { display: block; width: 100%; height: auto; box-shadow: 0 1px 2px rgba(36,35,33,.08), 0 6px 18px -10px rgba(36,35,33,.22); transition: opacity .2s ease; }
+.print:hover img { opacity: .88; }
+.print-cap { display: block; margin-top: .9em; color: var(--ink-dim); }
+.print-cap em { font-style: normal; color: var(--ink); }
+@media (max-width: 760px) {
+  .prints { grid-template-columns: 1fr; }
+  .print { grid-column: 1 / -1 !important; margin-top: 0 !important; }
+}
