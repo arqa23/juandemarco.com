@@ -14,7 +14,7 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on', line: 'off' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on' };
   var current = 'name';
   function markSettings() {
     var panel = document.getElementById('settings');
@@ -128,17 +128,76 @@
   }
 
   /* ---------- Prints wall: masonry rows so gutters match across and down ---------- */
+  // Prints wall: greedy "highest free spot" packing over the whole band at once.
+  // Each print tries every x where it sits exactly one gap from a neighbour or
+  // against an edge, takes the highest free y there, and then stretches a little
+  // (up to 35%) to close a leftover gap, so neighbours stay one gap apart.
   function layoutWall() {
     var wall = document.querySelector('.prints');
     if (!wall) return;
-    var gap = parseFloat(getComputedStyle(wall).columnGap) || 40;
-    wall.querySelectorAll('.print').forEach(function (a) {
-      var img = a.querySelector('img'), cap = a.querySelector('.print-cap');
-      var h = a.clientWidth * img.getAttribute('height') / img.getAttribute('width');
-      var capH = cap ? cap.offsetHeight + parseFloat(getComputedStyle(cap).marginTop) : 0;
-      a.style.gridRowEnd = 'span ' + Math.ceil((h + capH + gap) / 4);
+    var W = wall.clientWidth, g = parseFloat(getComputedStyle(wall).columnGap) || 40;
+    var base = W * (W < 600 ? 0.42 : 0.185), placed = [], bottom = 0;
+    var capH = 0, cap0 = wall.querySelector('.print-cap');
+    if (cap0) capH = cap0.offsetHeight + parseFloat(getComputedStyle(cap0).marginTop);
+    function topAt(x, w) {
+      var y = 0;
+      placed.forEach(function (p) { if (p.x < x + w + g - 0.5 && p.x + p.w + g > x + 0.5) y = Math.max(y, p.y + p.h + g); });
+      return y;
+    }
+    function room(x, y, h, dir) {           // free edge to the right (dir 1) or left (-1) over [y, y+h]
+      var lim = dir > 0 ? W : 0;
+      placed.forEach(function (p) {
+        if (p.y >= y + h + g - 0.5 || p.y + p.h + g <= y + 0.5) return;
+        if (dir > 0 && p.x >= x - 0.5) lim = Math.min(lim, p.x - g);
+        if (dir < 0 && p.x + p.w <= x + 0.5) lim = Math.max(lim, p.x + p.w + g);
+      });
+      return lim;
+    }
+    var items = [].map.call(wall.querySelectorAll('.print'), function (a) {
+      var img = a.querySelector('img'), r = img.getAttribute('width') / img.getAttribute('height');
+      return { a: a, r: r, w0: Math.min(W, base * Math.sqrt(parseFloat(a.dataset.size || 1) * r)) };
     });
+    function pack(order) {
+      placed = [];
+      var bot = 0, area = 0;
+      order.forEach(function (it) {
+        var r = it.r, w0 = it.w0, cands = [[0, 1], [W - w0, -1]], best = null;
+        placed.forEach(function (p) { cands.push([p.x + p.w + g, 1], [p.x - g - w0, -1]); });
+        cands.forEach(function (c) {
+          var x = c[0], dir = c[1], w = w0;
+          if (x < -0.5 || x > W - w + 0.5) return;
+          var y = topAt(x, w), h = w / r + capH;
+          var edge = dir > 0 ? x : x + w, lim = room(edge, y, h * 1.35, dir);
+          var slack = dir > 0 ? lim - (x + w) : x - lim;
+          if (slack > 0.5 && slack < w * 0.35) {
+            var w2 = w + slack, x2 = dir > 0 ? x : lim;
+            if (topAt(x2, w2) <= y + 0.5) { x = x2; w = w2; h = w / r + capH; }
+          }
+          var score = y + Math.abs(x + w / 2 - W / 2) * 0.03;
+          if (!best || score < best.s) best = { x: x, y: y, w: w, h: h, s: score, it: it };
+        });
+        placed.push(best);
+        bot = Math.max(bot, best.y + best.h); area += best.w * best.h;
+      });
+      return { placed: placed, d: area / (W * bot), h: bot };
+    }
+    // Try many hanging orders (seeded, so the wall is the same on every visit)
+    // and keep the densest one.
+    var seed = 23, rand = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    var bestPack = pack(items);
+    for (var t = 0; t < 160; t++) {
+      var o = items.slice();
+      for (var i = o.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)), tmp = o[i]; o[i] = o[j]; o[j] = tmp; }
+      var res = pack(o);
+      if (res.d > bestPack.d) bestPack = res;
+    }
+    bestPack.placed.forEach(function (p) {
+      var st = p.it.a.style; st.width = p.w + 'px'; st.left = p.x + 'px'; st.top = p.y + 'px';
+    });
+    bottom = bestPack.h;
+    wall.style.height = bottom + 'px';
   }
+
 
   function init() {
     layoutWall();
