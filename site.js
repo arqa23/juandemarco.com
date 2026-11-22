@@ -14,7 +14,7 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on', layout: 'slides' };
   var current = 'name';
   function markSettings() {
     var panel = document.getElementById('settings');
