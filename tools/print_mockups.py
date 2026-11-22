@@ -27,6 +27,9 @@ SERIES = {
               ("frankls-purposive-intention/04", 1), ("frankls-purposive-intention/05", 1), ("frankls-purposive-intention/06", 1),
               ("the-conflicted-icon/09", 1, 0.6)]),
     "fields": ("4:3", [("julius/06", 1), ("julius/07", 1), ("julius/08", 1), ("julius/09", 1), ("julius/07", 1, 0.55), ("julius/08", 1, 0.55)]),
+    # "free": whole images in their own proportions, on a white sheet with an even margin
+    "renderings": ("free", [("american-promise/01", 1), ("american-promise/02", 1), ("american-promise/04", 1), ("american-promise/06", 1)]),
+    "soma": ("free", [("soma/01", 1), ("soma/02", 1), ("soma/03", 1), ("soma/04", 1)]),
     "plans": ("1:1", [("parnell-residence/02", 1), ("parnell-residence/03", 1),
               ("parnell-residence/04", 1), ("talbot-road-residence/02", 1), ("talbot-road-residence/03", 1),
               ("parnell-residence/03", 1, 0.5), ("parnell-residence/04", 1, 0.5)]),
@@ -61,6 +64,23 @@ def sections(im, n, ART, zoom=1.0):
 def main():
     import shutil
     for slug, (fmt, srcs) in SERIES.items():
+        if fmt == "free":
+            folder = OUT / slug
+            shutil.rmtree(folder, ignore_errors=True)
+            folder.mkdir(parents=True)
+            for k, (name, _n) in enumerate(srcs, 1):
+                im = Image.open(SRC / f"{name}.webp").convert("RGB")
+                box = white_margins(im)
+                if box:
+                    im = im.crop(box)
+                s = (LONG * (1 - 2 * MARGIN)) / max(im.size)
+                art = im.resize((round(im.width * s), round(im.height * s)), Image.LANCZOS)
+                M = round(LONG * MARGIN)
+                sheet = Image.new("RGB", (art.width + 2 * M, art.height + 2 * M), "white")
+                sheet.paste(art, (M, M))
+                sheet.save(folder / f"{k:02d}.webp", "WEBP", quality=84, method=6)
+            print(slug, fmt, len(srcs))
+            continue
         rw, rh = RATIOS[fmt]
         W, H = (LONG * rw // max(rw, rh), LONG * rh // max(rw, rh))
         M = round(LONG * MARGIN)
