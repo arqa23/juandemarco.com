@@ -152,6 +152,7 @@ def page(title, section, body, body_class="", head_extra=""):
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{html.escape(full_title)}</title>
   <meta name="description" content="Juan De Marco">
+  <meta name="robots" content="noai, noimageai">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/style.css?v={ASSET_V}">
   <script src="/type.js?v={ASSET_V}"></script>
@@ -353,7 +354,7 @@ def main():
         size = rnd.choice([0.55, 0.75, 1, 1, 1.3, 1.6, 2.1, 2.7])
         items.append(
             f'      <a class="print" href="/prints/{slug}/#{k + 1}" data-size="{size}">\n'
-            f'        <img src="/images/prints/{slug}/{f}" width="{w}" height="{h}" alt="{name}, print {k + 1}" loading="lazy" decoding="async">\n'
+            f'        <img src="/images/prints/{slug}/{f}" width="{w}" height="{h}" alt="{name}, print {k + 1}" loading="lazy" decoding="async" draggable="false">\n'
             f'        <span class="print-cap"><em>{name}</em>, No. {k + 1}</span>\n      </a>')
     for slug, name, source, blurb in PRINT_SERIES:
         files = sorted(f.name for f in (ROOT / "images" / "prints" / slug).glob("[0-9]*.webp"))
@@ -361,9 +362,10 @@ def main():
         fmt = min(["2:3", "3:2", "3:4", "4:3", "1:1"], key=lambda r: abs(int(r[0]) / int(r[2]) - pw / ph)) + " format"
         if slug in ("renderings", "soma"):
             fmt = "Original proportions"
+        dims = [Image.open(ROOT / "images" / "prints" / slug / f).size for f in files]
         slides = "\n".join(
             f'        <img class="slide contain{" is-on" if k == 0 else ""}" {"src" if k == 0 else "data-src"}="/images/prints/{slug}/{f}" '
-            f'alt="{name}, print {k + 1} of {len(files)}" decoding="async">' for k, f in enumerate(files))
+            f'data-r="{dims[k][0] / dims[k][1]:.4f}" alt="{name}, print {k + 1} of {len(files)}" decoding="async" draggable="false">' for k, f in enumerate(files))
         room = f"""  <main class="room-page">
     <div class="room-top">
       <span class="room-where"><a href="/prints/">Prints</a> / {name}</span>
@@ -376,7 +378,8 @@ def main():
           <button class="slide-btn prev" type="button" aria-label="Previous print">&lsaquo;</button>
           <button class="slide-btn next" type="button" aria-label="Next print">&rsaquo;</button>
         </div>
-        <div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
+        <div class="room-under"><div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
+          <button class="room-zoom" type="button" aria-pressed="false" aria-label="Magnify" title="Magnify"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M13 13l5 5" stroke="currentColor" stroke-width="1.3"/></svg></button></div>
       </div>
       <div class="room-text">
         <h1>{name}</h1>

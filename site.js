@@ -154,6 +154,30 @@
 
   /* ---------- Project slideshow ---------- */
   var slideStep = null;
+  // Magnifier for print rooms: a round lens follows the cursor over the print.
+  function initZoom(show, current) {
+    var btn = show.querySelector('.room-zoom'), frame = show.querySelector('.frame');
+    if (!btn || !frame) return;
+    var lens = document.createElement('div');
+    lens.className = 'zoom-lens';
+    frame.appendChild(lens);
+    btn.addEventListener('click', function () {
+      var on = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      frame.classList.toggle('zooming', on);
+    });
+    frame.addEventListener('mousemove', function (e) {
+      if (!frame.classList.contains('zooming')) return;
+      var img = current(), r = frame.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top, L = lens.offsetWidth;
+      var Z = Math.max(2.2, Math.min(3, (img.naturalWidth || r.width * 2.5) / r.width * 1.1));
+      lens.style.left = (x - L / 2) + 'px'; lens.style.top = (y - L / 2) + 'px';
+      lens.style.backgroundImage = 'url("' + img.currentSrc + '")';
+      lens.style.backgroundSize = (r.width * Z) + 'px ' + (r.height * Z) + 'px';
+      lens.style.backgroundPosition = (L / 2 - x * Z) + 'px ' + (L / 2 - y * Z) + 'px';
+    });
+  }
+
   function initSlideshow() {
     slideStep = null;
     var show = document.querySelector('.slideshow');
@@ -163,6 +187,8 @@
       var s = slides[(k + slides.length) % slides.length];
       if (s && s.dataset.src) { s.src = s.dataset.src; s.removeAttribute('data-src'); }
     }
+    var layout = show.closest('.room-layout');
+    function fit() { if (layout && slides[i].dataset.r) layout.style.setProperty('--ratio', slides[i].dataset.r); }
     function go(k) {
       slides[i].classList.remove('is-on');
       i = (k + slides.length) % slides.length;
@@ -170,7 +196,10 @@
       slides[i].classList.add('is-on');
       counter.textContent = i + 1;
       load(i + 1); load(i - 1);
+      fit();
     }
+    fit();
+    initZoom(show, function () { return slides[i]; });
     load(1); load(-1);
     var start = parseInt(location.hash.slice(1), 10);
     if (start > 1 && start <= slides.length) { load(start - 1); go(start - 1); }
@@ -194,10 +223,16 @@
     var narrow = W < 600, base = W * (narrow ? 0.4 : 0.185), cx = W / 2;
     var capH = 0, cap0 = wall.querySelector('.print-cap');
     if (cap0) capH = cap0.offsetHeight + parseFloat(getComputedStyle(cap0).marginTop);
-    var seed = 23, rand = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    // A new hang on every visit; resizing keeps the same one (wallSeed is set
+    // when the Prints page opens).
+    var seed = wall.dataset.seed || (wall.dataset.seed = 1 + Math.floor(Math.random() * 2147483645));
+    seed = +seed;
+    var rand = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    var SIZES = [0.55, 0.75, 1, 1, 1.3, 1.6, 2.1, 2.7];
     var items = [].map.call(wall.querySelectorAll('.print'), function (a) {
       var img = a.querySelector('img'), r = img.getAttribute('width') / img.getAttribute('height');
-      return { a: a, r: r, w0: Math.min(W * (narrow ? 1 : 0.5), base * Math.sqrt(parseFloat(a.dataset.size || 1) * r)) };
+      var size = SIZES[Math.floor(rand() * SIZES.length)];
+      return { a: a, r: r, w0: Math.min(W * (narrow ? 1 : 0.5), base * Math.sqrt(size * r)) };
     });
     // ghosts: rectangles that block space but are never shown
     var ghosts = [], estH = 0;
@@ -295,6 +330,12 @@
     initSlideshow();
     if (document.fonts) document.fonts.ready.then(function () { place(); layoutWall(); });
   }
+
+  /* ---------- Image protection (deterrent; screenshots can't be blocked) ---------- */
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.closest && e.target.closest('img, .frame, .print, .cover, .zoom-lens')) e.preventDefault();
+  });
+  document.addEventListener('dragstart', function (e) { if (e.target.tagName === 'IMG') e.preventDefault(); });
 
   /* ---------- In-place page changes ---------- */
   function runScripts(container) {

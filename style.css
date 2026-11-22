@@ -526,29 +526,42 @@ body {
 .room-close:hover { opacity: .6; }
 .room-layout {
   --ratio: .6667;
-  --print-h: calc(100vh - var(--gutter) * 4 - max(28px, calc(40 * var(--s))) - 2em);
+  --print-h: calc(100vh - var(--gutter) * 4 - max(28px, calc(40 * var(--s))) - 3em);
+  --text-w: min(21em, 26vw);
+  --arrow: max(40px, calc(56 * var(--s)));
+  --room-gap: max(40px, calc(72 * var(--s)));
+  --max-w: calc(100vw - var(--gutter) * 3 - var(--text-w) - var(--room-gap) - var(--arrow) * 2);
   flex: 1; display: grid; align-items: center; justify-content: center;
-  grid-template-columns: minmax(0, 1fr) min(calc(var(--print-h) * var(--ratio, .6667)), 42vw) minmax(0, 1fr);
-  gap: max(64px, calc(120 * var(--s)));
+  grid-template-columns: auto var(--text-w);   /* the text follows the print, whatever its width */
+  gap: var(--room-gap);
 }
-.room-show { grid-column: 2; }
-.room-show .frame { aspect-ratio: var(--ratio, .6667); }
-.room-show .slide-btn { color: var(--ink); text-shadow: none; width: 12%; padding: 0; }
-.room-show .slide-btn.prev { left: -15%; }
-.room-show .slide-btn.next { right: -15%; }
-.room-show .frame { overflow: visible; }
-.room-show .slide-btn { opacity: .55; }
-.room-show .slide { box-shadow: 0 1px 2px rgba(36,35,33,.08), 0 10px 30px -14px rgba(36,35,33,.28); }
-.room-text { grid-column: 3; max-width: 22em; align-self: center; }
+/* The frame always takes the proportions of the print on show (site.js sets
+   --ratio per print), so there is never a band of wall colour inside it. */
+.room-show { grid-column: 1; padding: 0 var(--arrow); }
+.room-show .frame { width: min(var(--max-w), calc(var(--print-h) * var(--ratio))); aspect-ratio: var(--ratio); margin: 0 auto; overflow: visible;
+  box-shadow: 0 1px 2px rgba(36,35,33,.08), 0 10px 30px -14px rgba(36,35,33,.28); transition: width .3s ease; }
+.room-show .slide { transition: opacity .3s ease; }
+.room-show .slide-btn { color: var(--ink); text-shadow: none; width: var(--arrow); padding: 0; opacity: .55; justify-content: center; }
+.room-show .slide-btn.prev { left: calc(-1 * var(--arrow)); }
+.room-show .slide-btn.next { right: calc(-1 * var(--arrow)); }
+.room-show .slide-btn:hover { opacity: 1; }
+.room-under { display: flex; justify-content: space-between; align-items: center; width: min(var(--max-w), calc(var(--print-h) * var(--ratio))); margin: 0 auto; }
+.room-zoom { margin-top: .9em; padding: 4px; border: 0; background: none; color: var(--ink-dim); cursor: pointer; }
+.room-zoom:hover, .room-zoom[aria-pressed="true"] { color: var(--ink); }
+.frame.zooming { cursor: none; }
+.zoom-lens { position: absolute; width: max(180px, calc(260 * var(--s))); aspect-ratio: 1; border-radius: 50%; pointer-events: none; z-index: 3;
+  box-shadow: 0 0 0 1px rgba(36,35,33,.25), 0 12px 30px -10px rgba(0,0,0,.45); background-repeat: no-repeat; background-color: #fff; display: none; }
+.frame.zooming:hover .zoom-lens { display: block; }
+.room-text { grid-column: 2; align-self: center; }
 .room-text h1 { margin: 0 0 .9em; }
 .room-text p:not(.meta) { font-size: calc(var(--text-size) * var(--text-scale, 1)); line-height: 1.65; color: var(--ink-dim); }
 .room-text h1 { font-family: var(--title-font, var(--font)); font-weight: var(--title-w, 300); font-size: calc(var(--title-size) * var(--title-scale, 1)); letter-spacing: var(--title-track, .3em); text-transform: var(--title-case, uppercase); }
 .room-buy { display: inline-block; margin-top: 1.4em; padding: .7em 1.1em; border: 1px solid currentColor; color: var(--ink) !important; font-family: var(--label-font, var(--font)); font-size: calc(var(--nav-size) * var(--label-scale, 1)) !important; letter-spacing: var(--label-track, .2em); text-transform: var(--label-case, uppercase); }
 .room-mock { font-size: calc(var(--nav-size) * 1.05) !important; opacity: .7; }
 @media (max-width: 760px) {
-  .room-layout { grid-template-columns: 1fr; --print-h: 62vh; }
-  .room-show, .room-text { grid-column: 1; justify-self: center; }
-  .room-show { width: min(calc(var(--print-h) * var(--ratio, .6667)), 100%); }
+  .room-layout { grid-template-columns: 1fr; align-content: start; padding-top: 6vh; --print-h: 62vh; --text-w: 100%; --arrow: 28px; --max-w: calc(100vw - var(--gutter) * 3 - 56px); }
+  .room-show, .room-text { grid-column: 1; }
+  .room-zoom { display: none; }
 }
 
 /* With the image margin on, the darkening for readable text stays on the image,
@@ -569,3 +582,10 @@ body {
 .wall-slot.is-empty::before { content: "+"; position: absolute; inset: 0; display: grid; place-items: center; border: 1px dashed rgba(255,255,255,.45); border-radius: 50%; font-size: 13px; pointer-events: none; }
 .wall-clear { position: absolute; top: -7px; right: -7px; width: 13px; height: 13px; padding: 0; border: 0; border-radius: 50%; font-size: 10px; line-height: 13px; background: rgba(255,255,255,.2); color: inherit; cursor: pointer; }
 .wall-slot.is-empty .wall-clear { display: none; }
+
+/* Image protection (deterrents only: a screenshot can never be blocked) */
+img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+@media print {
+  img, .frame, .cover, .prints { visibility: hidden !important; }
+  body::after { content: "\00A9 Juan De Marco. Images are not available for printing."; display: block; padding: 2em; color: #000; }
+}
