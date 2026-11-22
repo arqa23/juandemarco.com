@@ -315,10 +315,22 @@
     // Height ends at the lowest image (captions hang below it). The page can
     // scroll only until that edge lines up with the bottom of "Contact".
     wall.style.height = best.h + 'px';
-    var page = wall.closest('.page'), contact = document.querySelectorAll('.nav .nav-label')[3];   // the menu's fourth line (where Contact was)
-    var gapBelow = contact && !narrow ? innerHeight - contact.getBoundingClientRect().bottom : 60;
+    // The stop sits two menu lines above the bottom line, where "Contact" was
+    // when the menu had six lines. The top of the hang mirrors that distance.
+    var page = wall.closest('.page'), labels = document.querySelectorAll('.nav .nav-label');
+    var gapBelow = 60;
+    if (labels.length > 1 && !narrow) {
+      var last = labels[labels.length - 1].getBoundingClientRect(), pitch = last.top - labels[labels.length - 2].getBoundingClientRect().top;
+      gapBelow = innerHeight - last.bottom + pitch * 2;
+    }
     if (!page) return;
     page.style.paddingBottom = Math.max(0, gapBelow) + 'px';
+    wall.style.marginTop = '';
+    if (!narrow) {
+      var sc = wall.closest('.scroller') || document.scrollingElement;
+      var topNow = wall.getBoundingClientRect().top + sc.scrollTop;
+      wall.style.marginTop = (gapBelow - topNow) + 'px';
+    }
   }
 
 
