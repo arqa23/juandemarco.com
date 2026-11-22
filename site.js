@@ -14,7 +14,7 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on', wall: 'random' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'beige' };
   // Prints wall colours (Settings > Prints wall): beige, charcoal, plus up to four
   // colours Juan picks (kept in this browser as jdm-wallcolours). "random" picks
   // one of all of these each time the Prints page opens. Dark walls switch the
@@ -66,7 +66,7 @@
   function applyPhotos() {
     var b = document.body;
     if (b.classList.contains('photo')) b.dataset.photoPage = '1';
-    if (b.dataset.photoPage) b.classList.toggle('photo', root.dataset.photos !== 'off');
+    if (b.dataset.photoPage) b.classList.toggle('photo', (root.dataset.photos || PREF_DEFAULTS.photos) !== 'off');
   }
   function snapshot() {
     var s = { textStyles: window.jdmType.load() };
