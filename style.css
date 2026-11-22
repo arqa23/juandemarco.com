@@ -31,8 +31,8 @@
   --ink: #efebe3;
   --ink-dim: rgba(239, 235, 227, .74);
   --header-h: calc(var(--edge) * 2 + var(--logo-size) * 1.4);
-  --bg: #2a2a28;      /* Dark mode: charcoal graphite, not black */
-  --mat: #2a2a28;     /* margin colour around full-screen images (follows the mode) */
+  --bg: #F5F2EA;      /* the only page colour: warm paper (guidelines) */
+  --mat: #F5F2EA;     /* margin around full-screen images */
   --font: "Jost", "Futura", "Helvetica Neue", Arial, sans-serif;
 
   /* Proportional scaling: the layout is designed at a 1920px-wide screen
@@ -51,14 +51,15 @@
   --legal-ink: rgba(255, 255, 255, .42);
   --frame-bg: #000;
   --scroll-thumb: #4a4a46;
-  --fade: rgba(42,42,40,.5);
-  --fade-0: rgba(42,42,40,0);
+  --fade: rgba(245,242,234,.5);
+  --fade-0: rgba(245,242,234,0);
   --shadow: 0 1px 12px rgba(0,0,0,.25);
   --legal-size: max(6px, calc(6.2 * var(--s)));
   --text-size: max(13.5px, calc(15.3 * var(--s)));
 }
 
 html, body { margin: 0; min-height: 100%; }
+html { background: #F5F2EA; }
 
 body {
   background: var(--bg);
@@ -415,9 +416,8 @@ body {
 .settings button.is-on { background: #fff; color: #111; border-color: #fff; }
 
 /* Colour (Settings): the site is Light. Warm = design guidelines (paper #F5F2EA,
-   ink #242321, graphite #6A6761); Black & white = the original cream and black. */
+   ink #242321, graphite #6A6761); Black & white = black text on the same paper. */
 :root[data-theme="light"] { --mat: #F5F2EA; }
-:root[data-theme="light"][data-colour="original"] { --mat: #f3f2ef; }
 :root[data-theme="light"] .inner:not(.photo) {
   --bg: #F5F2EA;
   --ink: #242321;
@@ -429,13 +429,9 @@ body {
   --shadow: none;
 }
 :root[data-theme="light"][data-colour="original"] .inner:not(.photo) {
-  --bg: #f3f2ef;
-  --ink: #141414;
-  --ink-dim: rgba(20, 20, 20, .72);
-  --legal-ink: rgba(20, 20, 20, .45);
-  --scroll-thumb: #c4c3bf;
-  --fade: rgba(243,242,239,.5);
-  --fade-0: rgba(243,242,239,0);
+  --ink: #000000;
+  --ink-dim: rgba(0, 0, 0, .72);
+  --legal-ink: rgba(0, 0, 0, .45);
 }
 :root[data-theme="light"] .inner:not(.photo) .nav a:hover .nav-dot,
 :root[data-theme="light"] .inner:not(.photo) .settings-btn:hover .nav-dot { background: rgba(20,20,20,.45); }
@@ -531,13 +527,14 @@ body {
 .room-close { font: 300 max(28px, calc(40 * var(--s))) / 1 var(--font); color: var(--ink); text-decoration: none; padding: 0 .1em; }
 .room-close:hover { opacity: .6; }
 .room-layout {
+  --ratio: .6667;
   --print-h: calc(100vh - var(--gutter) * 4 - max(28px, calc(40 * var(--s))) - 2em);
   flex: 1; display: grid; align-items: center; justify-content: center;
-  grid-template-columns: minmax(0, 1fr) calc(var(--print-h) * 2 / 3) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) min(calc(var(--print-h) * var(--ratio, .6667)), 42vw) minmax(0, 1fr);
   gap: max(64px, calc(120 * var(--s)));
 }
 .room-show { grid-column: 2; }
-.room-show .frame { aspect-ratio: 2 / 3; }
+.room-show .frame { aspect-ratio: var(--ratio, .6667); }
 .room-show .slide-btn { color: var(--ink); text-shadow: none; width: 12%; padding: 0; }
 .room-show .slide-btn.prev { left: -15%; }
 .room-show .slide-btn.next { right: -15%; }
@@ -553,5 +550,10 @@ body {
 @media (max-width: 760px) {
   .room-layout { grid-template-columns: 1fr; --print-h: 62vh; }
   .room-show, .room-text { grid-column: 1; justify-self: center; }
-  .room-show { width: calc(var(--print-h) * 2 / 3); max-width: 100%; }
+  .room-show { width: min(calc(var(--print-h) * var(--ratio, .6667)), 100%); }
 }
+
+/* With the image margin on, the darkening for readable text stays on the image,
+   so the paper margin never turns grey */
+:root[data-mat="on"] .photo .scroller { background: transparent; }
+:root[data-mat="on"] .photo .cover { filter: brightness(.7); }

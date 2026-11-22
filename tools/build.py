@@ -317,16 +317,39 @@ def main():
 
     # Prints. MOCKUP: 2:3 sheets cut from existing drawings by tools/print_mockups.py.
     # Each series opens as its own "room": one print at a time, text to the side.
-    PLACE = [(1, 3, 0), (5, 3, 9), (9, 3, 3), (2, 3, 1), (6, 3, 11), (10, 3, 5)]   # (start column, span, top offset)
-    items, n = [], 0
+    # Free placement: prints are shuffled, then packed row by row on a 12-column
+    # grid with random widths, gaps and drops (fixed seed, so it's stable between builds).
+    import random
+    from PIL import Image
+    rnd = random.Random(23)
+    allp = []
     for slug, name, source, blurb in PRINT_SERIES:
         files = sorted(f.name for f in (ROOT / "images" / "prints" / slug).glob("[0-9]*.webp"))
         for k, f in enumerate(files):
-            c, span, top = PLACE[n % len(PLACE)]; n += 1
-            items.append(
-                f'      <a class="print" href="/prints/{slug}/#{k + 1}" style="grid-column:{c} / span {span};margin-top:calc({top} * var(--s) * 10)">\n'
-                f'        <img src="/images/prints/{slug}/{f}" width="1067" height="1600" alt="{name}, print {k + 1}" loading="lazy" decoding="async">\n'
-                f'        <span class="print-cap"><em>{name}</em>, No. {k + 1}</span>\n      </a>')
+            w, h = Image.open(ROOT / "images" / "prints" / slug / f).size
+            allp.append((slug, name, k, f, w, h))
+    rnd.shuffle(allp)
+    items, col = [], 13
+    for slug, name, k, f, w, h in allp:
+        span = rnd.choice([2, 3, 3]) if h > w * 1.1 else (rnd.choice([3, 4]) if abs(w - h) < 40 else rnd.choice([4, 4, 5]))
+        gap = rnd.choice([0, 0, 1])
+        if col + gap + span > 13:
+            room = 13 - col - gap                     # squeeze in a narrower print if it still reads
+            if room >= (2 if h > w * 1.1 else 3):
+                span = room
+            else:
+                col, gap = 1, rnd.choice([0, 0, 1, 2])
+        c = col + gap
+        col = c + span
+        top = rnd.choice([0, 2, 4, 6, 9, 12])
+        items.append(
+            f'      <a class="print" href="/prints/{slug}/#{k + 1}" style="grid-column:{c} / span {span};margin-top:calc({top} * var(--s) * 10)">\n'
+            f'        <img src="/images/prints/{slug}/{f}" width="{w}" height="{h}" alt="{name}, print {k + 1}" loading="lazy" decoding="async">\n'
+            f'        <span class="print-cap"><em>{name}</em>, No. {k + 1}</span>\n      </a>')
+    for slug, name, source, blurb in PRINT_SERIES:
+        files = sorted(f.name for f in (ROOT / "images" / "prints" / slug).glob("[0-9]*.webp"))
+        pw, ph = Image.open(ROOT / "images" / "prints" / slug / files[0]).size
+        fmt = min(["2:3", "3:2", "3:4", "4:3", "1:1"], key=lambda r: abs(int(r[0]) / int(r[2]) - pw / ph))
         slides = "\n".join(
             f'        <img class="slide contain{" is-on" if k == 0 else ""}" {"src" if k == 0 else "data-src"}="/images/prints/{slug}/{f}" '
             f'alt="{name}, print {k + 1} of {len(files)}" decoding="async">' for k, f in enumerate(files))
@@ -335,7 +358,7 @@ def main():
       <span class="room-where"><a href="/prints/">Prints</a> / {name}</span>
       <a class="room-close" href="/prints/" aria-label="Close and go back to Prints">&times;</a>
     </div>
-    <div class="room-layout">
+    <div class="room-layout" style="--ratio:{pw / ph:.4f}">
       <div class="slideshow room-show" data-count="{len(files)}">
         <div class="frame">
 {slides}
@@ -346,7 +369,7 @@ def main():
       </div>
       <div class="room-text">
         <h1>{name}</h1>
-        <p class="meta">Series of {len(files)} &middot; {source}</p>
+        <p class="meta">Series of {len(files)} &middot; {fmt} format &middot; {source}</p>
         <p>{blurb}</p>
         <p class="room-buy">Print options coming soon</p>
         <p class="room-mock">Mockup: sections of existing drawings stand in for the final prints.</p>
