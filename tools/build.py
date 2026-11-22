@@ -2,7 +2,7 @@
 """Builds every page of juandemarco.com from one shared layout.
 
 Edit the text and the PROJECTS list here, then run:  python3 tools/build.py
-It writes index.html, about/, work/, work/project-N/ and contact/.
+It writes index.html, about/ (with contact), work/, work/project-N/, prints/ and a /contact/ redirect.
 Thumbnails for the Work grid are made from images/ into images/thumbs/.
 """
 import html, json, os, pathlib
@@ -112,7 +112,7 @@ TEXT_POSITION = "top"
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
 NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Prints", "/prints/"),
-       ("contact", "Contact", "/contact/"), ("about", "About", "/about/")]
+       ("about", "About", "/about/")]
 
 
 # Print series (MOCKUP names and text). slug, name, source, short text.
@@ -209,7 +209,7 @@ def page(title, section, body, body_class="", head_extra=""):
       <button type="button" data-pref="mat" data-val="off">Off</button>
     </div>
     <div class="settings-row">
-      <span class="settings-label">About / Contact image</span>
+      <span class="settings-label">About image</span>
       <button type="button" data-pref="photos" data-val="on">On</button>
       <button type="button" data-pref="photos" data-val="off">Off</button>
     </div>
@@ -406,11 +406,9 @@ def main():
                 f'    <div class="stack-sizer" aria-hidden="true">\n{about_block}    </div>\n'
                 f'    <div class="stack-content">\n{content}    </div>\n    </div>\n  </main>\n')
 
-    write("about/index.html", page("About", "about", stacked(about_block), "inner photo"))
-
-    contact = f"""      <h1>Contact</h1>
+    contact = f"""      <h2 class="about-contact">Contact</h2>
       <p>For commissions, collaborations and studio inquiries:</p>
-      <p class="email"><a id="email" href="/contact/">{EMAIL_USER} [at] {EMAIL_DOMAIN}</a></p>
+      <p class="email"><a id="email" href="/about/">{EMAIL_USER} [at] {EMAIL_DOMAIN}</a></p>
       <script>
       // Assemble the address in the browser so simple spam bots can't read it from the page.
       (function () {{
@@ -419,7 +417,12 @@ def main():
       }})();
       </script>
 """
-    write("contact/index.html", page("Contact", "contact", stacked(contact), "inner photo"))
+    # About and Contact are one page now: About text, then the contact text below.
+    write("about/index.html", page("About", "about", stacked(about_block + contact), "inner photo"))
+    # Old /contact/ links land on About.
+    write("contact/index.html", '<!doctype html>\n<meta charset="utf-8">\n<title>About</title>\n'
+          '<meta http-equiv="refresh" content="0; url=/about/">\n<link rel="canonical" href="/about/">\n'
+          '<a href="/about/">About</a>\n')
     print("built", 5 + len(PROJECTS), "pages")
 
 

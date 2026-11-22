@@ -589,3 +589,6 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   img, .frame, .cover, .prints { visibility: hidden !important; }
   body::after { content: "\00A9 Juan De Marco. Images are not available for printing."; display: block; padding: 2em; color: #000; }
 }
+
+/* Contact, below the About text */
+.page h2.about-contact { margin: 2.6em 0 1em; font-family: var(--label-font, var(--font)); font-weight: var(--label-w, 400); font-size: calc(var(--nav-size) * var(--label-scale, 1)); letter-spacing: var(--label-track, .2em); text-transform: var(--label-case, uppercase); }

@@ -7,10 +7,10 @@
   <meta name="description" content="Juan De Marco">
   <meta name="robots" content="noai, noimageai">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/style.css?v=83cfad8e">
-  <script src="/type.js?v=83cfad8e"></script>
-  <script src="/images.js?v=83cfad8e"></script>
-  <script src="/site.js?v=83cfad8e" defer></script>
+  <link rel="stylesheet" href="/style.css?v=06614b43">
+  <script src="/type.js?v=06614b43"></script>
+  <script src="/images.js?v=06614b43"></script>
+  <script src="/site.js?v=06614b43" defer></script>
 </head>
 <body class="inner photo">
   <img id="cover" class="cover" alt="" decoding="async" fetchpriority="high">
@@ -35,6 +35,16 @@
       <h1>About</h1>
       <p>Juan De Marco makes images, objects and software. The work moves between drawing, color studies, digital tools and built form, guided by an interest in light, atmosphere and how space is perceived.</p>
       <p>He trained as an architect, with a Master of Architecture from Princeton University and a Bachelor of Architecture from the Illinois Institute of Technology, and has worked at Snøhetta, Reiser + Umemoto and FXCollaborative. He is a licensed architect.</p>
+      <h2 class="about-contact">Contact</h2>
+      <p>For commissions, collaborations and studio inquiries:</p>
+      <p class="email"><a id="email" href="/about/">juan [at] juandemarco.com</a></p>
+      <script>
+      // Assemble the address in the browser so simple spam bots can't read it from the page.
+      (function () {
+        var a = document.getElementById('email'), e = "juan" + '@' + "juandemarco.com";
+        a.href = 'mailto:' + e; a.textContent = e;
+      })();
+      </script>
     </div>
     </div>
   </main>
@@ -48,7 +58,6 @@
       <a href="/"><span class="nav-label">Home</span></a>
       <a href="/work/"><span class="nav-label">Work</span></a>
       <a href="/prints/"><span class="nav-label">Prints</span></a>
-      <a href="/contact/"><span class="nav-label">Contact</span></a>
       <a href="/about/" aria-current="page"><span class="nav-label">About</span></a>
       <button class="settings-btn" type="button" aria-expanded="false" aria-controls="settings"><span class="nav-label">Settings</span></button>
   </nav>
@@ -92,7 +101,7 @@
       <button type="button" data-pref="mat" data-val="off">Off</button>
     </div>
     <div class="settings-row">
-      <span class="settings-label">About / Contact image</span>
+      <span class="settings-label">About image</span>
       <button type="button" data-pref="photos" data-val="on">On</button>
       <button type="button" data-pref="photos" data-val="off">Off</button>
     </div>
