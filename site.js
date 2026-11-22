@@ -14,7 +14,7 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on', layout: 'slides' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on', line: 'off' };
   var current = 'name';
   function markSettings() {
     var panel = document.getElementById('settings');
@@ -127,7 +127,21 @@
     if (slides.length < 2) show.classList.add('single');
   }
 
+  /* ---------- Prints wall: masonry rows so gutters match across and down ---------- */
+  function layoutWall() {
+    var wall = document.querySelector('.prints');
+    if (!wall) return;
+    var gap = parseFloat(getComputedStyle(wall).columnGap) || 40;
+    wall.querySelectorAll('.print').forEach(function (a) {
+      var img = a.querySelector('img'), cap = a.querySelector('.print-cap');
+      var h = a.clientWidth * img.getAttribute('height') / img.getAttribute('width');
+      var capH = cap ? cap.offsetHeight + parseFloat(getComputedStyle(cap).marginTop) : 0;
+      a.style.gridRowEnd = 'span ' + Math.ceil((h + capH + gap) / 4);
+    });
+  }
+
   function init() {
+    layoutWall();
     applyPhotos();
     place();
     initSettings();
@@ -174,7 +188,7 @@
     swapTo(url.href, true);
   });
   window.addEventListener('popstate', function () { swapTo(location.href, false); });
-  window.addEventListener('resize', place);
+  window.addEventListener('resize', function () { place(); layoutWall(); });
   document.addEventListener('keydown', function (e) {
     if (!slideStep || (e.target.closest && e.target.closest('input, textarea, select'))) return;
     if (e.key === 'ArrowRight') slideStep(1);

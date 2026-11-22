@@ -181,9 +181,9 @@ def page(title, section, body, body_class="", head_extra=""):
       <select id="ts-case" data-k="case"><option value="uppercase">Capitals</option><option value="none">As written</option></select></div>
     <div class="settings-rule"></div>
     <div class="settings-row">
-      <span class="settings-label">Project layout</span>
-      <button type="button" data-pref="layout" data-val="slides">Slideshow (now)</button>
-      <button type="button" data-pref="layout" data-val="scroll">Scroll</button>
+      <span class="settings-label">Title line</span>
+      <button type="button" data-pref="line" data-val="on">On</button>
+      <button type="button" data-pref="line" data-val="off">Off</button>
     </div>
     <div class="settings-row">
       <span class="settings-label">Colour</span>
@@ -291,41 +291,6 @@ def main():
             for k, f in enumerate(files))
         meta = html.escape(p.get("meta", "Year \u00b7 Medium"))
         text = "\n".join(f"      <p>{html.escape(t)}</p>" for t in p.get("text", ["Description coming soon."]))
-        # Alternative layout (Settings > Project layout > Scroll): one image after
-        # another at a paced rhythm. Documents sit as sheets with paper around them;
-        # images alternate full width and inset, left and right.
-        figs, photo_n = [], 0
-        from PIL import Image
-        for k, f in enumerate(files):
-            mode = DISPLAY.get(p["slug"] + "/" + f, {}).get("mode", "image")
-            w, h = Image.open(ROOT / "images" / "work" / p["slug"] / f).size
-            if mode == "document":
-                cls = "doc portrait" if h > w else "doc"
-            else:
-                cls = ["full", "inset right", "inset left"][photo_n % 3]
-                photo_n += 1
-            figs.append(
-                f'      <figure class="ps-fig {cls}">\n'
-                f'        <img src="/images/work/{p["slug"]}/{f}" width="{w}" height="{h}" alt="{html.escape(p["title"])}, image {k + 1}" loading="lazy" decoding="async">\n'
-                f'        <figcaption>{k + 1:02d} / {len(files):02d}</figcaption>\n      </figure>')
-        scroll = f"""    <section class="pscroll" aria-label="{html.escape(p["title"])}, all images">
-      <div class="ps-head">
-        <div class="ps-title">
-          <h1>{html.escape(p["title"])}</h1>
-          <p class="meta">{meta}</p>
-        </div>
-        <div class="ps-text">
-{text}
-        </div>
-      </div>
-{chr(10).join(figs)}
-      <nav class="ps-next project-nav" aria-label="Projects">
-        <a href="/work/{prev_p["slug"]}/">&lsaquo; {html.escape(prev_p["title"])}</a>
-        <a href="/work/">All</a>
-        <a href="/work/{next_p["slug"]}/">{html.escape(next_p["title"])} &rsaquo;</a>
-      </nav>
-    </section>
-"""
         body = f"""  <main class="page page-wide project">
     <div class="project-layout">
       <div class="project-main">
@@ -351,7 +316,7 @@ def main():
 {text}
       </div>
     </div>
-{scroll}  </main>
+  </main>
 """
         write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner"))
 
@@ -369,21 +334,13 @@ def main():
             w, h = Image.open(ROOT / "images" / "prints" / slug / f).size
             allp.append((slug, name, k, f, w, h))
     rnd.shuffle(allp)
-    items, col = [], 13
+    # Gallery wall: shuffled prints of random sizes on a 12-column grid with one
+    # gutter size both ways; site.js sets each print's height in 4px rows (masonry).
+    items = []
     for slug, name, k, f, w, h in allp:
-        span = rnd.choice([2, 3, 3]) if h > w * 1.1 else (rnd.choice([3, 4]) if abs(w - h) < 40 else rnd.choice([4, 4, 5]))
-        gap = rnd.choice([0, 0, 1])
-        if col + gap + span > 13:
-            room = 13 - col - gap                     # squeeze in a narrower print if it still reads
-            if room >= (2 if h > w * 1.1 else 3):
-                span = room
-            else:
-                col, gap = 1, rnd.choice([0, 0, 1, 2])
-        c = col + gap
-        col = c + span
-        top = rnd.choice([0, 2, 4, 6, 9, 12])
+        span = rnd.choice([2, 3, 3]) if h > w * 1.1 else (rnd.choice([2, 3]) if abs(w - h) < 40 else rnd.choice([3, 4, 4]))
         items.append(
-            f'      <a class="print" href="/prints/{slug}/#{k + 1}" style="grid-column:{c} / span {span};margin-top:calc({top} * var(--s) * 10)">\n'
+            f'      <a class="print" href="/prints/{slug}/#{k + 1}" style="grid-column:span {span}">\n'
             f'        <img src="/images/prints/{slug}/{f}" width="{w}" height="{h}" alt="{name}, print {k + 1}" loading="lazy" decoding="async">\n'
             f'        <span class="print-cap"><em>{name}</em>, No. {k + 1}</span>\n      </a>')
     for slug, name, source, blurb in PRINT_SERIES:

@@ -40,7 +40,7 @@
   try {
     var d = document.documentElement.dataset;
     d.theme = 'light';
-    ['colour', 'mat', 'photos', 'layout'].forEach(function (k) {
+    ['colour', 'mat', 'photos', 'line'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
       if (v) d[k] = v;
     });

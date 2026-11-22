@@ -248,7 +248,7 @@ body {
 .card img {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
   background: #1b1b1d;
   transition: opacity .2s ease;
@@ -494,13 +494,17 @@ body {
 .settings-out { width: 100%; font: 11px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #fff; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.2); text-transform: none; letter-spacing: 0; }
 .settings-label { width: 10em; }
 
-/* Prints: drawings as sheets, placed freely on a 12-column grid */
+/* Prints: a tall gallery wall. Same gutter across and down; the rows are 4px
+   and site.js gives each print the number of rows its height needs. */
 .prints-intro { margin: -0.6em 0 3em !important; color: var(--ink-dim); }
 .prints {
+  --wall-gap: max(28px, calc(52 * var(--s)));
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: max(16px, calc(32 * var(--s)));
-  row-gap: max(28px, calc(56 * var(--s)));
+  grid-auto-rows: 4px;
+  grid-auto-flow: row dense;
+  column-gap: var(--wall-gap);
+  row-gap: 0;
   align-items: start;
   padding-bottom: calc(var(--gutter) * 3);
 }
@@ -510,8 +514,8 @@ body {
 .print-cap { display: block; margin-top: .9em; color: var(--ink-dim); }
 .print-cap em { font-style: normal; color: var(--ink); }
 @media (max-width: 760px) {
-  .prints { grid-template-columns: 1fr; }
-  .print { grid-column: 1 / -1 !important; margin-top: 0 !important; }
+  .prints { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .print { grid-column: span 1 !important; }
 }
 
 /* No menu dots (Juan, 2026-11-21) */
@@ -558,26 +562,13 @@ body {
 :root[data-mat="on"] .photo .scroller { background: transparent; }
 :root[data-mat="on"] .photo .cover { filter: brightness(.7); }
 
-/* Project layout: Scroll (Settings). The slideshow layout stays the default. */
-.pscroll { display: none; }
-:root[data-layout="scroll"] .project .project-layout { display: none; }
-:root[data-layout="scroll"] .pscroll { display: block; }
-.pscroll { max-width: max(900px, calc(1240 * var(--s))); }
-.ps-head { display: grid; grid-template-columns: 5fr 7fr; gap: max(28px, calc(64 * var(--s))); margin-bottom: max(56px, calc(120 * var(--s))); }
-.ps-title h1 { margin: 0 0 1em !important; }
-.ps-text p:first-child { margin-top: 0; }
-.ps-fig { margin: 0 0 max(64px, calc(140 * var(--s))); }
-.ps-fig img { display: block; width: 100%; height: auto; }
-.ps-fig figcaption { margin-top: .9em; font-family: var(--label-font, var(--font)); font-size: calc(var(--nav-size) * var(--label-scale, 1)); letter-spacing: var(--label-track, .2em); color: var(--ink-dim); font-variant-numeric: tabular-nums; }
-.ps-fig.inset { width: 72%; }
-.ps-fig.inset.right { margin-left: auto; }
-.ps-fig.doc { width: 66%; margin-left: auto; margin-right: auto; }
-.ps-fig.doc.portrait { width: auto; max-width: 66%; }
-.ps-fig.doc.portrait img { width: auto; max-width: 100%; max-height: 86vh; margin: 0 auto; }
-.ps-fig.doc img { box-shadow: 0 1px 2px rgba(36,35,33,.08), 0 8px 24px -12px rgba(36,35,33,.22); }
-.ps-fig.doc figcaption { text-align: left; }
-.ps-next { display: flex; justify-content: space-between; border-top: 1px solid rgba(36,35,33,.15); padding-top: 1.4em; margin-bottom: calc(var(--gutter) * 2); }
-@media (max-width: 760px) {
-  .ps-head { grid-template-columns: 1fr; }
-  .ps-fig.inset, .ps-fig.doc { width: 100%; }
+/* Title line (Settings > Title line, off by default): a thin rule between the
+   project title and the images + text, running to the far edge of the text.
+   Off = exactly the previous spacing. */
+:root[data-line="on"] .project-head { position: relative; margin-bottom: calc(1.2em + max(36px, calc(56 * var(--s)))); }
+:root[data-line="on"] .project-head::after {
+  content: ""; position: absolute; left: 0; bottom: calc(-0.5 * max(36px, calc(56 * var(--s))) - .6em);
+  width: calc(100% + var(--gap) + var(--side-w)); border-top: 1px solid var(--ink); opacity: .22;
 }
+:root[data-line="on"] .project-text { padding-top: calc(var(--title-size) * 1.2 + 1.2em + max(36px, calc(56 * var(--s)))); }
+@media (max-width: 760px) { :root[data-line="on"] .project-head::after { width: 100%; } }

@@ -19,15 +19,17 @@ RATIOS = {"2:3": (2, 3), "3:2": (3, 2), "3:4": (3, 4), "4:3": (4, 3), "1:1": (1,
 
 # series slug: (format, list of (source image, how many sections to cut from it))
 SERIES = {
-    "silhouettes": ("2:3", [("march-of-the-silhouettes/02", 1), ("march-of-the-silhouettes/03", 1),
-                    ("march-of-the-silhouettes/04", 1), ("march-of-the-silhouettes/06", 1),
-                    ("march-of-the-silhouettes/07", 1)]),
+    "silhouettes": ("2:3", [("march-of-the-silhouettes/02", 2), ("march-of-the-silhouettes/03", 2),
+                    ("march-of-the-silhouettes/04", 2), ("march-of-the-silhouettes/06", 1),
+                    ("march-of-the-silhouettes/07", 2)]),
     "elevations": ("3:2", [("american-promise/03", 2, 0.5), ("american-promise/05", 2, 0.5)]),
     "lines": ("3:4", [("the-conflicted-icon/09", 1), ("frankls-purposive-intention/03", 1),
-              ("frankls-purposive-intention/04", 1), ("frankls-purposive-intention/05", 1)]),
-    "fields": ("4:3", [("julius/06", 1), ("julius/07", 1), ("julius/08", 1), ("julius/09", 1)]),
+              ("frankls-purposive-intention/04", 1), ("frankls-purposive-intention/05", 1), ("frankls-purposive-intention/06", 1),
+              ("the-conflicted-icon/09", 1, 0.6)]),
+    "fields": ("4:3", [("julius/06", 1), ("julius/07", 1), ("julius/08", 1), ("julius/09", 1), ("julius/07", 1, 0.55), ("julius/08", 1, 0.55)]),
     "plans": ("1:1", [("parnell-residence/02", 1), ("parnell-residence/03", 1),
-              ("parnell-residence/04", 1), ("talbot-road-residence/02", 1)]),
+              ("parnell-residence/04", 1), ("talbot-road-residence/02", 1), ("talbot-road-residence/03", 1),
+              ("parnell-residence/03", 1, 0.5), ("parnell-residence/04", 1, 0.5)]),
 }
 
 

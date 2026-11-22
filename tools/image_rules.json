@@ -16,14 +16,13 @@
   "skip": true
  },
  "american-promise/02": {
-  "clear": "tb"
+  "mode": "document"
  },
  "american-promise/03": {
   "mode": "document"
  },
  "american-promise/06": {
-  "scale": 0.9,
-  "fill": "#ffffff"
+  "mode": "document"
  },
  "the-conflicted-icon/03": {
   "clear": "lr"

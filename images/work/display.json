@@ -3,7 +3,8 @@
   "fit": "contain"
  },
  "american-promise/02.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "american-promise/03.webp": {
   "fit": "contain",
@@ -17,7 +18,8 @@
   "mode": "document"
  },
  "american-promise/06.webp": {
-  "fit": "contain"
+  "fit": "contain",
+  "mode": "document"
  },
  "frankls-purposive-intention/01.webp": {
   "fit": "contain"
