@@ -315,7 +315,7 @@
     // Height ends at the lowest image (captions hang below it). The page can
     // scroll only until that edge lines up with the bottom of "Contact".
     wall.style.height = best.h + 'px';
-    var page = wall.closest('.page'), contact = document.querySelector('.nav a[href="/contact/"] .nav-label');
+    var page = wall.closest('.page'), contact = document.querySelectorAll('.nav .nav-label')[3];   // the menu's fourth line (where Contact was)
     var gapBelow = contact && !narrow ? innerHeight - contact.getBoundingClientRect().bottom : 60;
     if (!page) return;
     page.style.paddingBottom = Math.max(0, gapBelow) + 'px';
