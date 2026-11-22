@@ -15,22 +15,31 @@
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
   var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on', wall: 'random' };
-  // Prints wall colours (Settings > Prints wall). Dark walls switch the text to
-  // a warm off-white. "random" picks one each time the Prints page opens.
-  var WALLS = { beige: '#F5F2EA', sage: '#CBD3C1', sky: '#C6D3DB', blush: '#E8CFC6', lavender: '#D6D0E0', butter: '#EEE2B9',
-    ochre: '#D9A653', teal: '#3E5C62', cobalt: '#34507F', oxblood: '#7A3B3A' };
-  var DARK_WALLS = { teal: 1, cobalt: 1, oxblood: 1 };
+  // Prints wall colours (Settings > Prints wall): beige, charcoal, plus up to four
+  // colours Juan picks (kept in this browser as jdm-wallcolours). "random" picks
+  // one of all of these each time the Prints page opens. Dark walls switch the
+  // text to a warm off-white.
+  var WALLS = { beige: '#F5F2EA', charcoal: '#2A2A28' };
+  var previewWall = null;
+  function myWalls() {
+    try { var a = JSON.parse(localStorage.getItem('jdm-wallcolours') || '[]'); return Array.isArray(a) ? a.slice(0, 4) : []; } catch (e) { return []; }
+  }
+  function saveMyWalls(a) { try { localStorage.setItem('jdm-wallcolours', JSON.stringify(a)); } catch (e) {} }
+  function isDark(c) {
+    var n = parseInt(c.slice(1), 16), r = n >> 16, gr = (n >> 8) & 255, b = n & 255;
+    return (0.2126 * r + 0.7152 * gr + 0.0722 * b) / 255 < 0.45;
+  }
   function applyWall() {
     var b = document.body, st = b.style;
     ['--bg', '--ink', '--ink-dim', '--legal-ink', '--fade', '--fade-0', '--scroll-thumb'].forEach(function (v) { st.removeProperty(v); });
     root.style.removeProperty('background');
     if (!document.querySelector('.prints')) return;
-    var k = root.dataset.wall || PREF_DEFAULTS.wall;
-    if (!WALLS[k]) { var keys = Object.keys(WALLS); k = keys[Math.floor(Math.random() * keys.length)]; }
-    var c = WALLS[k], n = parseInt(c.slice(1), 16), rgb = [n >> 16, (n >> 8) & 255, n & 255].join(',');
+    var k = root.dataset.wall || PREF_DEFAULTS.wall, c = previewWall || WALLS[k];
+    if (!c) { var all = [WALLS.beige, WALLS.charcoal].concat(myWalls().filter(Boolean)); c = all[Math.floor(Math.random() * all.length)]; }
+    var n = parseInt(c.slice(1), 16), rgb = [n >> 16, (n >> 8) & 255, n & 255].join(',');
     st.setProperty('--bg', c); root.style.background = c;
     st.setProperty('--fade', 'rgba(' + rgb + ',.5)'); st.setProperty('--fade-0', 'rgba(' + rgb + ',0)');
-    if (DARK_WALLS[k]) {
+    if (isDark(c)) {
       st.setProperty('--ink', '#EDE8DE'); st.setProperty('--ink-dim', 'rgba(237,232,222,.74)');
       st.setProperty('--legal-ink', 'rgba(237,232,222,.5)'); st.setProperty('--scroll-thumb', 'rgba(237,232,222,.3)');
     }
@@ -62,6 +71,7 @@
   function snapshot() {
     var s = { textStyles: window.jdmType.load() };
     for (var k in PREF_DEFAULTS) s[k] = root.dataset[k] || PREF_DEFAULTS[k];
+    s.wallColours = myWalls();
     return JSON.stringify(s, null, 1);
   }
   function initSettings() {
@@ -88,12 +98,34 @@
     panel.querySelectorAll('[data-pref]').forEach(function (b) {
       b.addEventListener('click', function () {
         var k = b.dataset.pref, v = b.dataset.val;
+        previewWall = null;
         if (v === PREF_DEFAULTS[k]) delete root.dataset[k]; else root.dataset[k] = v;
         try { localStorage.setItem('jdm-' + k, v); } catch (err) {}
         applyPhotos(); applyWall();
         markSettings();
       });
     });
+    function markPicks() {
+      var a = myWalls();
+      panel.querySelectorAll('.wall-pick').forEach(function (inp) {
+        var c = a[+inp.dataset.i];
+        inp.parentNode.classList.toggle('is-empty', !c);
+        if (c) inp.value = c;
+      });
+    }
+    panel.querySelectorAll('.wall-pick').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        var a = myWalls(); a[+inp.dataset.i] = inp.value; saveMyWalls(a);
+        previewWall = inp.value; applyWall(); markPicks();   // show the colour on the wall right away
+      });
+    });
+    panel.querySelectorAll('.wall-clear').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var a = myWalls(); a[+b.dataset.i] = null; saveMyWalls(a);
+        previewWall = null; applyWall(); markPicks();
+      });
+    });
+    markPicks();
     var out = panel.querySelector('#ts-out');
     panel.querySelector('#ts-copy').addEventListener('click', function () {
       var text = snapshot();
@@ -110,7 +142,8 @@
       document.body.appendChild(a); a.click(); a.remove();
     });
     panel.querySelector('#ts-reset').addEventListener('click', function () {
-      try { localStorage.removeItem('jdm-type'); } catch (err) {}
+      try { localStorage.removeItem('jdm-type'); localStorage.removeItem('jdm-wallcolours'); } catch (err) {}
+      previewWall = null;
       for (var k in PREF_DEFAULTS) { delete root.dataset[k]; try { localStorage.removeItem('jdm-' + k); } catch (err) {} }
       root.removeAttribute('style');
       window.jdmType.apply(window.jdmType.load());

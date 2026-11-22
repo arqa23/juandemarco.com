@@ -125,6 +125,10 @@ PRINT_SERIES = [
      "Line drawings of towers and rooms, drawn in axonometric. Series text to come."),
     ("fields", "Fields", "From Julius, 2017",
      "The Julius figure in a landscape of drawn trees and ground. Series text to come."),
+    ("renderings", "Renderings", "From American Promise, 2016",
+     "Photomontages of the American Promise monument on its Washington site. Series text to come."),
+    ("soma", "SOMA", "From SOMA",
+     "Colour fields from the SOMA series. Series text to come."),
     ("plans", "Plans", "From the Parnell and Talbot Road Residences",
      "Plans of two houses, read as drawings in their own right. Series text to come."),
 ]
@@ -182,17 +186,16 @@ def page(title, section, body, body_class="", head_extra=""):
     <div class="settings-rule"></div>
     <div class="settings-row settings-swatches">
       <span class="settings-label">Prints wall</span>
-      <button type="button" class="swatch" data-pref="wall" data-val="random" title="Random" aria-label="Random">Random</button>
+      <button type="button" data-pref="wall" data-val="random">Random</button>
       <button type="button" class="swatch" data-pref="wall" data-val="beige" title="Beige" aria-label="Beige" style="--sw:#F5F2EA"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="sage" title="Sage" aria-label="Sage" style="--sw:#CBD3C1"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="sky" title="Powder blue" aria-label="Powder blue" style="--sw:#C6D3DB"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="blush" title="Blush" aria-label="Blush" style="--sw:#E8CFC6"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="lavender" title="Lavender" aria-label="Lavender" style="--sw:#D6D0E0"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="butter" title="Butter" aria-label="Butter" style="--sw:#EEE2B9"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="ochre" title="Ochre" aria-label="Ochre" style="--sw:#D9A653"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="teal" title="Deep teal" aria-label="Deep teal" style="--sw:#3E5C62"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="cobalt" title="Gallery blue" aria-label="Gallery blue" style="--sw:#34507F"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="oxblood" title="Oxblood" aria-label="Oxblood" style="--sw:#7A3B3A"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="charcoal" title="Charcoal" aria-label="Charcoal" style="--sw:#2A2A28"></button>
+    </div>
+    <div class="settings-row settings-swatches">
+      <span class="settings-label">Your wall colours</span>
+      <span class="wall-slot"><input type="color" class="wall-pick" data-i="0" aria-label="Wall colour 1"><button type="button" class="wall-clear" data-i="0" aria-label="Remove colour 1">&times;</button></span>
+      <span class="wall-slot"><input type="color" class="wall-pick" data-i="1" aria-label="Wall colour 2"><button type="button" class="wall-clear" data-i="1" aria-label="Remove colour 2">&times;</button></span>
+      <span class="wall-slot"><input type="color" class="wall-pick" data-i="2" aria-label="Wall colour 3"><button type="button" class="wall-clear" data-i="2" aria-label="Remove colour 3">&times;</button></span>
+      <span class="wall-slot"><input type="color" class="wall-pick" data-i="3" aria-label="Wall colour 4"><button type="button" class="wall-clear" data-i="3" aria-label="Remove colour 4">&times;</button></span>
     </div>
     <div class="settings-row">
       <span class="settings-label">Colour</span>
@@ -355,7 +358,9 @@ def main():
     for slug, name, source, blurb in PRINT_SERIES:
         files = sorted(f.name for f in (ROOT / "images" / "prints" / slug).glob("[0-9]*.webp"))
         pw, ph = Image.open(ROOT / "images" / "prints" / slug / files[0]).size
-        fmt = min(["2:3", "3:2", "3:4", "4:3", "1:1"], key=lambda r: abs(int(r[0]) / int(r[2]) - pw / ph))
+        fmt = min(["2:3", "3:2", "3:4", "4:3", "1:1"], key=lambda r: abs(int(r[0]) / int(r[2]) - pw / ph)) + " format"
+        if slug in ("renderings", "soma"):
+            fmt = "Original proportions"
         slides = "\n".join(
             f'        <img class="slide contain{" is-on" if k == 0 else ""}" {"src" if k == 0 else "data-src"}="/images/prints/{slug}/{f}" '
             f'alt="{name}, print {k + 1} of {len(files)}" decoding="async">' for k, f in enumerate(files))
@@ -375,7 +380,7 @@ def main():
       </div>
       <div class="room-text">
         <h1>{name}</h1>
-        <p class="meta">Series of {len(files)} &middot; {fmt} format &middot; {source}</p>
+        <p class="meta">Series of {len(files)} &middot; {fmt} &middot; {source}</p>
         <p>{blurb}</p>
         <p class="room-buy">Print options coming soon</p>
         <p class="room-mock">Mockup: sections of existing drawings stand in for the final prints.</p>
@@ -386,7 +391,6 @@ def main():
         write(f"prints/{slug}/index.html", page(f"{name} \u00b7 Prints", "prints", room, "inner room"))
     write("prints/index.html", page("Prints", "prints",
         '  <main class="page page-wide prints-page">\n    <h1>Prints</h1>\n'
-        '    <p class="prints-intro">Drawings in series, as archival prints. Select one to enter its series.</p>\n'
         '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n', "inner"))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
