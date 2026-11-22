@@ -242,13 +242,13 @@ body {
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(max(240px, calc(380 * var(--s))), 1fr));
-  gap: max(16px, calc(28 * var(--s)));
+  gap: max(22px, calc(40 * var(--s)));
 }
 .card { display: block; color: var(--ink); text-decoration: none; }
 .card img {
   display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 2;
   object-fit: cover;
   background: #1b1b1d;
   transition: opacity .2s ease;
@@ -494,29 +494,23 @@ body {
 .settings-out { width: 100%; font: 11px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #fff; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.2); text-transform: none; letter-spacing: 0; }
 .settings-label { width: 10em; }
 
-/* Prints: a tall gallery wall. Same gutter across and down; the rows are 4px
-   and site.js gives each print the number of rows its height needs. */
+/* Prints: a tall salon-hang wall in a centred band (same distance from the left
+   edge as the Work grid keeps from the right). site.js packs the prints so
+   neighbours sit exactly one --wall-gap apart, across and down. */
 .prints-intro { margin: -0.6em 0 3em !important; color: var(--ink-dim); }
 .prints {
-  --wall-gap: max(28px, calc(52 * var(--s)));
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-auto-rows: 4px;
-  grid-auto-flow: row dense;
+  --wall-gap: max(24px, calc(44 * var(--s)));
+  position: relative;
   column-gap: var(--wall-gap);
-  row-gap: 0;
-  align-items: start;
-  padding-bottom: calc(var(--gutter) * 3);
+  margin: 0 0 calc(var(--gutter) * 3) calc(max(160px, calc(240 * var(--s))) + var(--gutter) - var(--edge));
 }
+.prints .print { position: absolute; }
 .print { display: block; color: var(--ink); text-decoration: none; }
 .print img { display: block; width: 100%; height: auto; box-shadow: 0 1px 2px rgba(36,35,33,.08), 0 6px 18px -10px rgba(36,35,33,.22); transition: opacity .2s ease; }
 .print:hover img { opacity: .88; }
 .print-cap { display: block; margin-top: .9em; color: var(--ink-dim); }
 .print-cap em { font-style: normal; color: var(--ink); }
-@media (max-width: 760px) {
-  .prints { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .print { grid-column: span 1 !important; }
-}
+@media (max-width: 760px) { .prints { margin: 0 0 calc(var(--gutter) * 3); } }
 
 /* No menu dots (Juan, 2026-11-21) */
 .nav-dot { display: none; }
@@ -561,14 +555,3 @@ body {
    so the paper margin never turns grey */
 :root[data-mat="on"] .photo .scroller { background: transparent; }
 :root[data-mat="on"] .photo .cover { filter: brightness(.7); }
-
-/* Title line (Settings > Title line, off by default): a thin rule between the
-   project title and the images + text, running to the far edge of the text.
-   Off = exactly the previous spacing. */
-:root[data-line="on"] .project-head { position: relative; margin-bottom: calc(1.2em + max(36px, calc(56 * var(--s)))); }
-:root[data-line="on"] .project-head::after {
-  content: ""; position: absolute; left: 0; bottom: calc(-0.5 * max(36px, calc(56 * var(--s))) - .6em);
-  width: calc(100% + var(--gap) + var(--side-w)); border-top: 1px solid var(--ink); opacity: .22;
-}
-:root[data-line="on"] .project-text { padding-top: calc(var(--title-size) * 1.2 + 1.2em + max(36px, calc(56 * var(--s)))); }
-@media (max-width: 760px) { :root[data-line="on"] .project-head::after { width: 100%; } }

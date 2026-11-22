@@ -181,11 +181,6 @@ def page(title, section, body, body_class="", head_extra=""):
       <select id="ts-case" data-k="case"><option value="uppercase">Capitals</option><option value="none">As written</option></select></div>
     <div class="settings-rule"></div>
     <div class="settings-row">
-      <span class="settings-label">Title line</span>
-      <button type="button" data-pref="line" data-val="on">On</button>
-      <button type="button" data-pref="line" data-val="off">Off</button>
-    </div>
-    <div class="settings-row">
       <span class="settings-label">Colour</span>
       <button type="button" data-pref="colour" data-val="guidelines">Warm (guidelines)</button>
       <button type="button" data-pref="colour" data-val="original">Black &amp; white</button>
@@ -338,9 +333,9 @@ def main():
     # gutter size both ways; site.js sets each print's height in 4px rows (masonry).
     items = []
     for slug, name, k, f, w, h in allp:
-        span = rnd.choice([2, 3, 3]) if h > w * 1.1 else (rnd.choice([2, 3]) if abs(w - h) < 40 else rnd.choice([3, 4, 4]))
+        size = rnd.choice([1, 1, 1, 1.4, 1.4, 2])
         items.append(
-            f'      <a class="print" href="/prints/{slug}/#{k + 1}" style="grid-column:span {span}">\n'
+            f'      <a class="print" href="/prints/{slug}/#{k + 1}" data-size="{size}">\n'
             f'        <img src="/images/prints/{slug}/{f}" width="{w}" height="{h}" alt="{name}, print {k + 1}" loading="lazy" decoding="async">\n'
             f'        <span class="print-cap"><em>{name}</em>, No. {k + 1}</span>\n      </a>')
     for slug, name, source, blurb in PRINT_SERIES:
