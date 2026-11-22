@@ -5,6 +5,7 @@ Edit the text and the PROJECTS list here, then run:  python3 tools/build.py
 It writes index.html, about/ (with contact), work/, work/project-N/, prints/ and a /contact/ redirect.
 Thumbnails for the Work grid are made from images/ into images/thumbs/.
 """
+import re
 import html, json, os, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -134,7 +135,21 @@ PRINT_SERIES = [
 ]
 
 
+# The Settings test panel. False hides it and the site shows its defaults only
+# (saved test choices in a browser are ignored). True brings it back.
+SETTINGS_ON = False
+
+
 def page(title, section, body, body_class="", head_extra=""):
+    out = _page(title, section, body, body_class, head_extra)
+    if not SETTINGS_ON:
+        out = re.sub(r'\n      <button class="settings-btn".*?</button>', '', out)
+        out = re.sub(r'\n  <div class="settings" id="settings" hidden>.*?\n  </div>\n', '\n', out, flags=re.S)
+        out = out.replace('<html lang="en">', '<html lang="en" data-settings="off">', 1)
+    return out
+
+
+def _page(title, section, body, body_class="", head_extra=""):
     nav = "\n".join(
         f'      <a href="{href}"{" aria-current=\"page\"" if key == section else ""}>'
         f'<span class="nav-label">{label}</span></a>'
