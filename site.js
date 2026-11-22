@@ -14,7 +14,27 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'on', wall: 'random' };
+  // Prints wall colours (Settings > Prints wall). Dark walls switch the text to
+  // a warm off-white. "random" picks one each time the Prints page opens.
+  var WALLS = { beige: '#F5F2EA', sage: '#CBD3C1', sky: '#C6D3DB', blush: '#E8CFC6', lavender: '#D6D0E0', butter: '#EEE2B9',
+    ochre: '#D9A653', teal: '#3E5C62', cobalt: '#34507F', oxblood: '#7A3B3A' };
+  var DARK_WALLS = { teal: 1, cobalt: 1, oxblood: 1 };
+  function applyWall() {
+    var b = document.body, st = b.style;
+    ['--bg', '--ink', '--ink-dim', '--legal-ink', '--fade', '--fade-0', '--scroll-thumb'].forEach(function (v) { st.removeProperty(v); });
+    root.style.removeProperty('background');
+    if (!document.querySelector('.prints')) return;
+    var k = root.dataset.wall || PREF_DEFAULTS.wall;
+    if (!WALLS[k]) { var keys = Object.keys(WALLS); k = keys[Math.floor(Math.random() * keys.length)]; }
+    var c = WALLS[k], n = parseInt(c.slice(1), 16), rgb = [n >> 16, (n >> 8) & 255, n & 255].join(',');
+    st.setProperty('--bg', c); root.style.background = c;
+    st.setProperty('--fade', 'rgba(' + rgb + ',.5)'); st.setProperty('--fade-0', 'rgba(' + rgb + ',0)');
+    if (DARK_WALLS[k]) {
+      st.setProperty('--ink', '#EDE8DE'); st.setProperty('--ink-dim', 'rgba(237,232,222,.74)');
+      st.setProperty('--legal-ink', 'rgba(237,232,222,.5)'); st.setProperty('--scroll-thumb', 'rgba(237,232,222,.3)');
+    }
+  }
   var current = 'name';
   function markSettings() {
     var panel = document.getElementById('settings');
@@ -70,7 +90,7 @@
         var k = b.dataset.pref, v = b.dataset.val;
         if (v === PREF_DEFAULTS[k]) delete root.dataset[k]; else root.dataset[k] = v;
         try { localStorage.setItem('jdm-' + k, v); } catch (err) {}
-        applyPhotos();
+        applyPhotos(); applyWall();
         markSettings();
       });
     });
@@ -94,7 +114,7 @@
       for (var k in PREF_DEFAULTS) { delete root.dataset[k]; try { localStorage.removeItem('jdm-' + k); } catch (err) {} }
       root.removeAttribute('style');
       window.jdmType.apply(window.jdmType.load());
-      applyPhotos(); markSettings(); place();
+      applyPhotos(); applyWall(); markSettings(); place();
     });
     markSettings();
   }
@@ -128,23 +148,59 @@
   }
 
   /* ---------- Prints wall: masonry rows so gutters match across and down ---------- */
-  // Prints wall: greedy "highest free spot" packing over the whole band at once.
-  // Each print tries every x where it sits exactly one gap from a neighbour or
-  // against an edge, takes the highest free y there, and then stretches a little
-  // (up to 35%) to close a leftover gap, so neighbours stay one gap apart.
+  // Prints wall: each print goes to the highest free spot (filling holes too)
+  // where it sits exactly one gap from its neighbours, then stretches a little
+  // to close a small leftover gap. Invisible, randomly sized "ghost" blocks along
+  // the top and both sides keep those edges ragged, pulling the hang inward.
+  // Many seeded hanging orders are tried and the densest kept, so the wall is
+  // the same on every visit.
   function layoutWall() {
     var wall = document.querySelector('.prints');
     if (!wall) return;
     var W = wall.clientWidth, g = parseFloat(getComputedStyle(wall).columnGap) || 40;
-    var base = W * (W < 600 ? 0.42 : 0.185), placed = [], bottom = 0;
+    var narrow = W < 600, base = W * (narrow ? 0.4 : 0.185), cx = W / 2;
     var capH = 0, cap0 = wall.querySelector('.print-cap');
     if (cap0) capH = cap0.offsetHeight + parseFloat(getComputedStyle(cap0).marginTop);
-    function topAt(x, w) {
-      var y = 0;
-      placed.forEach(function (p) { if (p.x < x + w + g - 0.5 && p.x + p.w + g > x + 0.5) y = Math.max(y, p.y + p.h + g); });
-      return y;
+    var seed = 23, rand = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    var items = [].map.call(wall.querySelectorAll('.print'), function (a) {
+      var img = a.querySelector('img'), r = img.getAttribute('width') / img.getAttribute('height');
+      return { a: a, r: r, w0: Math.min(W * (narrow ? 1 : 0.5), base * Math.sqrt(parseFloat(a.dataset.size || 1) * r)) };
+    });
+    // ghosts: rectangles that block space but are never shown
+    var ghosts = [], estH = 0;
+    items.forEach(function (it) { estH += it.w0 * (it.w0 / it.r + capH); });
+    estH = estH / (W * 0.6) + 600;
+    if (!narrow) {
+      for (var gx = 0; gx < W;) {
+        var sw = W * (0.07 + rand() * 0.14), mid = Math.abs(gx + sw / 2 - cx) / (W / 2);
+        var depth = rand() * base * (0.25 + 0.9 * mid);
+        if (depth > 4) ghosts.push({ x: gx, y: -2000, w: Math.min(sw, W - gx), h: 2000 + depth - g, ghost: 1 });
+        gx += sw;
+      }
+      [0, 1].forEach(function (side) {
+        for (var gy = 0; gy < estH;) {
+          var sh = 140 + rand() * 320, inset = rand() * W * 0.1 - g;
+          if (inset > 4) ghosts.push({ x: side ? W - inset : 0, y: gy, w: inset, h: sh - g, ghost: 1 });
+          gy += sh;
+        }
+      });
     }
-    function room(x, y, h, dir) {           // free edge to the right (dir 1) or left (-1) over [y, y+h]
+    var placed;
+    function free(x, y, w, h) {
+      for (var k = 0; k < placed.length; k++) {
+        var p = placed[k];
+        if (p.x < x + w + g - 0.5 && p.x + p.w + g > x + 0.5 && p.y < y + h + g - 0.5 && p.y + p.h + g > y + 0.5) return false;
+      }
+      return true;
+    }
+    function lowestFit(x, w, h) {           // highest y >= 0 where the print fits at x
+      var ys = [0];
+      placed.forEach(function (p) { if (p.x < x + w + g && p.x + p.w + g > x) ys.push(p.y + p.h + g); });
+      ys.sort(function (a, b) { return a - b; });
+      for (var k = 0; k < ys.length; k++) if (ys[k] >= 0 && free(x, ys[k], w, h)) return ys[k];
+      return Infinity;
+    }
+    function room(x, y, h, dir) {
       var lim = dir > 0 ? W : 0;
       placed.forEach(function (p) {
         if (p.y >= y + h + g - 0.5 || p.y + p.h + g <= y + 0.5) return;
@@ -153,59 +209,58 @@
       });
       return lim;
     }
-    var items = [].map.call(wall.querySelectorAll('.print'), function (a) {
-      var img = a.querySelector('img'), r = img.getAttribute('width') / img.getAttribute('height');
-      return { a: a, r: r, w0: Math.min(W, base * Math.sqrt(parseFloat(a.dataset.size || 1) * r)) };
-    });
     function pack(order) {
-      placed = [];
-      var bot = 0, area = 0;
+      placed = ghosts.slice();
+      var real = [], bot = 0, top = Infinity, area = 0;
       order.forEach(function (it) {
         var r = it.r, w0 = it.w0, cands = [[0, 1], [W - w0, -1]], best = null;
         placed.forEach(function (p) { cands.push([p.x + p.w + g, 1], [p.x - g - w0, -1]); });
         cands.forEach(function (c) {
-          var x = c[0], dir = c[1], w = w0;
+          var x = c[0], dir = c[1], w = w0, h = w / r + capH;
           if (x < -0.5 || x > W - w + 0.5) return;
-          var y = topAt(x, w), h = w / r + capH;
+          var y = lowestFit(x, w, h);
+          if (y === Infinity) return;
           var edge = dir > 0 ? x : x + w, lim = room(edge, y, h * 1.35, dir);
           var slack = dir > 0 ? lim - (x + w) : x - lim;
           if (slack > 0.5 && slack < w * 0.35) {
-            var w2 = w + slack, x2 = dir > 0 ? x : lim;
-            if (topAt(x2, w2) <= y + 0.5) { x = x2; w = w2; h = w / r + capH; }
+            var w2 = w + slack, x2 = dir > 0 ? x : lim, h2 = w2 / r + capH;
+            if (free(x2, y, w2, h2)) { x = x2; w = w2; h = h2; }
           }
-          var score = y + Math.abs(x + w / 2 - W / 2) * 0.03;
-          if (!best || score < best.s) best = { x: x, y: y, w: w, h: h, s: score, it: it };
+          var score = y + Math.abs(x + w / 2 - cx) * 0.05;
+          if (!best || score < best.s) best = { x: x, y: y, w: w, h: h, ih: w / r, s: score, it: it };
         });
-        placed.push(best);
-        bot = Math.max(bot, best.y + best.h); area += best.w * best.h;
+        placed.push(best); real.push(best);
+        bot = Math.max(bot, best.y + best.ih); top = Math.min(top, best.y); area += best.w * best.h;
       });
-      return { placed: placed, d: area / (W * bot), h: bot };
+      return { placed: real, top: top, h: bot - top, d: area / (W * (bot - top)) };
     }
-    // Try many hanging orders (seeded, so the wall is the same on every visit)
-    // and keep the densest one.
-    var seed = 23, rand = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-    var bestPack = pack(items);
-    for (var t = 0; t < 160; t++) {
+    var best = pack(items);
+    for (var t = 0; t < 40; t++) {
       var o = items.slice();
       for (var i = o.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)), tmp = o[i]; o[i] = o[j]; o[j] = tmp; }
       var res = pack(o);
-      if (res.d > bestPack.d) bestPack = res;
+      if (res.d > best.d) best = res;
     }
-    bestPack.placed.forEach(function (p) {
-      var st = p.it.a.style; st.width = p.w + 'px'; st.left = p.x + 'px'; st.top = p.y + 'px';
+    best.placed.forEach(function (p) {
+      var st = p.it.a.style; st.width = p.w + 'px'; st.left = p.x + 'px'; st.top = (p.y - best.top) + 'px';
     });
-    bottom = bestPack.h;
-    wall.style.height = bottom + 'px';
+    // Height ends at the lowest image (captions hang below it). The page can
+    // scroll only until that edge lines up with the bottom of "Contact".
+    wall.style.height = best.h + 'px';
+    var page = wall.closest('.page'), contact = document.querySelector('.nav a[href="/contact/"] .nav-label');
+    var gapBelow = contact && !narrow ? innerHeight - contact.getBoundingClientRect().bottom : 60;
+    if (!page) return;
+    page.style.paddingBottom = Math.max(0, gapBelow) + 'px';
   }
 
 
   function init() {
     layoutWall();
-    applyPhotos();
+    applyPhotos(); applyWall();
     place();
     initSettings();
     initSlideshow();
-    if (document.fonts) document.fonts.ready.then(place);
+    if (document.fonts) document.fonts.ready.then(function () { place(); layoutWall(); });
   }
 
   /* ---------- In-place page changes ---------- */

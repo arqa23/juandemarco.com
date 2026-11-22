@@ -180,6 +180,20 @@ def page(title, section, body, body_class="", head_extra=""):
     <div class="settings-row"><label class="settings-label" for="ts-case">Case</label>
       <select id="ts-case" data-k="case"><option value="uppercase">Capitals</option><option value="none">As written</option></select></div>
     <div class="settings-rule"></div>
+    <div class="settings-row settings-swatches">
+      <span class="settings-label">Prints wall</span>
+      <button type="button" class="swatch" data-pref="wall" data-val="random" title="Random" aria-label="Random">Random</button>
+      <button type="button" class="swatch" data-pref="wall" data-val="beige" title="Beige" aria-label="Beige" style="--sw:#F5F2EA"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="sage" title="Sage" aria-label="Sage" style="--sw:#CBD3C1"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="sky" title="Powder blue" aria-label="Powder blue" style="--sw:#C6D3DB"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="blush" title="Blush" aria-label="Blush" style="--sw:#E8CFC6"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="lavender" title="Lavender" aria-label="Lavender" style="--sw:#D6D0E0"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="butter" title="Butter" aria-label="Butter" style="--sw:#EEE2B9"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="ochre" title="Ochre" aria-label="Ochre" style="--sw:#D9A653"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="teal" title="Deep teal" aria-label="Deep teal" style="--sw:#3E5C62"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="cobalt" title="Gallery blue" aria-label="Gallery blue" style="--sw:#34507F"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="oxblood" title="Oxblood" aria-label="Oxblood" style="--sw:#7A3B3A"></button>
+    </div>
     <div class="settings-row">
       <span class="settings-label">Colour</span>
       <button type="button" data-pref="colour" data-val="guidelines">Warm (guidelines)</button>
@@ -333,7 +347,7 @@ def main():
     # gutter size both ways; site.js sets each print's height in 4px rows (masonry).
     items = []
     for slug, name, k, f, w, h in allp:
-        size = rnd.choice([1, 1, 1, 1.4, 1.4, 2])
+        size = rnd.choice([0.55, 0.75, 1, 1, 1.3, 1.6, 2.1, 2.7])
         items.append(
             f'      <a class="print" href="/prints/{slug}/#{k + 1}" data-size="{size}">\n'
             f'        <img src="/images/prints/{slug}/{f}" width="{w}" height="{h}" alt="{name}, print {k + 1}" loading="lazy" decoding="async">\n'
