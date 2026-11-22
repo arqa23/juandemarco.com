@@ -13,58 +13,67 @@ from images import white_margins
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC, OUT = ROOT / "images" / "originals", ROOT / "images" / "prints"
-W, H, M = 1067, 1600, 80          # 2:3 sheet, even white margin
-ART = (W - 2 * M) / (H - 2 * M)   # proportion of the drawing inside the margin
+LONG, MARGIN = 1600, 0.05         # sheet's long side in px; even white margin (x long side)
+# Standard print formats, width:height
+RATIOS = {"2:3": (2, 3), "3:2": (3, 2), "3:4": (3, 4), "4:3": (4, 3), "1:1": (1, 1)}
 
-# series slug: list of (source image, how many sections to cut from it)
+# series slug: (format, list of (source image, how many sections to cut from it))
 SERIES = {
-    "silhouettes": [("march-of-the-silhouettes/02", 1), ("march-of-the-silhouettes/03", 1),
+    "silhouettes": ("2:3", [("march-of-the-silhouettes/02", 1), ("march-of-the-silhouettes/03", 1),
                     ("march-of-the-silhouettes/04", 1), ("march-of-the-silhouettes/06", 1),
-                    ("march-of-the-silhouettes/07", 1)],
-    "elevations": [("american-promise/03", 2), ("american-promise/05", 2)],
-    "lines": [("the-conflicted-icon/09", 1), ("frankls-purposive-intention/03", 1),
-              ("frankls-purposive-intention/04", 1), ("frankls-purposive-intention/05", 1)],
-    "fields": [("julius/06", 1), ("julius/07", 1), ("julius/08", 1), ("julius/09", 1)],
-    "plans": [("parnell-residence/02", 1), ("parnell-residence/03", 1),
-              ("parnell-residence/04", 1), ("talbot-road-residence/02", 1)],
+                    ("march-of-the-silhouettes/07", 1)]),
+    "elevations": ("3:2", [("american-promise/03", 2, 0.5), ("american-promise/05", 2, 0.5)]),
+    "lines": ("3:4", [("the-conflicted-icon/09", 1), ("frankls-purposive-intention/03", 1),
+              ("frankls-purposive-intention/04", 1), ("frankls-purposive-intention/05", 1)]),
+    "fields": ("4:3", [("julius/06", 1), ("julius/07", 1), ("julius/08", 1), ("julius/09", 1)]),
+    "plans": ("1:1", [("parnell-residence/02", 1), ("parnell-residence/03", 1),
+              ("parnell-residence/04", 1), ("talbot-road-residence/02", 1)]),
 }
 
 
-def sections(im, n):
-    """The n densest 2:3 windows of the drawing, not overlapping."""
+def sections(im, n, ART, zoom=1.0):
+    """The n densest windows of proportion ART (scaled by zoom) in the drawing."""
     box = white_margins(im)
     if box:
         im = im.crop(box)
     h = im.height
     w = round(h * ART)
-    if w > im.width:                       # tall drawing: use full width instead
+    if w > im.width:                       # window wider than the drawing: use full width
         w = im.width; h = round(w / ART)
-    ink = (np.asarray(im.convert("L")) < 200).astype(np.float32)
-    cols = ink[:h].sum(0)
-    cum = np.concatenate([[0], np.cumsum(cols)])
-    xs = list(range(0, im.width - w + 1, max(1, w // 8)))
-    xs.sort(key=lambda x: -(cum[x + w] - cum[x]))
+    w, h = round(w * zoom), round(h * zoom)
+    ink = (np.asarray(im.convert("L")) < 200).astype(np.float64)
+    S = np.pad(ink.cumsum(0).cumsum(1), ((1, 0), (1, 0)))
+    step = max(1, min(w, h) // 12)
+    cands = [(S[y + h, x + w] - S[y, x + w] - S[y + h, x] + S[y, x], x, y)
+             for y in range(0, im.height - h + 1, step) for x in range(0, im.width - w + 1, step)]
+    cands.sort(reverse=True)
     picked = []
-    for x in xs:
-        if all(abs(x - p) >= w for p in picked):
-            picked.append(x)
+    for _, x, y in cands:
+        if all(abs(x - px) >= w * 0.6 or abs(y - py) >= h * 0.6 for px, py in picked):
+            picked.append((x, y))
         if len(picked) == n:
             break
-    return [im.crop((x, 0, x + w, h)) for x in sorted(picked)]
+    return [im.crop((x, y, x + w, y + h)) for x, y in sorted(picked)]
 
 
 def main():
-    for slug, srcs in SERIES.items():
+    import shutil
+    for slug, (fmt, srcs) in SERIES.items():
+        rw, rh = RATIOS[fmt]
+        W, H = (LONG * rw // max(rw, rh), LONG * rh // max(rw, rh))
+        M = round(LONG * MARGIN)
+        art = (W - 2 * M) / (H - 2 * M)
         folder = OUT / slug
-        folder.mkdir(parents=True, exist_ok=True)
+        shutil.rmtree(folder, ignore_errors=True)
+        folder.mkdir(parents=True)
         k = 0
-        for name, n in srcs:
-            for part in sections(Image.open(SRC / f"{name}.webp").convert("RGB"), n):
+        for name, n, *zoom in srcs:
+            for part in sections(Image.open(SRC / f"{name}.webp").convert("RGB"), n, art, *zoom):
                 k += 1
                 sheet = Image.new("RGB", (W, H), "white")
                 sheet.paste(part.resize((W - 2 * M, H - 2 * M), Image.LANCZOS), (M, M))
                 sheet.save(folder / f"{k:02d}.webp", "WEBP", quality=84, method=6)
-        print(slug, k)
+        print(slug, fmt, k, (W, H))
 
 
 if __name__ == "__main__":
