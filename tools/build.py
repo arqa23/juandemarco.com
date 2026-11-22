@@ -181,6 +181,11 @@ def page(title, section, body, body_class="", head_extra=""):
       <select id="ts-case" data-k="case"><option value="uppercase">Capitals</option><option value="none">As written</option></select></div>
     <div class="settings-rule"></div>
     <div class="settings-row">
+      <span class="settings-label">Project layout</span>
+      <button type="button" data-pref="layout" data-val="slides">Slideshow (now)</button>
+      <button type="button" data-pref="layout" data-val="scroll">Scroll</button>
+    </div>
+    <div class="settings-row">
       <span class="settings-label">Colour</span>
       <button type="button" data-pref="colour" data-val="guidelines">Warm (guidelines)</button>
       <button type="button" data-pref="colour" data-val="original">Black &amp; white</button>
@@ -286,6 +291,41 @@ def main():
             for k, f in enumerate(files))
         meta = html.escape(p.get("meta", "Year \u00b7 Medium"))
         text = "\n".join(f"      <p>{html.escape(t)}</p>" for t in p.get("text", ["Description coming soon."]))
+        # Alternative layout (Settings > Project layout > Scroll): one image after
+        # another at a paced rhythm. Documents sit as sheets with paper around them;
+        # images alternate full width and inset, left and right.
+        figs, photo_n = [], 0
+        from PIL import Image
+        for k, f in enumerate(files):
+            mode = DISPLAY.get(p["slug"] + "/" + f, {}).get("mode", "image")
+            w, h = Image.open(ROOT / "images" / "work" / p["slug"] / f).size
+            if mode == "document":
+                cls = "doc portrait" if h > w else "doc"
+            else:
+                cls = ["full", "inset right", "inset left"][photo_n % 3]
+                photo_n += 1
+            figs.append(
+                f'      <figure class="ps-fig {cls}">\n'
+                f'        <img src="/images/work/{p["slug"]}/{f}" width="{w}" height="{h}" alt="{html.escape(p["title"])}, image {k + 1}" loading="lazy" decoding="async">\n'
+                f'        <figcaption>{k + 1:02d} / {len(files):02d}</figcaption>\n      </figure>')
+        scroll = f"""    <section class="pscroll" aria-label="{html.escape(p["title"])}, all images">
+      <div class="ps-head">
+        <div class="ps-title">
+          <h1>{html.escape(p["title"])}</h1>
+          <p class="meta">{meta}</p>
+        </div>
+        <div class="ps-text">
+{text}
+        </div>
+      </div>
+{chr(10).join(figs)}
+      <nav class="ps-next project-nav" aria-label="Projects">
+        <a href="/work/{prev_p["slug"]}/">&lsaquo; {html.escape(prev_p["title"])}</a>
+        <a href="/work/">All</a>
+        <a href="/work/{next_p["slug"]}/">{html.escape(next_p["title"])} &rsaquo;</a>
+      </nav>
+    </section>
+"""
         body = f"""  <main class="page page-wide project">
     <div class="project-layout">
       <div class="project-main">
@@ -311,7 +351,7 @@ def main():
 {text}
       </div>
     </div>
-  </main>
+{scroll}  </main>
 """
         write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner"))
 
