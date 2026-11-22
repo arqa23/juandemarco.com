@@ -527,17 +527,18 @@ body {
 .room-layout {
   --ratio: .6667;
   --print-h: calc(100vh - var(--gutter) * 4 - max(28px, calc(40 * var(--s))) - 3em);
-  --text-w: min(21em, 26vw);
+  --text-w: min(17em, 21vw);
   --arrow: max(40px, calc(56 * var(--s)));
-  --room-gap: max(40px, calc(72 * var(--s)));
-  --max-w: calc(100vw - var(--gutter) * 3 - var(--text-w) - var(--room-gap) - var(--arrow) * 2);
+  --room-gap: max(28px, calc(48 * var(--s)));
+  --max-w: calc(100vw - var(--gutter) * 3 - var(--text-w) * 2 - var(--room-gap) * 2 - var(--arrow) * 2);
   flex: 1; display: grid; align-items: center; justify-content: center;
-  grid-template-columns: auto var(--text-w);   /* the text follows the print, whatever its width */
+  /* print centred on the page; the text sits to its right, an empty twin column on the left */
+  grid-template-columns: var(--text-w) auto var(--text-w);
   gap: var(--room-gap);
 }
 /* The frame always takes the proportions of the print on show (site.js sets
    --ratio per print), so there is never a band of wall colour inside it. */
-.room-show { grid-column: 1; padding: 0 var(--arrow); }
+.room-show { grid-column: 2; padding: 0 var(--arrow); }
 .room-show .frame { width: min(var(--max-w), calc(var(--print-h) * var(--ratio))); aspect-ratio: var(--ratio); margin: 0 auto; overflow: visible;
   box-shadow: 0 1px 2px rgba(36,35,33,.08), 0 10px 30px -14px rgba(36,35,33,.28); transition: width .3s ease; }
 .room-show .slide { transition: opacity .3s ease; }
@@ -552,7 +553,7 @@ body {
 .zoom-lens { position: absolute; width: max(180px, calc(260 * var(--s))); aspect-ratio: 1; border-radius: 50%; pointer-events: none; z-index: 3;
   box-shadow: 0 0 0 1px rgba(36,35,33,.25), 0 12px 30px -10px rgba(0,0,0,.45); background-repeat: no-repeat; background-color: #fff; display: none; }
 .frame.zooming:hover .zoom-lens { display: block; }
-.room-text { grid-column: 2; align-self: center; }
+.room-text { grid-column: 3; align-self: center; }
 .room-text h1 { margin: 0 0 .9em; }
 .room-text p:not(.meta) { font-size: calc(var(--text-size) * var(--text-scale, 1)); line-height: 1.65; color: var(--ink-dim); }
 .room-text h1 { font-family: var(--title-font, var(--font)); font-weight: var(--title-w, 300); font-size: calc(var(--title-size) * var(--title-scale, 1)); letter-spacing: var(--title-track, .3em); text-transform: var(--title-case, uppercase); }
@@ -561,6 +562,7 @@ body {
 @media (max-width: 760px) {
   .room-layout { grid-template-columns: 1fr; align-content: start; padding-top: 6vh; --print-h: 62vh; --text-w: 100%; --arrow: 28px; --max-w: calc(100vw - var(--gutter) * 3 - 56px); }
   .room-show, .room-text { grid-column: 1; }
+  .room-layout { grid-template-columns: 1fr; }
   .room-zoom { display: none; }
 }
 
