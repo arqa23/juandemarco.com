@@ -315,7 +315,7 @@ def main():
         f'        <span class="card-title">{html.escape(p["title"])}</span>\n'
         f'      </a>' for p in PROJECTS)
     write("work/index.html", page("Work", "work",
-        f'  <main class="page page-wide">\n    <h1>Work</h1>\n    <div class="grid">\n{cards}\n    </div>\n  </main>\n',
+        f'  <main class="page page-wide work-page">\n    <h1 class="work-h">Work</h1>\n    <div class="grid">\n{cards}\n    </div>\n  </main>\n',
         "inner"))
 
     for i, p in enumerate(PROJECTS):
