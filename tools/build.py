@@ -215,7 +215,7 @@ def _page(title, section, body, body_class="", head_extra=""):
       <button type="button" data-pref="wall" data-val="page">Page colour</button>
       <button type="button" data-pref="wall" data-val="random">Random</button>
       <button type="button" class="swatch" data-pref="wall" data-val="beige" title="Beige" aria-label="Beige" style="--sw:#FAF9F5"></button>
-      <button type="button" class="swatch" data-pref="wall" data-val="charcoal" title="Charcoal" aria-label="Charcoal" style="--sw:#1F1F1E"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="charcoal" title="Charcoal" aria-label="Charcoal" style="--sw:#171716"></button>
     </div>
     <div class="settings-row settings-swatches">
       <span class="settings-label">Your wall colours</span>

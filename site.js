@@ -19,7 +19,7 @@
   // colours Juan picks (kept in this browser as jdm-wallcolours). "random" picks
   // one of all of these each time the Prints page opens. Dark walls switch the
   // text to a warm off-white.
-  var WALLS = { beige: '#FAF9F5', charcoal: '#1F1F1E' };
+  var WALLS = { beige: '#FAF9F5', charcoal: '#171716' };
   var previewWall = null;
   function myWalls() {
     try { var a = JSON.parse(localStorage.getItem('jdm-wallcolours') || '[]'); return Array.isArray(a) ? a.slice(0, 4) : []; } catch (e) { return []; }
