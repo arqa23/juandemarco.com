@@ -19,7 +19,7 @@
   // colours Juan picks (kept in this browser as jdm-wallcolours). "random" picks
   // one of all of these each time the Prints page opens. Dark walls switch the
   // text to a warm off-white.
-  var WALLS = { beige: '#FAF9F5', charcoal: '#2A2A28' };
+  var WALLS = { beige: '#FAF9F5', charcoal: '#1C1C1B' };
   var previewWall = null;
   function myWalls() {
     try { var a = JSON.parse(localStorage.getItem('jdm-wallcolours') || '[]'); return Array.isArray(a) ? a.slice(0, 4) : []; } catch (e) { return []; }
@@ -304,7 +304,7 @@
       return { placed: real, top: top, h: bot - top, d: area / (W * (bot - top)) };
     }
     var best = pack(items);
-    for (var t = 0; t < 40; t++) {
+    for (var t = 0; t < 24; t++) {
       var o = items.slice();
       for (var i = o.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)), tmp = o[i]; o[i] = o[j]; o[j] = tmp; }
       var res = pack(o);
@@ -316,6 +316,7 @@
     // Height ends at the lowest image (captions hang below it). The page can
     // scroll only until that edge lines up with the bottom of "Contact".
     wall.style.height = best.h + 'px';
+    wall.classList.add('is-hung');   // shown only once every print has its place
     // The stop sits two menu lines above the bottom line, where "Contact" was
     // when the menu had six lines. The top of the hang mirrors that distance.
     var page = wall.closest('.page'), labels = document.querySelectorAll('.nav .nav-label, .nav .settings-btn');
@@ -362,10 +363,17 @@
   function swapTo(url, push) {
     if (busy) return;
     busy = true;
-    fetch(url, { credentials: 'same-origin' })
+    fetch(url, { credentials: 'same-origin', cache: 'no-cache' })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
       .then(function (text) {
         var doc = new DOMParser().parseFromString(text, 'text/html');
+        // If the site was updated since this page loaded (different script or
+        // style version), load the page fully so old and new code never mix.
+        var mine = document.querySelector('script[src*="site.js"]'), theirs = doc.querySelector('script[src*="site.js"]');
+        if (!mine || !theirs || mine.getAttribute('src') !== theirs.getAttribute('src') ||
+            doc.documentElement.getAttribute('data-settings') !== root.getAttribute('data-settings')) {
+          location.href = url; return;
+        }
         document.title = doc.title;
         document.body.className = doc.body.className;
         document.body.innerHTML = doc.body.innerHTML;
