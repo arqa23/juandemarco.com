@@ -651,8 +651,8 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 
 /* Work, filmstrip: one horizontal row of square tiles across the middle of
    the window, with empty space above (name) and below (menu). Scroll sideways
-   (wheel, drag or arrow keys). It loops endlessly, edge to edge, from a random
-   starting point. Previous: full-screen grid (PR #24). */
+   (wheel, drag or arrow keys), first project to last, edge to edge; it glides
+   in slowly on arrival. Previous: full-screen grid (PR #24). */
 .work-page {
   --tile-gap: max(6px, calc(10 * var(--s)));
   --strip-pad: calc(var(--gutter) + 180 * var(--s) + 20px);

@@ -43,6 +43,9 @@
     if (isDark(c)) {
       st.setProperty('--ink', '#EDE8DE'); st.setProperty('--ink-dim', 'rgba(237,232,222,.74)');
       st.setProperty('--legal-ink', 'rgba(237,232,222,.5)'); st.setProperty('--scroll-thumb', 'rgba(237,232,222,.3)');
+    } else {   // light wall: dark text, even when the site is in dark mode
+      st.setProperty('--ink', '#242321'); st.setProperty('--ink-dim', '#6A6761');
+      st.setProperty('--legal-ink', 'rgba(36,35,33,.45)'); st.setProperty('--scroll-thumb', '#c9c4b8');
     }
   }
   var current = 'name';
@@ -102,6 +105,10 @@
         previewWall = null;
         if (v === PREF_DEFAULTS[k]) delete root.dataset[k]; else root.dataset[k] = v;
         try { localStorage.setItem('jdm-' + k, v); } catch (err) {}
+        if (k === 'mode') {   // a new mode brings the Prints wall back to the page colour
+          delete root.dataset.wall;
+          try { localStorage.removeItem('jdm-wall'); } catch (err) {}
+        }
         applyPhotos(); applyWall();
         markSettings();
       });
@@ -369,16 +376,20 @@
     g.scrollBy({ left: e.key === 'ArrowRight' ? step : -step, behavior: 'smooth' });
   });
 
-  /* Endless strip: the set of tiles is repeated three times and the scroll
-     position is quietly moved back by one set whenever it nears either end,
-     so it never runs out. Random starting point on each visit. Click and drag
-     with the mouse to pan (a drag does not open the project). */
-  var drag = null, dragMoved = false;
+  /* Strip: runs from the first project to the last. On arrival it glides in
+     slowly and settles at the start; any wheel, drag, key or touch takes over
+     at once. Click and drag with the mouse to pan (a drag does not open the
+     project). */
+  var drag = null, dragMoved = false, glide = null;
+  function stopGlide() { if (glide) { cancelAnimationFrame(glide); glide = null; } }
+  ['wheel', 'pointerdown', 'keydown', 'touchstart'].forEach(function (t) {
+    window.addEventListener(t, stopGlide, { passive: true, capture: true });
+  });
   window.addEventListener('pointermove', function (e) {
     if (!drag) return;
     var dx = e.clientX - drag.x;
     if (!dragMoved && Math.abs(dx) > 5) { dragMoved = true; drag.g.classList.add('is-dragging'); }
-    if (dragMoved) { drag.g.scrollLeft = drag.left - dx; drag.wrap(); drag.left = drag.g.scrollLeft + dx; }
+    if (dragMoved) drag.g.scrollLeft = drag.left - dx;
   });
   window.addEventListener('pointerup', function () {
     if (!drag) return;
@@ -386,33 +397,24 @@
   });
   function initFilmstrip() {
     var g = strip();
-    if (!g || g.dataset.loop) return;
-    g.dataset.loop = '1';
-    var cards = Array.prototype.slice.call(g.children);
-    if (!cards.length) return;
-    function copies() {
-      var f = document.createDocumentFragment();
-      cards.forEach(function (c) {
-        var k = c.cloneNode(true);
-        k.setAttribute('aria-hidden', 'true'); k.tabIndex = -1;
-        f.appendChild(k);
-      });
-      return f;
+    if (!g || g.dataset.ready) return;
+    g.dataset.ready = '1';
+    var card = g.querySelector('.card');
+    var from = Math.min(g.scrollWidth - g.clientWidth, card ? card.offsetWidth * 0.9 : 500);
+    if (from > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var t0 = null, dur = 3400;
+      g.scrollLeft = from;
+      var step = function (t) {
+        if (t0 === null) t0 = t;
+        var k = Math.min(1, (t - t0) / dur), e = 0.5 - 0.5 * Math.cos(Math.PI * k);
+        g.scrollLeft = from * (1 - e);
+        glide = k < 1 ? requestAnimationFrame(step) : null;
+      };
+      stopGlide(); glide = requestAnimationFrame(step);
     }
-    g.insertBefore(copies(), cards[0]);
-    g.appendChild(copies());
-    function setW() { return cards[0].offsetLeft - g.children[0].offsetLeft; }
-    function wrap() {
-      var w = setW();
-      if (g.scrollLeft < w * 0.5) g.scrollLeft += w;
-      else if (g.scrollLeft > w * 1.5) g.scrollLeft -= w;
-    }
-    g.scrollLeft = setW() * (1 + Math.random());
-    g.addEventListener('scroll', wrap, { passive: true });
-
     g.addEventListener('pointerdown', function (e) {
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
-      drag = { g: g, x: e.clientX, left: g.scrollLeft, wrap: wrap }; dragMoved = false;
+      drag = { g: g, x: e.clientX, left: g.scrollLeft }; dragMoved = false;
     });
     g.addEventListener('click', function (e) { if (dragMoved) { e.preventDefault(); e.stopPropagation(); dragMoved = false; } }, true);
     g.addEventListener('dragstart', function (e) { e.preventDefault(); });
