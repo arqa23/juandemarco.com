@@ -351,6 +351,23 @@
   });
   document.addEventListener('dragstart', function (e) { if (e.target.tagName === 'IMG') e.preventDefault(); });
 
+  /* ---------- Work filmstrip: wheel and arrow keys move it sideways ---------- */
+  function strip() { return document.querySelector('.work-page .grid'); }
+  document.addEventListener('wheel', function (e) {
+    var g = strip();
+    if (!g || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    if (e.target.closest && e.target.closest('.settings')) return;
+    e.preventDefault();
+    g.scrollLeft += e.deltaY * (e.deltaMode === 1 ? 40 : 1);
+  }, { passive: false });
+  document.addEventListener('keydown', function (e) {
+    var g = strip();
+    if (!g || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
+    var card = g.querySelector('.card');
+    var step = card ? card.offsetWidth + parseFloat(getComputedStyle(g).columnGap || 0) : 300;
+    g.scrollBy({ left: e.key === 'ArrowRight' ? step : -step, behavior: 'smooth' });
+  });
+
   /* ---------- In-place page changes ---------- */
   function runScripts(container) {
     container.querySelectorAll('script').forEach(function (old) {
