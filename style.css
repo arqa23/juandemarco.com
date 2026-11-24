@@ -649,13 +649,29 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   .card-title { position: static; opacity: 1; background: none; padding: .7em 0 .4em; justify-content: flex-start; text-align: left; }
 }
 
-/* Work, full screen: the tiles fill the window; the gap between tiles is also
-   the margin at the left, right and top. Name and menu are plain text over the
-   tiles, in the mode's ink (dark on light, light on dark). */
-.work-page { --tile-gap: max(6px, calc(10 * var(--s))); padding: var(--tile-gap) !important; margin: 0 !important; max-width: none; }
-.work-page .work-h { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.work-page .grid { margin: 0; gap: var(--tile-gap); }
-body:has(.work-page) .site-header::before { display: none; }
-@media (hover: none), (max-width: 760px) {
-  .work-page { padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--tile-gap) 90px !important; }
+/* Work, filmstrip: one horizontal row of square tiles across the middle of
+   the window, with empty space above (name) and below (menu). Scroll sideways
+   (the mouse wheel also moves it sideways). Previous: full-screen grid (PR #24). */
+.work-page {
+  --tile-gap: max(6px, calc(10 * var(--s)));
+  --strip-pad: calc(var(--gutter) + 180 * var(--s) + 20px);
+  position: fixed; inset: 0; z-index: 1;
+  display: flex; align-items: center;
+  padding: 0 !important; margin: 0 !important; max-width: none;
 }
+.work-page .work-h { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.work-page .grid {
+  display: flex; gap: var(--tile-gap); margin: 0; width: 100%;
+  padding: 0 var(--edge);
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.work-page .grid::-webkit-scrollbar { display: none; }
+.work-page .card { flex: 0 0 auto; width: calc(100vh - 2 * var(--strip-pad)); }
+.work-page .grid::after { content: ""; flex: 0 0 calc(var(--edge) - var(--tile-gap)); }
+@media (hover: none), (max-width: 760px) {
+  .work-page { position: static; display: block; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) 0 90px !important; }
+  .work-page .grid { scroll-snap-type: x mandatory; }
+  .work-page .card { width: 72vw; scroll-snap-align: start; scroll-margin-left: var(--edge); }
+}
+
