@@ -342,6 +342,7 @@
     place();
     initSettings();
     initSlideshow();
+    initFilmstrip();
     if (document.fonts) document.fonts.ready.then(function () { place(); layoutWall(); });
   }
 
@@ -367,6 +368,55 @@
     var step = card ? card.offsetWidth + parseFloat(getComputedStyle(g).columnGap || 0) : 300;
     g.scrollBy({ left: e.key === 'ArrowRight' ? step : -step, behavior: 'smooth' });
   });
+
+  /* Endless strip: the set of tiles is repeated three times and the scroll
+     position is quietly moved back by one set whenever it nears either end,
+     so it never runs out. Random starting point on each visit. Click and drag
+     with the mouse to pan (a drag does not open the project). */
+  var drag = null, dragMoved = false;
+  window.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x;
+    if (!dragMoved && Math.abs(dx) > 5) { dragMoved = true; drag.g.classList.add('is-dragging'); }
+    if (dragMoved) { drag.g.scrollLeft = drag.left - dx; drag.wrap(); drag.left = drag.g.scrollLeft + dx; }
+  });
+  window.addEventListener('pointerup', function () {
+    if (!drag) return;
+    drag.g.classList.remove('is-dragging'); drag = null;
+  });
+  function initFilmstrip() {
+    var g = strip();
+    if (!g || g.dataset.loop) return;
+    g.dataset.loop = '1';
+    var cards = Array.prototype.slice.call(g.children);
+    if (!cards.length) return;
+    function copies() {
+      var f = document.createDocumentFragment();
+      cards.forEach(function (c) {
+        var k = c.cloneNode(true);
+        k.setAttribute('aria-hidden', 'true'); k.tabIndex = -1;
+        f.appendChild(k);
+      });
+      return f;
+    }
+    g.insertBefore(copies(), cards[0]);
+    g.appendChild(copies());
+    function setW() { return cards[0].offsetLeft - g.children[0].offsetLeft; }
+    function wrap() {
+      var w = setW();
+      if (g.scrollLeft < w * 0.5) g.scrollLeft += w;
+      else if (g.scrollLeft > w * 1.5) g.scrollLeft -= w;
+    }
+    g.scrollLeft = setW() * (1 + Math.random());
+    g.addEventListener('scroll', wrap, { passive: true });
+
+    g.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { g: g, x: e.clientX, left: g.scrollLeft, wrap: wrap }; dragMoved = false;
+    });
+    g.addEventListener('click', function (e) { if (dragMoved) { e.preventDefault(); e.stopPropagation(); dragMoved = false; } }, true);
+    g.addEventListener('dragstart', function (e) { e.preventDefault(); });
+  }
 
   /* ---------- In-place page changes ---------- */
   function runScripts(container) {

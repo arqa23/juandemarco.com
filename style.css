@@ -651,7 +651,8 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 
 /* Work, filmstrip: one horizontal row of square tiles across the middle of
    the window, with empty space above (name) and below (menu). Scroll sideways
-   (the mouse wheel also moves it sideways). Previous: full-screen grid (PR #24). */
+   (wheel, drag or arrow keys). It loops endlessly, edge to edge, from a random
+   starting point. Previous: full-screen grid (PR #24). */
 .work-page {
   --tile-gap: max(6px, calc(10 * var(--s)));
   --strip-pad: calc(var(--gutter) + 180 * var(--s) + 20px);
@@ -662,16 +663,17 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .work-page .work-h { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .work-page .grid {
   display: flex; gap: var(--tile-gap); margin: 0; width: 100%;
-  padding: 0 var(--edge);
+  padding: 0;
   overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
   scrollbar-width: none;
 }
 .work-page .grid::-webkit-scrollbar { display: none; }
 .work-page .card { flex: 0 0 auto; width: calc(100vh - 2 * var(--strip-pad)); }
-.work-page .grid::after { content: ""; flex: 0 0 calc(var(--edge) - var(--tile-gap)); }
+.work-page .grid { cursor: grab; user-select: none; -webkit-user-select: none; }
+.work-page .grid.is-dragging { cursor: grabbing; }
+.work-page .grid.is-dragging .card { pointer-events: none; }
 @media (hover: none), (max-width: 760px) {
   .work-page { position: static; display: block; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) 0 90px !important; }
-  .work-page .grid { scroll-snap-type: x mandatory; }
-  .work-page .card { width: 72vw; scroll-snap-align: start; scroll-margin-left: var(--edge); }
+  .work-page .card { width: 72vw; }
 }
 
