@@ -624,3 +624,27 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 :root[data-grad="on"][data-mode="dark"] .inner:not(.photo) { --fade: rgba(39,39,38,.5); --fade-0: rgba(39,39,38,0); }
 :root[data-grad="on"] body.inner:not(.photo) { background: transparent; }
 :root[data-grad="on"] .inner:not(.photo) .frame { background: transparent; }
+
+/* Work: square tiles, three per row, in the same centred band as the Prints
+   wall; the project name appears over the tile on hover (touch screens show
+   it under the tile). Previous layout: 3:2 cards with names below (PR #9). */
+.grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: max(6px, calc(10 * var(--s)));
+  margin-left: calc(max(160px, calc(240 * var(--s))) + var(--gutter) - var(--edge));
+}
+.card { position: relative; overflow: hidden; }
+.card img { aspect-ratio: 1 / 1; transition: opacity .25s ease, transform .6s ease; }
+.card:hover img { opacity: 1; transform: scale(1.02); }
+.card-title {
+  position: absolute; inset: 0; margin: 0; padding: 1em;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  opacity: 0; transition: opacity .25s ease;
+}
+.card:hover .card-title, .card:focus-visible .card-title { opacity: 1; }
+@media (hover: none), (max-width: 760px) {
+  .grid { margin-left: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card { overflow: visible; }
+  .card-title { position: static; opacity: 1; background: none; padding: .7em 0 .4em; justify-content: flex-start; text-align: left; }
+}
