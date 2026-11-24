@@ -280,12 +280,24 @@ def thumbs():
     from PIL import Image
     for pr in PROJECTS:
         folder = ROOT / "images" / "work" / pr["slug"]
-        src, dst = folder / project_images(pr["slug"])[0], folder / "thumb.webp"
+        # Square tile, cut from the centre of the full-size first image and kept
+        # as sharp as the source allows (up to 1400px, for high-density screens).
+        src, dst = folder / project_images(pr["slug"])[0], folder / "tile.webp"
         if dst.exists() and dst.stat().st_mtime >= src.stat().st_mtime:
             continue
+        orig = ROOT / "images" / "originals" / pr["slug"] / src.name
+        if orig.exists() and min(Image.open(orig).size) > min(Image.open(src).size):
+            src = orig      # a taller original makes a sharper square
         im = Image.open(src).convert("RGB")
-        im.thumbnail((1200, 1200), Image.LANCZOS)
-        im.save(dst, "WEBP", quality=84, method=6)
+        side = min(im.size)
+        left, top = (im.width - side) // 2, (im.height - side) // 2
+        im = im.crop((left, top, left + side, top + side))
+        if side > 1400:
+            im = im.resize((1400, 1400), Image.LANCZOS)
+        im.save(dst, "WEBP", quality=88, method=6)
+        old = folder / "thumb.webp"
+        if old.exists():
+            old.unlink()
 
 
 def img_tag(path, alt, eager=False):
@@ -311,7 +323,7 @@ def main():
 
     cards = "\n".join(
         f'      <a class="card" href="/work/{p["slug"]}/">\n'
-        f'        <img src="/images/work/{p["slug"]}/thumb.webp" alt="{html.escape(p["title"])}" loading="lazy" decoding="async">\n'
+        f'        <img src="/images/work/{p["slug"]}/tile.webp" alt="{html.escape(p["title"])}" loading="lazy" decoding="async">\n'
         f'        <span class="card-title">{html.escape(p["title"])}</span>\n'
         f'      </a>' for p in PROJECTS)
     write("work/index.html", page("Work", "work",
