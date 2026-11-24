@@ -31,8 +31,8 @@
   --ink: #efebe3;
   --ink-dim: rgba(239, 235, 227, .74);
   --header-h: calc(var(--edge) * 2 + var(--logo-size) * 1.4);
-  --bg: #F5F2EA;      /* the only page colour: warm paper (guidelines) */
-  --mat: #F5F2EA;     /* margin around full-screen images */
+  --bg: #FAF9F5;      /* the only page colour: warm paper (guidelines) */
+  --mat: #FAF9F5;     /* margin around full-screen images */
   --font: "Jost", "Futura", "Helvetica Neue", Arial, sans-serif;
 
   /* Proportional scaling: the layout is designed at a 1920px-wide screen
@@ -51,15 +51,15 @@
   --legal-ink: rgba(255, 255, 255, .42);
   --frame-bg: #000;
   --scroll-thumb: #4a4a46;
-  --fade: rgba(245,242,234,.5);
-  --fade-0: rgba(245,242,234,0);
+  --fade: rgba(250,249,245,.5);
+  --fade-0: rgba(250,249,245,0);
   --shadow: 0 1px 12px rgba(0,0,0,.25);
   --legal-size: max(6px, calc(6.2 * var(--s)));
   --text-size: max(13.5px, calc(15.3 * var(--s)));
 }
 
 html, body { margin: 0; min-height: 100%; }
-html { background: #F5F2EA; }
+html { background: #FAF9F5; }
 
 body {
   background: var(--bg);
@@ -415,17 +415,17 @@ body {
 .settings button:hover { border-color: #fff; }
 .settings button.is-on { background: #fff; color: #111; border-color: #fff; }
 
-/* Colour (Settings): the site is Light. Warm = design guidelines (paper #F5F2EA,
+/* Colour (Settings): the site is Light. Warm = design guidelines (paper #FAF9F5,
    ink #242321, graphite #6A6761); Black & white = black text on the same paper. */
-:root[data-theme="light"] { --mat: #F5F2EA; }
+:root[data-theme="light"] { --mat: #FAF9F5; }
 :root[data-theme="light"] .inner:not(.photo) {
-  --bg: #F5F2EA;
+  --bg: #FAF9F5;
   --ink: #242321;
   --ink-dim: #6A6761;
   --legal-ink: rgba(36, 35, 33, .45);
   --scroll-thumb: #c9c4b8;
-  --fade: rgba(245,242,234,.5);
-  --fade-0: rgba(245,242,234,0);
+  --fade: rgba(250,249,245,.5);
+  --fade-0: rgba(250,249,245,0);
   --shadow: none;
 }
 :root[data-theme="light"][data-colour="original"] .inner:not(.photo) {
@@ -594,3 +594,27 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 
 /* Contact, below the About text */
 .page h2.about-contact { margin: 2.6em 0 1em; font-family: var(--label-font, var(--font)); font-weight: var(--label-w, 400); font-size: calc(var(--nav-size) * var(--label-scale, 1)); letter-spacing: var(--label-track, .2em); text-transform: var(--label-case, uppercase); }
+
+/* Settings button: a small sliders icon at the foot of the menu */
+.settings-icon { width: max(15px, calc(18 * var(--s))); height: max(15px, calc(18 * var(--s))); fill: currentColor; opacity: .78; transition: opacity .15s ease; }
+.settings-btn:hover .settings-icon, .settings-btn.is-open .settings-icon { opacity: 1; }
+.settings-icon circle { fill: var(--bg, #FAF9F5); stroke: currentColor; stroke-width: 1.1; }
+
+/* Dark mode (Settings > Mode): charcoal paper, warm off-white ink */
+:root[data-mode="dark"] { --mat: #2A2A28; background: #2A2A28; }
+:root[data-mode="dark"] .inner:not(.photo), :root[data-mode="dark"] .home {
+  --bg: #2A2A28;
+  --ink: #EDE8DE;
+  --ink-dim: rgba(237, 232, 222, .68);
+  --legal-ink: rgba(237, 232, 222, .42);
+  --scroll-thumb: #4a4a46;
+  --fade: rgba(42,42,40,.5);
+  --fade-0: rgba(42,42,40,0);
+}
+:root[data-mode="dark"] .inner:not(.photo) .card img { background: #353533; }
+
+/* Background gradient (Settings): a little lighter towards the top, both modes */
+:root[data-grad="on"] .inner:not(.photo) { --g-top: #FFFFFF; --g-bot: #F1EFE8; --fade: rgba(255,255,255,.5); --fade-0: rgba(255,255,255,0); }
+:root[data-grad="on"][data-mode="dark"] .inner:not(.photo) { --g-top: #3A3A37; --g-bot: #242422; --fade: rgba(58,58,55,.5); --fade-0: rgba(58,58,55,0); }
+:root[data-grad="on"] body.inner:not(.photo) { background: linear-gradient(var(--g-top), var(--g-bot)) fixed; }
+:root[data-grad="on"] .inner:not(.photo) .frame { background: transparent; }

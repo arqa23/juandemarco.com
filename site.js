@@ -14,12 +14,12 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'beige' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'page', mode: 'light', grad: 'off' };
   // Prints wall colours (Settings > Prints wall): beige, charcoal, plus up to four
   // colours Juan picks (kept in this browser as jdm-wallcolours). "random" picks
   // one of all of these each time the Prints page opens. Dark walls switch the
   // text to a warm off-white.
-  var WALLS = { beige: '#F5F2EA', charcoal: '#2A2A28' };
+  var WALLS = { beige: '#FAF9F5', charcoal: '#2A2A28' };
   var previewWall = null;
   function myWalls() {
     try { var a = JSON.parse(localStorage.getItem('jdm-wallcolours') || '[]'); return Array.isArray(a) ? a.slice(0, 4) : []; } catch (e) { return []; }
@@ -35,6 +35,7 @@
     root.style.removeProperty('background');
     if (!document.querySelector('.prints')) return;
     var k = root.dataset.wall || PREF_DEFAULTS.wall, c = previewWall || WALLS[k];
+    if (k === 'page' && !previewWall) return;   // follow the page's light / dark mode
     if (!c) { var all = [WALLS.beige, WALLS.charcoal].concat(myWalls().filter(Boolean)); c = all[Math.floor(Math.random() * all.length)]; }
     var n = parseInt(c.slice(1), 16), rgb = [n >> 16, (n >> 8) & 255, n & 255].join(',');
     st.setProperty('--bg', c); root.style.background = c;
@@ -317,7 +318,7 @@
     wall.style.height = best.h + 'px';
     // The stop sits two menu lines above the bottom line, where "Contact" was
     // when the menu had six lines. The top of the hang mirrors that distance.
-    var page = wall.closest('.page'), labels = document.querySelectorAll('.nav .nav-label');
+    var page = wall.closest('.page'), labels = document.querySelectorAll('.nav .nav-label, .nav .settings-btn');
     var gapBelow = 60;
     if (labels.length > 1 && !narrow) {
       var last = labels[labels.length - 1].getBoundingClientRect(), pitch = last.top - labels[labels.length - 2].getBoundingClientRect().top;

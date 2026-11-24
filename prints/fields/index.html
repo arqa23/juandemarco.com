@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-settings="off">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,10 +7,10 @@
   <meta name="description" content="Juan De Marco">
   <meta name="robots" content="noai, noimageai">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/style.css?v=1e975203">
-  <script src="/type.js?v=1e975203"></script>
-  <script src="/images.js?v=1e975203"></script>
-  <script src="/site.js?v=1e975203" defer></script>
+  <link rel="stylesheet" href="/style.css?v=73bff3b1">
+  <script src="/type.js?v=73bff3b1"></script>
+  <script src="/images.js?v=73bff3b1"></script>
+  <script src="/site.js?v=73bff3b1" defer></script>
 </head>
 <body class="inner room">
   <div class="scroller">
@@ -54,8 +54,71 @@
       <a href="/work/"><span class="nav-label">Work</span></a>
       <a href="/prints/" aria-current="page"><span class="nav-label">Prints</span></a>
       <a href="/about/"><span class="nav-label">About</span></a>
+      <button class="settings-btn" type="button" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings"><svg class="settings-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.1" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   </nav>
 
+  <div class="settings" id="settings" hidden>
+    <p class="settings-note">Test panel. Choices are kept in this browser only.</p>
+    <div class="settings-row"><label class="settings-label" for="ts-style">Text style</label>
+      <select id="ts-style"><option value="name">Name</option><option value="title">Title</option><option value="text">Text</option><option value="label">Label</option></select></div>
+    <div class="settings-row"><label class="settings-label" for="ts-font">Font</label>
+      <select id="ts-font" data-k="font"><option value="jost">Jost (old)</option><option value="inter">Inter</option><option value="instrument">Instrument Sans</option><option value="geist">Geist</option><option value="host">Host Grotesk</option><option value="franklin">Libre Franklin</option><option value="albert">Albert Sans</option></select></div>
+    <div class="settings-row"><label class="settings-label" for="ts-w">Weight</label>
+      <select id="ts-w" data-k="w"><option value="300">Light</option><option value="400">Regular</option><option value="500">Medium</option><option value="600">Semibold</option></select></div>
+    <div class="settings-row"><label class="settings-label" for="ts-size">Size</label>
+      <input id="ts-size" data-k="size" type="range" min="50" max="250" step="5"><output id="ts-size-out" for="ts-size"></output></div>
+    <div class="settings-row"><label class="settings-label" for="ts-track">Spacing</label>
+      <select id="ts-track" data-k="track"><option value="0">None</option><option value="0.02">Very tight</option><option value="0.05">Tight</option><option value="0.1">Medium</option><option value="0.2">Wide</option><option value="0.3">Wider</option><option value="0.42">Widest</option></select></div>
+    <div class="settings-row"><label class="settings-label" for="ts-case">Case</label>
+      <select id="ts-case" data-k="case"><option value="uppercase">Capitals</option><option value="none">As written</option></select></div>
+    <div class="settings-rule"></div>
+    <div class="settings-row">
+      <span class="settings-label">Mode</span>
+      <button type="button" data-pref="mode" data-val="light">Light</button>
+      <button type="button" data-pref="mode" data-val="dark">Dark</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Background gradient</span>
+      <button type="button" data-pref="grad" data-val="on">On</button>
+      <button type="button" data-pref="grad" data-val="off">Off</button>
+    </div>
+    <div class="settings-row settings-swatches">
+      <span class="settings-label">Prints wall</span>
+      <button type="button" data-pref="wall" data-val="page">Page colour</button>
+      <button type="button" data-pref="wall" data-val="random">Random</button>
+      <button type="button" class="swatch" data-pref="wall" data-val="beige" title="Beige" aria-label="Beige" style="--sw:#FAF9F5"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="charcoal" title="Charcoal" aria-label="Charcoal" style="--sw:#2A2A28"></button>
+    </div>
+    <div class="settings-row settings-swatches">
+      <span class="settings-label">Your wall colours</span>
+      <span class="wall-slot"><input type="color" class="wall-pick" data-i="0" aria-label="Wall colour 1"><button type="button" class="wall-clear" data-i="0" aria-label="Remove colour 1">&times;</button></span>
+      <span class="wall-slot"><input type="color" class="wall-pick" data-i="1" aria-label="Wall colour 2"><button type="button" class="wall-clear" data-i="1" aria-label="Remove colour 2">&times;</button></span>
+      <span class="wall-slot"><input type="color" class="wall-pick" data-i="2" aria-label="Wall colour 3"><button type="button" class="wall-clear" data-i="2" aria-label="Remove colour 3">&times;</button></span>
+      <span class="wall-slot"><input type="color" class="wall-pick" data-i="3" aria-label="Wall colour 4"><button type="button" class="wall-clear" data-i="3" aria-label="Remove colour 4">&times;</button></span>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Colour</span>
+      <button type="button" data-pref="colour" data-val="guidelines">Warm (guidelines)</button>
+      <button type="button" data-pref="colour" data-val="original">Black &amp; white</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Image margin</span>
+      <button type="button" data-pref="mat" data-val="on">On</button>
+      <button type="button" data-pref="mat" data-val="off">Off</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">About image</span>
+      <button type="button" data-pref="photos" data-val="on">On</button>
+      <button type="button" data-pref="photos" data-val="off">Off</button>
+    </div>
+    <div class="settings-rule"></div>
+    <div class="settings-row">
+      <button type="button" id="ts-copy">Copy my settings</button>
+      <button type="button" id="ts-download">Download</button>
+      <button type="button" id="ts-reset">Reset all</button>
+    </div>
+    <textarea id="ts-out" class="settings-out" rows="4" readonly hidden aria-label="Settings to copy"></textarea>
+  </div>
 
   <footer class="site-footer">
     <span>&copy; 2026 Juan De Marco</span>

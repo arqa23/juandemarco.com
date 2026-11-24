@@ -137,7 +137,7 @@ PRINT_SERIES = [
 
 # The Settings test panel. False hides it and the site shows its defaults only
 # (saved test choices in a browser are ignored). True brings it back.
-SETTINGS_ON = False
+SETTINGS_ON = True
 
 
 def page(title, section, body, body_class="", head_extra=""):
@@ -182,7 +182,7 @@ def _page(title, section, body, body_class="", head_extra=""):
 
   <nav class="nav" aria-label="Main">
 {nav}
-      <button class="settings-btn" type="button" aria-expanded="false" aria-controls="settings"><span class="nav-label">Settings</span></button>
+      <button class="settings-btn" type="button" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings"><svg class="settings-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.1" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   </nav>
 
   <div class="settings" id="settings" hidden>
@@ -200,10 +200,21 @@ def _page(title, section, body, body_class="", head_extra=""):
     <div class="settings-row"><label class="settings-label" for="ts-case">Case</label>
       <select id="ts-case" data-k="case"><option value="uppercase">Capitals</option><option value="none">As written</option></select></div>
     <div class="settings-rule"></div>
+    <div class="settings-row">
+      <span class="settings-label">Mode</span>
+      <button type="button" data-pref="mode" data-val="light">Light</button>
+      <button type="button" data-pref="mode" data-val="dark">Dark</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Background gradient</span>
+      <button type="button" data-pref="grad" data-val="on">On</button>
+      <button type="button" data-pref="grad" data-val="off">Off</button>
+    </div>
     <div class="settings-row settings-swatches">
       <span class="settings-label">Prints wall</span>
+      <button type="button" data-pref="wall" data-val="page">Page colour</button>
       <button type="button" data-pref="wall" data-val="random">Random</button>
-      <button type="button" class="swatch" data-pref="wall" data-val="beige" title="Beige" aria-label="Beige" style="--sw:#F5F2EA"></button>
+      <button type="button" class="swatch" data-pref="wall" data-val="beige" title="Beige" aria-label="Beige" style="--sw:#FAF9F5"></button>
       <button type="button" class="swatch" data-pref="wall" data-val="charcoal" title="Charcoal" aria-label="Charcoal" style="--sw:#2A2A28"></button>
     </div>
     <div class="settings-row settings-swatches">
