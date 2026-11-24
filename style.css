@@ -648,3 +648,17 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   .card { overflow: visible; }
   .card-title { position: static; opacity: 1; background: none; padding: .7em 0 .4em; justify-content: flex-start; text-align: left; }
 }
+
+/* Work, full screen: the tiles fill the window; the gap between tiles is also
+   the margin at the left, right and top. Name and menu float over the tiles
+   on a small paper-coloured label. */
+.work-page { --tile-gap: max(6px, calc(10 * var(--s))); padding: var(--tile-gap) !important; margin: 0 !important; max-width: none; }
+.work-page .work-h { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.work-page .grid { margin: 0; gap: var(--tile-gap); }
+body:has(.work-page) .logo,
+body:has(.work-page) .nav a .nav-label,
+body:has(.work-page) .settings-btn { background: color-mix(in srgb, var(--bg) 88%, transparent); padding: .35em .55em; }
+body:has(.work-page) .site-header::before { display: none; }
+@media (hover: none), (max-width: 760px) {
+  .work-page { padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--tile-gap) 90px !important; }
+}
