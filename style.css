@@ -604,23 +604,23 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .settings-icon circle { fill: var(--bg, #FAF9F5); stroke: currentColor; stroke-width: 1.1; }
 
 /* Dark mode (Settings > Mode): charcoal paper, warm off-white ink */
-:root[data-mode="dark"] { --mat: #1F1F1E; background: #1F1F1E; }
+:root[data-mode="dark"] { --mat: #171716; background: #171716; }
 :root[data-mode="dark"] .inner:not(.photo), :root[data-mode="dark"] .home {
-  --bg: #1F1F1E;
+  --bg: #171716;
   --ink: #EDE8DE;
   --ink-dim: rgba(237, 232, 222, .68);
   --legal-ink: rgba(237, 232, 222, .42);
   --scroll-thumb: #4a4a46;
-  --fade: rgba(31,31,30,.5);
-  --fade-0: rgba(31,31,30,0);
+  --fade: rgba(23,23,22,.5);
+  --fade-0: rgba(23,23,22,0);
 }
-:root[data-mode="dark"] .inner:not(.photo) .card img { background: #2a2a29; }
+:root[data-mode="dark"] .inner:not(.photo) .card img { background: #222221; }
 
 /* Background gradient (Settings): a little lighter towards the top, both modes */
 /* painted on <html> (the body is only as tall as its fixed content) */
 :root[data-grad="on"] { background: linear-gradient(#FFFFFF, #ECE9E1) fixed; }
-:root[data-grad="on"][data-mode="dark"] { background: linear-gradient(#2F2F2E, #151514) fixed; }
+:root[data-grad="on"][data-mode="dark"] { background: linear-gradient(#272726, #0D0D0C) fixed; }
 :root[data-grad="on"] .inner:not(.photo) { --fade: rgba(255,255,255,.5); --fade-0: rgba(255,255,255,0); }
-:root[data-grad="on"][data-mode="dark"] .inner:not(.photo) { --fade: rgba(47,47,46,.5); --fade-0: rgba(47,47,46,0); }
+:root[data-grad="on"][data-mode="dark"] .inner:not(.photo) { --fade: rgba(39,39,38,.5); --fade-0: rgba(39,39,38,0); }
 :root[data-grad="on"] body.inner:not(.photo) { background: transparent; }
 :root[data-grad="on"] .inner:not(.photo) .frame { background: transparent; }
