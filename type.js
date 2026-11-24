@@ -43,7 +43,7 @@
     var d = document.documentElement.dataset;
     d.theme = 'light';
     if (off) return;
-    ['colour', 'mat', 'photos', 'wall'].forEach(function (k) {
+    ['colour', 'mat', 'photos', 'wall', 'mode', 'grad'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
       if (v) d[k] = v;
     });
