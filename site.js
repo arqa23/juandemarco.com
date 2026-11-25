@@ -32,7 +32,7 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'page', mode: 'dark', grad: 'off', hang: 'rows', ptitle: 'hover' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'page', mode: 'dark', grad: 'off', hang: 'rows', ptitle: 'hover', tiles: 'image' };
   // Prints wall colours (Settings > Prints wall): beige, charcoal, plus up to four
   // colours Juan picks (kept in this browser as jdm-wallcolours). "random" picks
   // one of all of these each time the Prints page opens. Dark walls switch the
@@ -593,6 +593,50 @@
     root.classList.toggle('legal-flat', flat);
   }
 
+  /* Projects test page: lines from the J of the name to the end of the menu;
+     tiles slide in along them from the right and settle, one after another. */
+  function initPress() {
+    var page = document.querySelector('.press-page');
+    if (!page) return;
+    var lines = page.querySelector('.press-lines'), press = page.querySelector('.press'), cards = press.querySelectorAll('.card');
+    if (innerWidth <= 760 || !matchMedia('(hover: hover)').matches) { press.classList.add('is-set'); return; }
+    var name = document.querySelector('.site-header a, .site-header'), labels = document.querySelectorAll('.nav .nav-label');
+    var nr = name.getBoundingClientRect(), left = nr.left, right = innerWidth, top = nr.bottom, bottom = innerHeight;
+    if (labels.length) {
+      right = Math.max.apply(null, [].map.call(labels, function (l) { return l.getBoundingClientRect().right; }));
+      bottom = labels[0].getBoundingClientRect().top - 24;
+    }
+    // first letter of the name: start the lines at its ink, not its box
+    var rg = document.createRange(), txt = name.querySelector('.name, .logo') || name;
+    var tn = (function f(n) { if (n.nodeType === 3 && n.textContent.trim()) return n; for (var i = 0; i < n.childNodes.length; i++) { var r = f(n.childNodes[i]); if (r) return r; } return null; })(txt);
+    if (tn) { var k = tn.textContent.search(/\S/); rg.setStart(tn, k); rg.setEnd(tn, k + 1); left = rg.getBoundingClientRect().left; }
+    var S = Math.round((innerHeight - 2 * (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter')) || 50)) * 0.3 * 0.62);
+    S = Math.max(90, Math.min(S, (right - left) / 6));
+    var gap = Math.max(6, S * 0.06), P = Math.round(S * 1.45);
+    var n = Math.max(2, Math.floor((bottom - top - 24) / P)), y0 = top + (bottom - top - n * P) / 2;
+    var perRow = Math.max(1, Math.floor((right - left + gap) / (S + gap)));
+    lines.innerHTML = '';
+    for (var i = 0; i <= n; i++) { var el = document.createElement('i'); el.style.cssText = 'left:' + left + 'px;width:' + (right - left) + 'px;top:' + Math.round(y0 + i * P) + 'px'; lines.appendChild(el); }
+    press.style.setProperty('--tile', S + 'px');
+    var fresh = !press.dataset.set;
+    cards.forEach(function (c, j) {
+      var row = Math.floor(j / perRow), col = j % perRow;
+      c.style.left = (left + col * (S + gap)) + 'px';
+      c.style.top = (y0 + (row + 1) * P - S - 1) + 'px';
+    });
+    press.classList.add('is-set');
+    if (!fresh || !press.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) { press.dataset.set = '1'; return; }
+    press.dataset.set = '1';
+    // every block travels the same way at the same pace, a beat apart, so
+    // they never overlap on the way in
+    cards.forEach(function (c, j) {
+      var row = Math.floor(j / perRow), col = j % perRow;
+      c.animate([{ transform: 'translateX(' + (innerWidth - left) + 'px)' }, { transform: 'translateX(0)' }],
+        { duration: 3600, delay: row * 1100 + col * 220, easing: 'cubic-bezier(.12, .7, .2, 1)', fill: 'backwards' });
+    });
+  }
+  addEventListener('resize', function () { var p = document.querySelector('.press'); if (p && p.dataset.set) initPress(); });
+
   function init() {
     initToTop();
     turnLegal();
@@ -603,6 +647,7 @@
     initSlideshow();
     initFilmstrip();
     initWallGlide();
+    initPress();
     startDrift();
     if (document.fonts) document.fonts.ready.then(function () { place(); layoutWall(); });
   }
@@ -649,6 +694,23 @@
     if (!drag) return;
     drag.g.classList.remove('is-dragging'); drag = null;
   });
+  // Desktop: over a tile that the window edge cuts off, the cursor becomes an
+  // arrow and a click slides that tile fully into view. Tiles that are fully
+  // in view always open their project.
+  function stripDir(g) {
+    if (!mouse.on) { delete g.dataset.dir; return; }
+    var gr = g.getBoundingClientRect(), pad = Math.max(24, innerWidth * 50 / 1920), d = '', by = 0;
+    [].some.call(g.querySelectorAll('.card'), function (c) {
+      var r = c.getBoundingClientRect();
+      if (mouse.x < r.left || mouse.x > r.right || mouse.y < r.top || mouse.y > r.bottom) return false;
+      var cut = r.width * 0.15;   // a sliver off the edge still opens the project
+      if (r.left < gr.left - cut) { d = 'prev'; by = r.left - gr.left - pad; }
+      else if (r.right > gr.right + cut) { d = 'next'; by = r.right - gr.right + pad; }
+      return true;
+    });
+    if (d) g.dataset.dir = d; else delete g.dataset.dir;
+    g._cutBy = by;
+  }
   function initFilmstrip() {
     var g = strip();
     if (!g || g.dataset.ready) return;
@@ -669,17 +731,13 @@
     // Desktop: near either end of the strip the cursor becomes an arrow, and a
     // click there slides the strip one project that way instead of opening one.
     var stepW = function () { var c = g.querySelector('.card'); return c ? c.offsetWidth + parseFloat(getComputedStyle(g).columnGap || 0) : 300; };
-    g.addEventListener('mousemove', function (e) {
-      var r = g.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, max = g.scrollWidth - g.clientWidth;
-      var d = x < 0.25 && g.scrollLeft > 1 ? 'prev' : x > 0.75 && g.scrollLeft < max - 1 ? 'next' : '';
-      if (d) g.dataset.dir = d; else delete g.dataset.dir;
-    });
+    g.addEventListener('mousemove', function () { stripDir(g); });
     g.addEventListener('mouseleave', function () { delete g.dataset.dir; });
     g.addEventListener('click', function (e) {
       if (!g.dataset.dir || dragMoved || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
       e.preventDefault(); e.stopPropagation();
       stopGlide();
-      easeBy(g, g.dataset.dir === 'next' ? stepW() : -stepW());
+      easeBy(g, g._cutBy || (g.dataset.dir === 'next' ? stepW() : -stepW()));
     }, true);
     g.addEventListener('pointerdown', function (e) {
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
@@ -789,7 +847,7 @@
       if (mouse.on) {
         var dx = mouse.x - (r.left + r.width / 2), dy = Math.max(0, Math.abs(mouse.y - (r.top + r.height / 2)) - r.height / 2);
         var d = Math.sqrt(dx * dx + dy * dy * 2.25);
-        if (d < R) t = 1 + 0.3 * (0.5 + 0.5 * Math.cos(Math.PI * d / R));
+        if (d < R) t = 1 + 0.15 * (0.5 + 0.5 * Math.cos(Math.PI * d / R));
       }
       var k = c._k + (t - c._k) * Math.min(1, dt * 3);
       if (Math.abs(k - t) < 0.0005) k = t;
@@ -823,6 +881,7 @@
       prox = Math.max(prox, 1 - Math.min(1, Math.sqrt(dx * dx + dy * dy) / 140));
     });
     var moved = T.x ? magnify(T, dt) : 0;
+    if (T.x) stripDir(el);
     drift.pos += moved;
     var now = performance.now(), E = drift.ease;
     if (E && E.el === el) {
@@ -836,7 +895,7 @@
       if (Math.abs(get() - drift.pos) > 2) drift.pos = get();
       drift.ramp = Math.min(1, drift.ramp + dt / 2.5);
       drift.slow += ((1 - 0.95 * prox) - drift.slow) * Math.min(1, dt * 2.5);
-      drift.pos += (T.x ? 14 : 10) * drift.slow * drift.ramp * drift.ramp * drift.dir * dt;
+      drift.pos += (T.x ? 7 : 10) * drift.slow * drift.ramp * drift.ramp * drift.dir * dt;
       if (drift.pos >= max) { drift.pos = max; drift.dir = -1; } else if (drift.pos <= 0) { drift.pos = 0; drift.dir = 1; }
       set(drift.pos);
     }

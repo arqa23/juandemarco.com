@@ -599,7 +599,7 @@ body {
   :root:not([data-ptitle="below"]) .print-cap {
     position: absolute; inset: 0; margin: 0; padding: 1em;
     display: flex; align-items: center; justify-content: center; text-align: center; white-space: normal;
-    background: color-mix(in srgb, var(--bg) 84%, transparent);
+    background: color-mix(in srgb, var(--bg) 42%, transparent);
     opacity: 0; transition: opacity .25s ease;
     font-size: calc(var(--nav-size) * var(--caption-scale, .7) / .7) !important;   /* on the print: back to the label size */
   }
@@ -784,4 +784,26 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   .project-main .slide-btn { display: none; }   /* the cursor shows the way instead */
   .work-page .grid[data-dir="next"], .work-page .grid[data-dir="next"] a { cursor: var(--cur-next); }
   .work-page .grid[data-dir="prev"], .work-page .grid[data-dir="prev"] a { cursor: var(--cur-prev); }
+}
+
+/* Projects (test page): small square tiles on a grid of horizontal lines that
+   run from the J of the name to the end of the menu. The tiles slide in along
+   the lines and settle, like type being set. site.js places them. */
+.press-page { position: fixed; inset: 0; z-index: 1; padding: 0 !important; margin: 0 !important; max-width: none; }
+.press-page .work-h { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.press-lines { position: absolute; inset: 0; pointer-events: none; }
+.press-lines i { position: absolute; height: 1px; background: var(--ink); opacity: .28; transform-origin: left; }
+.press { position: absolute; inset: 0; }
+.press .card { position: absolute; width: var(--tile, 160px); opacity: 0; }
+.press.is-set .card { opacity: 1; }
+.press .card img { aspect-ratio: 1 / 1; }
+/* Silhouette: the dark parts of each image become a solid white shape (black
+   in light mode); everything else drops out to the page colour. */
+:root[data-tiles="silhouette"] .press .card img { background: none; filter: url(#sil-white); }
+:root[data-tiles="silhouette"][data-mode="light"] .press .card img { filter: url(#sil-black); }
+@media (hover: none), (max-width: 760px) {
+  .press-page { position: static; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--gutter) 90px !important; }
+  .press-lines { display: none; }
+  .press { position: static; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .press .card { position: static; width: auto; opacity: 1; transform: none !important; }
 }
