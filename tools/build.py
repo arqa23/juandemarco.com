@@ -183,7 +183,7 @@ def _page(title, section, body, body_class="", head_extra=""):
   <nav class="nav" aria-label="Main">
 {nav}
   </nav>
-  <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width="1.1" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
+  <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
 
   <div class="settings" id="settings" hidden>
     <p class="settings-note">Test panel. Choices are kept in this browser only.</p>
@@ -212,7 +212,8 @@ def _page(title, section, body, body_class="", head_extra=""):
     </div>
     <div class="settings-row">
       <span class="settings-label">Gallery layout</span>
-      <button type="button" data-pref="hang" data-val="rows">Rows</button>
+      <button type="button" data-pref="hang" data-val="rows">Even</button>
+      <button type="button" data-pref="hang" data-val="flow">Flow</button>
       <button type="button" data-pref="hang" data-val="salon">Salon</button>
     </div>
     <div class="settings-row">

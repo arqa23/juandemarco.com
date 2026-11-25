@@ -284,7 +284,27 @@
       var size = SIZES[Math.floor(rand() * SIZES.length)];
       return { a: a, r: r, cw: cap && !overlay ? capWidth(cap) : 0, w0: Math.min(W * (narrow ? 1 : 0.5), base * Math.sqrt(size * r)) };
     });
-    var best = (document.documentElement.dataset.hang || PREF_DEFAULTS.hang) === 'salon' ? salon() : rows();
+    var hang = document.documentElement.dataset.hang || PREF_DEFAULTS.hang;
+    var best = hang === 'salon' ? salon() : hang === 'flow' ? rows() : even();
+    // Even (default): every print the same height, every gap the same, across
+    // and down. Rows hold up to three prints and sit centred on the wall.
+    function even() {
+      var order = items.slice();
+      for (var i = order.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)), tmp = order[i]; order[i] = order[j]; order[j] = tmp; }
+      var H = W * (narrow ? 0.55 : 0.27), MAX = narrow ? 2 : 3, out = [], y = 0, q = 0;
+      while (q < order.length) {
+        var row = [], sum = 0;
+        while (q < order.length && row.length < MAX) {
+          var w = H * order[q].r, add = (row.length ? g : 0) + w;
+          if (row.length && sum + add > W) break;
+          row.push({ it: order[q], w: Math.min(w, W) }); sum += add; q++;
+        }
+        var x = Math.max(0, (W - sum) / 2);
+        row.forEach(function (p) { out.push({ x: x, y: y, w: p.w, ih: p.w / p.it.r, it: p.it }); x += p.w + g; });
+        y += H + gv;
+      }
+      return { placed: out, top: 0, h: y - gv };
+    }
     function salon() {
     // ghosts: rectangles that block space but are never shown
       var ghosts = [], estH = 0;
@@ -559,23 +579,18 @@
     var sc = document.querySelector('.scroller'), src = sc || window;
     var top = function () { return sc ? sc.scrollTop : (document.scrollingElement || document.documentElement).scrollTop; };
     src.addEventListener('scroll', function () { btn.classList.toggle('is-on', top() > innerHeight * 0.5); }, { passive: true });
-    btn.addEventListener('click', function () { (sc || window).scrollTo({ top: 0, behavior: 'smooth' }); });
+    btn.addEventListener('click', function () { driftHold(2500); (sc || window).scrollTo({ top: 0, behavior: 'smooth' }); });
   }
 
-  // Copyright: upright on most pages; on a project page it turns a
-  // quarter clockwise around the settings icon as the page arrives, and turns
-  // back on the way out. It starts from where it was on the last page.
-  var legalTurned = false;
+  // Copyright: vertical on the home page, horizontal beside the settings icon
+  // on every other page. No movement between the two.
   function turnLegal() {
     var foot = document.querySelector('.site-footer');
     if (!foot) return;
-    var want = !!document.querySelector('.page.project');
+    var flat = !document.querySelector('.home');
     foot.classList.add('no-anim');
-    foot.classList.toggle('is-turned', legalTurned);
-    void foot.offsetWidth;   // settle the starting position before turning
-    foot.classList.remove('no-anim');
-    requestAnimationFrame(function () { requestAnimationFrame(function () { foot.classList.toggle('is-turned', want); }); });
-    legalTurned = want;
+    foot.classList.toggle('is-turned', flat);
+    root.classList.toggle('legal-flat', flat);
   }
 
   function init() {
@@ -588,6 +603,7 @@
     initSlideshow();
     initFilmstrip();
     initWallGlide();
+    startDrift();
     if (document.fonts) document.fonts.ready.then(function () { place(); layoutWall(); });
   }
 
@@ -611,7 +627,7 @@
     if (!g || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
     var card = g.querySelector('.card');
     var step = card ? card.offsetWidth + parseFloat(getComputedStyle(g).columnGap || 0) : 300;
-    g.scrollBy({ left: e.key === 'ArrowRight' ? step : -step, behavior: 'smooth' });
+    easeBy(g, e.key === 'ArrowRight' ? step : -step);
   });
 
   /* Strip: runs from the first project to the last. On arrival it glides in
@@ -663,7 +679,7 @@
       if (!g.dataset.dir || dragMoved || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
       e.preventDefault(); e.stopPropagation();
       stopGlide();
-      g.scrollBy({ left: g.dataset.dir === 'next' ? stepW() : -stepW(), behavior: 'smooth' });
+      easeBy(g, g.dataset.dir === 'next' ? stepW() : -stepW());
     }, true);
     g.addEventListener('pointerdown', function (e) {
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
@@ -726,6 +742,105 @@
       glide = k < 1 ? requestAnimationFrame(step) : null;
     };
     stopGlide(); glide = requestAnimationFrame(step);
+  }
+
+  /* ---------- Ambient motion on the Work strip and the Gallery wall ----------
+     Both keep moving very slowly, all the time. Near an image the movement
+     slows almost to a stop and picks up again as the cursor moves away. The
+     wheel, a drag, the keys and the arrow clicks take over at once; the drift
+     comes back gently a moment later. On the Work strip the tile nearest the
+     cursor also grows (up to 1.3x) and pushes its neighbours aside. */
+  var drift = { raf: null, el: null, pos: 0, dir: 1, hold: 0, ramp: 0, slow: 1, last: 0, down: false, ease: null };
+  var mouse = { x: -1e4, y: -1e4, on: false };
+  document.addEventListener('mousemove', function (e) { mouse.x = e.clientX; mouse.y = e.clientY; mouse.on = true; startDrift(); }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', function () { mouse.on = false; });
+  function driftHold(ms) { drift.hold = Math.max(drift.hold, performance.now() + ms); drift.ramp = 0; }
+  ['wheel', 'keydown', 'touchstart'].forEach(function (t) {
+    window.addEventListener(t, function () { driftHold(1200); }, { passive: true, capture: true });
+  });
+  window.addEventListener('pointerdown', function () { drift.down = true; }, true);
+  ['pointerup', 'pointercancel'].forEach(function (t) {
+    window.addEventListener(t, function () { if (drift.down) { drift.down = false; driftHold(500); } }, true);
+  });
+  function easeBy(el, d) {
+    var max = el.scrollWidth - el.clientWidth, from = el.scrollLeft;
+    drift.ease = { el: el, from: from, to: Math.max(0, Math.min(max, from + d)), t0: performance.now(), dur: 750 };
+    driftHold(900); startDrift();
+  }
+  function driftTarget() {
+    var g = strip();
+    if (g && matchMedia('(hover: hover) and (min-width: 761px)').matches) return { el: g, x: true, items: g.querySelectorAll('.card') };
+    var sc = wallScroller();
+    if (sc) return { el: sc, x: false, items: document.querySelectorAll('.prints .print') };
+    return null;
+  }
+  function startDrift() {
+    if (drift.raf || matchMedia('(prefers-reduced-motion: reduce)').matches || !driftTarget()) return;
+    drift.last = 0; drift.raf = requestAnimationFrame(driftTick);
+  }
+  function magnify(T, dt) {
+    var cards = T.items, el = T.el;
+    if (!cards.length || (drag && dragMoved)) return 0;
+    var base = innerHeight, rects = [], change = false;
+    cards.forEach(function (c, n) { c._k = c._k || 1; var r = c.getBoundingClientRect(); rects.push(r); if (!n) base = r.width / c._k; });
+    var R = base * 1.1, ks = [];
+    cards.forEach(function (c, n) {
+      var r = rects[n], t = 1;
+      if (mouse.on) {
+        var dx = mouse.x - (r.left + r.width / 2), dy = Math.max(0, Math.abs(mouse.y - (r.top + r.height / 2)) - r.height / 2);
+        var d = Math.sqrt(dx * dx + dy * dy * 2.25);
+        if (d < R) t = 1 + 0.3 * (0.5 + 0.5 * Math.cos(Math.PI * d / R));
+      }
+      var k = c._k + (t - c._k) * Math.min(1, dt * 3);
+      if (Math.abs(k - t) < 0.0005) k = t;
+      if (k !== c._k) change = true;
+      ks.push(k);
+    });
+    if (!change) return 0;
+    // keep what is under the cursor (or the middle of the strip) where it is
+    var er = el.getBoundingClientRect(), ref = mouse.on && mouse.x > er.left && mouse.x < er.right ? mouse.x : er.left + er.width / 2;
+    var a = 0, best = Infinity;
+    rects.forEach(function (r, n) { var d = ref < r.left ? r.left - ref : ref > r.right ? ref - r.right : 0; if (d < best) { best = d; a = n; } });
+    var u = (ref - rects[a].left) / rects[a].width;
+    cards.forEach(function (c, n) { c._k = ks[n]; c.style.setProperty('--k', ks[n].toFixed(4)); });
+    var nr = cards[a].getBoundingClientRect(), delta = nr.left + u * nr.width - ref;
+    if (glide) return 0;
+    var before = el.scrollLeft; el.scrollLeft = before + delta;
+    return el.scrollLeft - before;
+  }
+  function driftTick(t) {
+    var T = driftTarget();
+    if (!T) { drift.raf = null; drift.el = null; return; }
+    var el = T.el, get = function () { return T.x ? el.scrollLeft : el.scrollTop; };
+    var set = function (v) { if (T.x) el.scrollLeft = v; else el.scrollTop = v; };
+    if (el !== drift.el) { drift.el = el; drift.pos = get(); drift.dir = 1; drift.ramp = 0; drift.ease = null; }
+    var dt = drift.last ? Math.min(0.05, (t - drift.last) / 1000) : 0.016; drift.last = t;
+    var max = T.x ? el.scrollWidth - el.clientWidth : el.scrollHeight - el.clientHeight;
+    var prox = 0;
+    if (mouse.on) T.items.forEach(function (it) {
+      var r = it.getBoundingClientRect();
+      var dx = Math.max(r.left - mouse.x, 0, mouse.x - r.right), dy = Math.max(r.top - mouse.y, 0, mouse.y - r.bottom);
+      prox = Math.max(prox, 1 - Math.min(1, Math.sqrt(dx * dx + dy * dy) / 140));
+    });
+    var moved = T.x ? magnify(T, dt) : 0;
+    drift.pos += moved;
+    var now = performance.now(), E = drift.ease;
+    if (E && E.el === el) {
+      E.from += moved; E.to += moved;
+      var k = Math.min(1, (now - E.t0) / E.dur), e = 0.5 - 0.5 * Math.cos(Math.PI * k);
+      set(E.from + (E.to - E.from) * e); drift.pos = get();
+      if (k >= 1) drift.ease = null;
+    } else if (glide || wallRaf || drift.down || drag || now < drift.hold) {
+      drift.ease = null; drift.pos = get(); drift.ramp = 0;
+    } else {
+      if (Math.abs(get() - drift.pos) > 2) drift.pos = get();
+      drift.ramp = Math.min(1, drift.ramp + dt / 2.5);
+      drift.slow += ((1 - 0.95 * prox) - drift.slow) * Math.min(1, dt * 2.5);
+      drift.pos += (T.x ? 14 : 10) * drift.slow * drift.ramp * drift.ramp * drift.dir * dt;
+      if (drift.pos >= max) { drift.pos = max; drift.dir = -1; } else if (drift.pos <= 0) { drift.pos = 0; drift.dir = 1; }
+      set(drift.pos);
+    }
+    drift.raf = requestAnimationFrame(driftTick);
   }
 
   /* ---------- In-place page changes ---------- */
