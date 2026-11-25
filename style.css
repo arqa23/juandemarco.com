@@ -474,7 +474,7 @@ body {
 .logo { font-family: var(--name-font, var(--font)); font-weight: var(--name-w, 300); font-size: calc(var(--logo-size) * var(--name-scale, 1)); letter-spacing: var(--name-track, .42em); text-transform: var(--name-case, uppercase); }
 .page h1 { font-family: var(--title-font, var(--font)); font-weight: var(--title-w, 300); font-size: calc(var(--title-size) * var(--title-scale, 1)); letter-spacing: var(--title-track, .3em); text-transform: var(--title-case, uppercase); }
 .page p:not(.meta):not(.email):not(.settings-note) { font-family: var(--text-font, var(--font)); font-weight: var(--text-w, 300); font-size: calc(var(--text-size) * var(--text-scale, 1)); letter-spacing: var(--text-track, 0); text-transform: var(--text-case, none); }
-.page .email { font-family: var(--text-font, var(--font)); font-weight: var(--text-w, 300); font-size: calc(var(--text-size) * 1.25 * var(--text-scale, 1)) !important; }
+.page .email { font-family: var(--text-font, var(--font)); font-weight: var(--text-w, 300); font-size: calc(var(--text-size) * var(--text-scale, 1)) !important; margin-top: 0 !important; }   /* same as the paragraph text */
 .nav a, .settings-btn, .project-nav, .meta, .slide-count, .card-title {
   font-family: var(--label-font, var(--font));
   font-weight: var(--label-w, 400);
@@ -583,6 +583,9 @@ body {
   :root:not([data-ptitle="below"]) .print:hover img { opacity: 1; }
 }
 
+/* Kept for screen readers and search, not shown (the Gallery title, 2026-11-25) */
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0 !important; }
+
 /* No menu dots (Juan, 2026-11-21) */
 .nav-dot { display: none; }
 
@@ -664,12 +667,13 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 }
 
 /* Contact, below the About text */
-.page h2.about-contact { margin: 2.6em 0 1em; font-family: var(--label-font, var(--font)); font-weight: var(--label-w, 400); font-size: calc(var(--nav-size) * var(--label-scale, 1)); letter-spacing: var(--label-track, .2em); text-transform: var(--label-case, uppercase); }
+.page h2.about-contact { margin: 2.2em 0 .9em; font-family: var(--title-font, var(--font)); font-weight: var(--title-w, 300); font-size: calc(var(--title-size) * var(--title-scale, 1)); letter-spacing: var(--title-track, .3em); text-transform: var(--title-case, uppercase); }   /* same as the About title */
 
 /* Settings button: a small sliders icon at the foot of the menu */
 .settings-icon { width: max(15px, calc(18 * var(--s))); height: max(15px, calc(18 * var(--s))); fill: currentColor; opacity: .78; transition: opacity .15s ease; }
 .settings-btn:hover .settings-icon, .settings-btn.is-open .settings-icon { opacity: 1; }
-.settings-icon circle { fill: var(--bg, #FAF9F5); stroke: currentColor; stroke-width: 1.1; }
+.settings-icon circle { fill: none; stroke: currentColor; stroke-width: 1.1; }   /* open dots: the background shows through */
+.home .settings-icon circle { fill: #fff; }   /* over the home image the dots match the white name and menu */
 
 /* Dark mode (Settings > Mode): charcoal paper, warm off-white ink */
 :root[data-mode="dark"] { --mat: #171716; background: #171716; }

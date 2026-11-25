@@ -446,8 +446,8 @@
     // Rows, after 6a architects' home page: prints flow like words in centred
     // text, at most three to a row, each in one of five set widths whatever
     // its shape. A row lines its prints up along the bottom or (less often)
-    // along the top. Rows lean toward the centre; the outer prints of a row
-    // may sit a little apart or float within the row, and some rows leave
+    // along the top. Rows lean toward the centre; neighbours in a row sit one
+    // gap apart, the outer prints may float within the row, and some rows leave
     // open wall above them, so clusters never grow into one solid mass.
     // Edges that would land just off another edge are moved to meet it.
     function rows() {
@@ -468,7 +468,7 @@
         if (q && !narrow && rand() < 0.4) y += g * (3 + rand() * 6);
         var row = [], sum = 0, gaps = [];
         while (q < order.length && row.length < MAX) {
-          var gap = row.length ? (!narrow && rand() < 0.3 ? g * (2 + rand() * 5) : g) : 0;
+          var gap = row.length ? g : 0;   // neighbours in a row always one gap apart
           if (row.length && sum + gap + order[q].rw > W) break;
           if (row.length) gaps.push(gap);
           row.push(order[q]); sum += gap + order[q].rw; q++;
@@ -597,7 +597,7 @@
     var card = g.querySelector('.card');
     var from = Math.min(g.scrollWidth - g.clientWidth, card ? card.offsetWidth * 0.9 : 500);
     if (from > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      var t0 = null, dur = 3400;
+      var t0 = null, dur = 4850;   // 30% slower than before (3400)
       g.scrollLeft = from;
       var step = function (t) {
         if (t0 === null) t0 = t;
