@@ -188,7 +188,7 @@ def _page(title, section, body, body_class="", head_extra=""):
   <div class="settings" id="settings" hidden>
     <p class="settings-note">Test panel. Choices are kept in this browser only.</p>
     <div class="settings-row"><label class="settings-label" for="ts-style">Text style</label>
-      <select id="ts-style"><option value="name">Name</option><option value="title">Title</option><option value="text">Text</option><option value="label">Label</option><option value="caption">Print caption</option></select></div>
+      <select id="ts-style"><option value="name">Name</option><option value="title">Title</option><option value="text">Text</option><option value="label">Label</option><option value="caption">Print caption</option><option value="menu">Menu</option></select></div>
     <div class="settings-row"><label class="settings-label" for="ts-font">Font</label>
       <select id="ts-font" data-k="font"><option value="jost">Jost (old)</option><option value="inter">Inter</option><option value="instrument">Instrument Sans</option><option value="geist">Geist</option><option value="host">Host Grotesk</option><option value="franklin">Libre Franklin</option><option value="albert">Albert Sans</option></select></div>
     <div class="settings-row"><label class="settings-label" for="ts-w">Weight</label>
