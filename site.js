@@ -10,6 +10,13 @@
     if (!labels.length) return;
     var bottom = labels[labels.length - 1].getBoundingClientRect().bottom;
     root.style.setProperty('--nav-bottom', bottom + 'px');
+    // settings button and back-to-top line up on the copyright's centre line
+    var foot = document.querySelector('.site-footer');
+    if (foot) {
+      var f = foot.getBoundingClientRect();
+      root.style.setProperty('--legal-mid', (f.left + f.width / 2) + 'px');
+      root.style.setProperty('--legal-top', (innerHeight - f.top) + 'px');
+    }
   }
 
   /* ---------- Settings (temporary test panel) ---------- */
