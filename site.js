@@ -217,105 +217,216 @@
     if (slides.length < 2) show.classList.add('single');
   }
 
-  /* ---------- Prints wall: masonry rows so gutters match across and down ---------- */
-  // Prints wall: each print goes to the highest free spot (filling holes too)
-  // where it sits exactly one gap from its neighbours, then stretches a little
-  // to close a small leftover gap. Invisible, randomly sized "ghost" blocks along
-  // the top and both sides keep those edges ragged, pulling the hang inward.
-  // Many seeded hanging orders are tried and the densest kept, so the wall is
-  // the same on every visit.
+  /* ---------- Prints wall: salon hang, even gaps between print edges ---------- */
+  // Every print goes to the highest free spot where its EDGES sit one gap from
+  // its neighbours, across and down (captions hang inside the gap below each
+  // print and only need to stay clear of other prints). A few prints ahead are
+  // tried for each spot, prints may stretch or shrink a little to close a
+  // leftover gap or to line up with a neighbour's top or bottom, and afterwards
+  // prints float up into any space left above them. Invisible, randomly sized
+  // "ghost" blocks along the top and both sides keep those edges ragged. Several
+  // hanging orders are tried and the one with the fewest large holes is kept.
   function layoutWall() {
     var wall = document.querySelector('.prints');
     if (!wall) return;
-    var W = wall.clientWidth, g = parseFloat(getComputedStyle(wall).columnGap) || 40;
+    var W = wall.clientWidth, g = parseFloat(getComputedStyle(wall).columnGap) || 60;
     var narrow = W < 600, base = W * (narrow ? 0.4 : 0.185), cx = W / 2;
     var capH = 0, cap0 = wall.querySelector('.print-cap');
     if (cap0) capH = cap0.offsetHeight + parseFloat(getComputedStyle(cap0).marginTop);
+    var c = Math.max(8, g * 0.25);              // clearance around a caption
+    var gv = Math.max(g, capH + c);             // gap down: the same as across unless a caption needs more
+    var snapT = g * 0.6;                        // edges closer than this get lined up
     // A new hang on every visit; resizing keeps the same one (wallSeed is set
     // when the Prints page opens).
     var seed = wall.dataset.seed || (wall.dataset.seed = 1 + Math.floor(Math.random() * 2147483645));
     seed = +seed;
     var rand = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
     var SIZES = [0.55, 0.75, 1, 1, 1.3, 1.6, 2.1, 2.7];
+    function capWidth(cap) { var rg = document.createRange(); rg.selectNodeContents(cap); return rg.getBoundingClientRect().width; }
     var items = [].map.call(wall.querySelectorAll('.print'), function (a) {
-      var img = a.querySelector('img'), r = img.getAttribute('width') / img.getAttribute('height');
+      var img = a.querySelector('img'), cap = a.querySelector('.print-cap'), r = img.getAttribute('width') / img.getAttribute('height');
       var size = SIZES[Math.floor(rand() * SIZES.length)];
-      return { a: a, r: r, w0: Math.min(W * (narrow ? 1 : 0.5), base * Math.sqrt(size * r)) };
+      return { a: a, r: r, cw: cap ? capWidth(cap) : 0, w0: Math.min(W * (narrow ? 1 : 0.5), base * Math.sqrt(size * r)) };
     });
     // ghosts: rectangles that block space but are never shown
     var ghosts = [], estH = 0;
-    items.forEach(function (it) { estH += it.w0 * (it.w0 / it.r + capH); });
+    items.forEach(function (it) { estH += it.w0 * (it.w0 / it.r + gv); });
     estH = estH / (W * 0.6) + 600;
     if (!narrow) {
       for (var gx = 0; gx < W;) {
         var sw = W * (0.07 + rand() * 0.14), mid = Math.abs(gx + sw / 2 - cx) / (W / 2);
         var depth = rand() * base * (0.25 + 0.9 * mid);
-        if (depth > 4) ghosts.push({ x: gx, y: -2000, w: Math.min(sw, W - gx), h: 2000 + depth - g, ghost: 1 });
+        if (depth > 4) ghosts.push({ x: gx, y: -2000, w: Math.min(sw, W - gx), ih: 2000 + depth - gv, cw: 0, ghost: 1 });
         gx += sw;
       }
       [0, 1].forEach(function (side) {
         for (var gy = 0; gy < estH;) {
           var sh = 140 + rand() * 320, inset = rand() * W * 0.1 - g;
-          if (inset > 4) ghosts.push({ x: side ? W - inset : 0, y: gy, w: inset, h: sh - g, ghost: 1 });
+          if (inset > 4) ghosts.push({ x: side ? W - inset : 0, y: gy, w: inset, ih: sh - gv, cw: 0, ghost: 1 });
           gy += sh;
         }
       });
     }
     var placed;
-    function free(x, y, w, h) {
-      for (var k = 0; k < placed.length; k++) {
-        var p = placed[k];
-        if (p.x < x + w + g - 0.5 && p.x + p.w + g > x + 0.5 && p.y < y + h + g - 0.5 && p.y + p.h + g > y + 0.5) return false;
-      }
+    // Does a print at (x, y, w, ih) with a caption cw wide clash with p?
+    function clash(x, y, w, ih, cw, p) {
+      // print against print: one gap across, one gap down
+      if (p.x < x + w + g - 0.5 && p.x + p.w + g > x + 0.5 && p.y < y + ih + gv - 0.5 && p.y + p.ih + gv > y + 0.5) return true;
+      if (!capH) return false;
+      var cy = y + ih, py = p.y + p.ih;
+      // this caption against p's print
+      if (cw > w && p.x < x + cw + c && p.x + p.w + c > x && p.y < cy + capH + c && p.y + p.ih + c > cy) return true;
+      // p's caption against this print
+      if (p.cw > p.w && x < p.x + p.cw + c && x + w + c > p.x && y < py + capH + c && y + ih + c > py) return true;
+      return false;
+    }
+    function free(x, y, w, ih, cw, skip) {
+      if (x < -0.5 || x + w > W + 0.5 || y < -0.5) return false;
+      for (var k = 0; k < placed.length; k++) if (placed[k] !== skip && clash(x, y, w, ih, cw, placed[k])) return false;
       return true;
     }
-    function lowestFit(x, w, h) {           // highest y >= 0 where the print fits at x
-      var ys = [0];
-      placed.forEach(function (p) { if (p.x < x + w + g && p.x + p.w + g > x) ys.push(p.y + p.h + g); });
+    function lowestFit(x, w, ih, cw, skip) {   // highest y >= 0 where the print fits at x
+      var near = [], ys = [0], span = Math.max(w, cw) + g;
+      placed.forEach(function (p) {
+        if (p !== skip && p.x < x + span && p.x + Math.max(p.w, p.cw) + g > x) { near.push(p); ys.push(p.y + p.ih + gv); }
+      });
       ys.sort(function (a, b) { return a - b; });
-      for (var k = 0; k < ys.length; k++) if (ys[k] >= 0 && free(x, ys[k], w, h)) return ys[k];
+      for (var k = 0; k < ys.length; k++) {
+        var y = ys[k], ok = y >= 0;
+        for (var q = 0; ok && q < near.length; q++) if (clash(x, y, w, ih, cw, near[q])) ok = false;
+        if (ok) return y;
+      }
       return Infinity;
     }
-    function room(x, y, h, dir) {
+    function room(x, y, ih, dir, skip) {        // how far a print's free side can grow
       var lim = dir > 0 ? W : 0;
       placed.forEach(function (p) {
-        if (p.y >= y + h + g - 0.5 || p.y + p.h + g <= y + 0.5) return;
+        if (p === skip || p.y >= y + ih + gv - 0.5 || p.y + p.ih + gv <= y + 0.5) return;
         if (dir > 0 && p.x >= x - 0.5) lim = Math.min(lim, p.x - g);
         if (dir < 0 && p.x + p.w <= x + 0.5) lim = Math.max(lim, p.x + p.w + g);
       });
       return lim;
     }
+    // Try to resize a print anchored on one side so it fills the gap beside it
+    // or meets a neighbour's top or bottom edge. Returns the best variant.
+    function settle(b, it) {
+      var r = it.r, lo = it.w0 * 0.7, hi = it.w0 * 1.4;
+      function at(w, y) {
+        var x = b.dir > 0 ? b.x : b.x + b.w - w;
+        return free(x, y, w, w / r, it.cw, b.self) ? { x: x, y: y, w: w, ih: w / r } : null;
+      }
+      // 1. close a small gap on the open side
+      var edge = b.dir > 0 ? b.x + b.w : b.x, lim = room(edge, b.y, b.ih * 1.3, b.dir, b.self);
+      var slack = b.dir > 0 ? lim - edge : edge - lim;
+      if (slack > 0.5 && slack < b.w * 0.4 && b.w + slack <= hi) { var v = at(b.w + slack, b.y); if (v) { b.x = v.x; b.w = v.w; b.ih = v.ih; } }
+      // 2. line up the top with a neighbour's top just below it
+      placed.forEach(function (p) {
+        if (p.ghost || p === b.self) return;
+        var d = p.y - b.y;
+        if (d > 0.5 && d < snapT && p.x < b.x + b.w + g * 3 && p.x + p.w + g * 3 > b.x && free(b.x, p.y, b.w, b.ih, it.cw, b.self)) b.y = p.y;
+      });
+      // 3. line up the bottom with a neighbour's bottom (stretch or shrink a little)
+      var bot = b.y + b.ih, bestD = snapT;
+      placed.forEach(function (p) {
+        if (p.ghost || p === b.self || p.x > b.x + b.w + g * 3 || p.x + p.w + g * 3 < b.x) return;
+        var pb = p.y + p.ih, d = Math.abs(pb - bot);
+        if (d > 0.5 && d < bestD) {
+          var w = (pb - b.y) * r;
+          if (w >= lo && w <= hi) { var v = at(w, b.y); if (v) { b.x = v.x; b.w = v.w; b.ih = v.ih; bestD = d; } }
+        }
+      });
+      return b;
+    }
     function pack(order) {
       placed = ghosts.slice();
-      var real = [], bot = 0, top = Infinity, area = 0;
-      order.forEach(function (it) {
-        var r = it.r, w0 = it.w0, cands = [[0, 1], [W - w0, -1]], best = null;
-        placed.forEach(function (p) { cands.push([p.x + p.w + g, 1], [p.x - g - w0, -1]); });
-        cands.forEach(function (c) {
-          var x = c[0], dir = c[1], w = w0, h = w / r + capH;
-          if (x < -0.5 || x > W - w + 0.5) return;
-          var y = lowestFit(x, w, h);
-          if (y === Infinity) return;
-          var edge = dir > 0 ? x : x + w, lim = room(edge, y, h * 1.35, dir);
-          var slack = dir > 0 ? lim - (x + w) : x - lim;
-          if (slack > 0.5 && slack < w * 0.35) {
-            var w2 = w + slack, x2 = dir > 0 ? x : lim, h2 = w2 / r + capH;
-            if (free(x2, y, w2, h2)) { x = x2; w = w2; h = h2; }
-          }
-          var score = y + Math.abs(x + w / 2 - cx) * 0.05;
-          if (!best || score < best.s) best = { x: x, y: y, w: w, h: h, ih: w / r, s: score, it: it };
+      var real = [], left = order.slice(), LOOK = 3;
+      while (left.length) {
+        var best = null;
+        for (var li = 0; li < Math.min(LOOK, left.length); li++) {
+          var it = left[li], w0 = it.w0, ih0 = w0 / it.r;
+          var cands = [[0, 1], [W - w0, -1]];
+          placed.forEach(function (p) {
+            cands.push([p.x + p.w + g, 1], [p.x - g - w0, -1]);
+            if (!p.ghost) cands.push([p.x, 1], [p.x + p.w - w0, -1]);   // edges lined up with a print above
+          });
+          // each print may also hang a little smaller to fit a narrower spot
+          [1, 0.8].forEach(function (k) {
+            var w = w0 * k, ih = w / it.r;
+            cands.forEach(function (cd) {
+              var x = cd[1] > 0 ? cd[0] : cd[0] + w0 - w;
+              if (x < -0.5 || x > W - w + 0.5) return;
+              var y = lowestFit(x, w, ih, it.cw);
+              if (y === Infinity) return;
+              var score = y + Math.abs(x + w / 2 - cx) * 0.05 + li * g * 0.75 + (1 - k) * g * 2;
+              if (!best || score < best.s) best = { x: x, y: y, w: w, ih: ih, dir: cd[1], s: score, it: it, li: li };
+            });
+          });
+        }
+        settle(best, best.it);
+        var p = { x: best.x, y: best.y, w: best.w, ih: best.ih, cw: best.it.cw, it: best.it };
+        placed.push(p); real.push(p);
+        left.splice(best.li, 1);
+      }
+      // prints float up into free space above them, then re-settle
+      for (var round = 0; round < 2; round++) {
+        real.slice().sort(function (a, b) { return a.y - b.y; }).forEach(function (p) {
+          var y = lowestFit(p.x, p.w, p.ih, p.cw, p);
+          if (y < p.y - 0.5) p.y = y;
+          var b = settle({ x: p.x, y: p.y, w: p.w, ih: p.ih, dir: p.x + p.w / 2 < cx ? -1 : 1, self: p }, { r: p.it.r, w0: p.it.w0, cw: p.cw });
+          p.x = b.x; p.y = b.y; p.w = b.w; p.ih = b.ih;
         });
-        placed.push(best); real.push(best);
-        bot = Math.max(bot, best.y + best.ih); top = Math.min(top, best.y); area += best.w * best.h;
-      });
-      return { placed: real, top: top, h: bot - top, d: area / (W * (bot - top)) };
+      }
+      var top = Infinity, bot = 0;
+      real.forEach(function (p) { top = Math.min(top, p.y); bot = Math.max(bot, p.y + p.ih); });
+      return { placed: real, top: top, h: bot - top, holes: holes(real, top, bot) };
     }
-    var best = pack(items);
-    for (var t = 0; t < 24; t++) {
+    // Large empty patches inside the hang (not the ragged edges): a coarse grid
+    // of the wall, prints grown by half a gap; empty cells between the
+    // left- and rightmost prints nearby, grouped into patches.
+    function holes(real, top, bot) {
+      var cell = Math.max(10, g / 3), cols = Math.ceil(W / cell), rows = Math.ceil((bot - top) / cell) + 1;
+      var grid = new Uint8Array(cols * rows), lo = new Array(rows), hi = new Array(rows);
+      real.forEach(function (p) {
+        var c0 = Math.max(0, Math.floor((p.x - g / 2) / cell)), c1 = Math.min(cols - 1, Math.floor((p.x + Math.max(p.w, p.cw) + g / 2) / cell));
+        var r0 = Math.max(0, Math.floor((p.y - top - g / 2) / cell)), r1 = Math.min(rows - 1, Math.floor((p.y + p.ih + gv / 2 - top) / cell));
+        for (var rr = r0; rr <= r1; rr++) for (var cc = c0; cc <= c1; cc++) grid[rr * cols + cc] = 1;
+      });
+      for (var rr = 0; rr < rows; rr++) {
+        lo[rr] = cols; hi[rr] = -1;
+        for (var cc = 0; cc < cols; cc++) if (grid[rr * cols + cc]) { lo[rr] = Math.min(lo[rr], cc); hi[rr] = cc; }
+      }
+      // the edge of the hang near each row: the most outward print within a band
+      var band = Math.round(base / cell), L = [], R = [];
+      for (rr = 0; rr < rows; rr++) {
+        var a = cols, b = -1;
+        for (var k = Math.max(0, rr - band); k <= Math.min(rows - 1, rr + band); k++) { a = Math.min(a, lo[k]); b = Math.max(b, hi[k]); }
+        L[rr] = a; R[rr] = b;
+      }
+      var seen = new Uint8Array(cols * rows), score = 0, stack = [];
+      for (rr = 0; rr < rows; rr++) for (cc = L[rr]; cc <= R[rr]; cc++) {
+        var i0 = rr * cols + cc;
+        if (grid[i0] || seen[i0]) continue;
+        var n = 0, open = false; stack.push(i0); seen[i0] = 1;
+        while (stack.length) {
+          var i = stack.pop(), y0 = Math.floor(i / cols), x0 = i % cols; n++;
+          [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+            var x1 = x0 + d[0], y1 = y0 + d[1];
+            if (y1 < 0 || y1 >= rows) return;
+            if (x1 < L[y1] || x1 > R[y1]) { open = true; return; }
+            var j = y1 * cols + x1;
+            if (!grid[j] && !seen[j]) { seen[j] = 1; stack.push(j); }
+          });
+        }
+        score += n * n * (open ? 0.3 : 1);
+      }
+      return Math.sqrt(score) * cell * cell;
+    }
+    var best = pack(items), rate = function (res) { return res.h * W + res.holes * 20; };
+    for (var t = 0; t < 10; t++) {
       var o = items.slice();
       for (var i = o.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)), tmp = o[i]; o[i] = o[j]; o[j] = tmp; }
       var res = pack(o);
-      if (res.d > best.d) best = res;
+      if (rate(res) < rate(best)) best = res;
     }
     best.placed.forEach(function (p) {
       var st = p.it.a.style; st.width = p.w + 'px'; st.left = p.x + 'px'; st.top = (p.y - best.top) + 'px';
@@ -466,7 +577,8 @@
     swapTo(url.href, true);
   });
   window.addEventListener('popstate', function () { swapTo(location.href, false); });
-  window.addEventListener('resize', function () { place(); layoutWall(); });
+  var wallTimer;
+  window.addEventListener('resize', function () { place(); clearTimeout(wallTimer); wallTimer = setTimeout(layoutWall, 120); });
   document.addEventListener('keydown', function (e) {
     if (!slideStep || (e.target.closest && e.target.closest('input, textarea, select'))) return;
     if (e.key === 'ArrowRight') slideStep(1);

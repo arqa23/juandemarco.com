@@ -475,12 +475,20 @@ body {
 .page h1 { font-family: var(--title-font, var(--font)); font-weight: var(--title-w, 300); font-size: calc(var(--title-size) * var(--title-scale, 1)); letter-spacing: var(--title-track, .3em); text-transform: var(--title-case, uppercase); }
 .page p:not(.meta):not(.email):not(.settings-note) { font-family: var(--text-font, var(--font)); font-weight: var(--text-w, 300); font-size: calc(var(--text-size) * var(--text-scale, 1)); letter-spacing: var(--text-track, 0); text-transform: var(--text-case, none); }
 .page .email { font-family: var(--text-font, var(--font)); font-weight: var(--text-w, 300); font-size: calc(var(--text-size) * 1.25 * var(--text-scale, 1)) !important; }
-.nav a, .settings-btn, .project-nav, .meta, .slide-count, .card-title, .print-cap {
+.nav a, .settings-btn, .project-nav, .meta, .slide-count, .card-title {
   font-family: var(--label-font, var(--font));
   font-weight: var(--label-w, 400);
   font-size: calc(var(--nav-size) * var(--label-scale, 1)) !important;
   letter-spacing: var(--label-track, .2em);
   text-transform: var(--label-case, uppercase);
+}
+
+.print-cap {
+  font-family: var(--caption-font, var(--font));
+  font-weight: var(--caption-w, 400);
+  font-size: calc(var(--nav-size) * var(--caption-scale, .7)) !important;
+  letter-spacing: var(--caption-track, .2em);
+  text-transform: var(--caption-case, uppercase);
 }
 
 /* Settings panel controls */
@@ -496,10 +504,11 @@ body {
 
 /* Prints: a tall salon-hang wall in a centred band (same distance from the left
    edge as the Work grid keeps from the right). site.js packs the prints so
-   neighbours sit exactly one --wall-gap apart, across and down. */
+   neighbours sit exactly one --wall-gap apart, across and down, measured
+   from the print edges; captions hang inside the gap below each print. */
 .prints-intro { margin: -0.6em 0 3em !important; color: var(--ink-dim); }
 .prints {
-  --wall-gap: max(24px, calc(44 * var(--s)));
+  --wall-gap: max(36px, calc(66 * var(--s)));   /* 50% more than before (44) */
   position: relative;
   column-gap: var(--wall-gap);
   margin: 0 0 0 calc(max(160px, calc(240 * var(--s))) + var(--gutter) - var(--edge));
