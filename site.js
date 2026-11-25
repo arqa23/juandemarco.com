@@ -15,6 +15,7 @@
     if (foot) {
       var f = foot.getBoundingClientRect();
       root.style.setProperty('--legal-mid', (f.left + f.width / 2) + 'px');
+      root.style.setProperty('--legal-w', f.width + 'px');
       root.style.setProperty('--legal-top', (innerHeight - f.top) + 'px');
     }
   }

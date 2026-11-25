@@ -48,7 +48,7 @@
   --nav-size: max(10px, calc(11.7 * var(--s)));
   --nav-gap: max(12px, calc(16 * var(--s)));
   --dot: max(5px, calc(6 * var(--s)));
-  --legal-ink: rgba(255, 255, 255, .42);
+  --legal-ink: rgba(255, 255, 255, .58);
   --frame-bg: #000;
   --scroll-thumb: #4a4a46;
   --fade: rgba(250,249,245,.5);
@@ -422,7 +422,7 @@ body {
   --bg: #FAF9F5;
   --ink: #242321;
   --ink-dim: #6A6761;
-  --legal-ink: rgba(36, 35, 33, .45);
+  --legal-ink: rgba(36, 35, 33, .6);
   --scroll-thumb: #c9c4b8;
   --fade: rgba(250,249,245,.5);
   --fade-0: rgba(250,249,245,0);
@@ -431,7 +431,7 @@ body {
 :root[data-theme="light"][data-colour="original"] .inner:not(.photo) {
   --ink: #000000;
   --ink-dim: rgba(0, 0, 0, .72);
-  --legal-ink: rgba(0, 0, 0, .45);
+  --legal-ink: rgba(0, 0, 0, .6);
 }
 :root[data-theme="light"] .inner:not(.photo) .nav a:hover .nav-dot,
 :root[data-theme="light"] .inner:not(.photo) .settings-btn:hover .nav-dot { background: rgba(20,20,20,.45); }
@@ -528,14 +528,15 @@ body {
 
 /* Settings button: on its own in the lower left corner (Juan, 2026-11-25) */
 .settings-corner {
-  --icon: max(15px, calc(18 * var(--s)));
+  --icon: var(--legal-w, max(15px, calc(18 * var(--s))));   /* as wide as the copyright */
   position: fixed; z-index: 4; color: var(--ink);
   left: calc(var(--legal-mid, 20px) - var(--icon) / 2); bottom: var(--gutter);
 }
-.settings-corner .settings-icon { display: block; }
+.settings-corner .settings-icon { display: block; width: var(--icon); height: var(--icon); }
 /* The copyright sits just above the settings button: one small bar up the left edge */
 @media (min-width: 701px) {
-  .site-footer { bottom: calc(var(--gutter) + max(15px, calc(18 * var(--s))) + max(12px, calc(16 * var(--s)))); }
+  /* on the page margin like the titles and the menu; bold so it reads a little brighter */
+  .site-footer { left: var(--gutter); font-weight: 600; bottom: calc(var(--gutter) + var(--legal-w, 18px) + max(12px, calc(16 * var(--s)))); }
 }
 .settings { left: calc(var(--gutter) + max(30px, calc(36 * var(--s)))); right: auto; }
 
@@ -666,7 +667,7 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   --bg: #171716;
   --ink: #EDE8DE;
   --ink-dim: rgba(237, 232, 222, .68);
-  --legal-ink: rgba(237, 232, 222, .42);
+  --legal-ink: rgba(237, 232, 222, .58);
   --scroll-thumb: #4a4a46;
   --fade: rgba(23,23,22,.5);
   --fade-0: rgba(23,23,22,0);
