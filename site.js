@@ -231,6 +231,21 @@
     load(1); load(-1);
     var start = parseInt(location.hash.slice(1), 10);
     if (start > 1 && start <= slides.length) { load(start - 1); go(start - 1); }
+    // Desktop: the cursor over the image shows the way (left half back, right
+    // half on) and a click there turns the image.
+    var frame = show.querySelector('.frame');
+    if (frame && slides.length > 1) {
+      frame.addEventListener('mousemove', function (e) {
+        if (frame.classList.contains('zooming')) { delete frame.dataset.dir; return; }
+        var r = frame.getBoundingClientRect();
+        frame.dataset.dir = e.clientX - r.left < r.width / 2 ? 'prev' : 'next';
+      });
+      frame.addEventListener('mouseleave', function () { delete frame.dataset.dir; });
+      frame.addEventListener('click', function (e) {
+        if (!frame.dataset.dir || e.target.closest('.slide-btn')) return;
+        go(i + (frame.dataset.dir === 'next' ? 1 : -1));
+      });
+    }
     show.querySelector('.prev').addEventListener('click', function () { go(i - 1); });
     show.querySelector('.next').addEventListener('click', function () { go(i + 1); });
     slideStep = function (d) { go(i + d); };
@@ -572,6 +587,7 @@
     initSettings();
     initSlideshow();
     initFilmstrip();
+    initWallGlide();
     if (document.fonts) document.fonts.ready.then(function () { place(); layoutWall(); });
   }
 
@@ -634,12 +650,70 @@
       };
       stopGlide(); glide = requestAnimationFrame(step);
     }
+    // Desktop: near either end of the strip the cursor becomes an arrow, and a
+    // click there slides the strip one project that way instead of opening one.
+    var stepW = function () { var c = g.querySelector('.card'); return c ? c.offsetWidth + parseFloat(getComputedStyle(g).columnGap || 0) : 300; };
+    g.addEventListener('mousemove', function (e) {
+      var r = g.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, max = g.scrollWidth - g.clientWidth;
+      var d = x < 0.25 && g.scrollLeft > 1 ? 'prev' : x > 0.75 && g.scrollLeft < max - 1 ? 'next' : '';
+      if (d) g.dataset.dir = d; else delete g.dataset.dir;
+    });
+    g.addEventListener('mouseleave', function () { delete g.dataset.dir; });
+    g.addEventListener('click', function (e) {
+      if (!g.dataset.dir || dragMoved || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      e.preventDefault(); e.stopPropagation();
+      stopGlide();
+      g.scrollBy({ left: g.dataset.dir === 'next' ? stepW() : -stepW(), behavior: 'smooth' });
+    }, true);
     g.addEventListener('pointerdown', function (e) {
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
       drag = { g: g, x: e.clientX, left: g.scrollLeft }; dragMoved = false;
     });
     g.addEventListener('click', function (e) { if (dragMoved) { e.preventDefault(); e.stopPropagation(); dragMoved = false; } }, true);
     g.addEventListener('dragstart', function (e) { e.preventDefault(); });
+  }
+
+  /* Gallery: arrives with a slow glide up into place, like the Work strip, and
+     the wheel moves it smoothly (a little drift after each turn of the wheel). */
+  var wallTarget = null, wallRaf = null;
+  function wallScroller() {
+    if (!document.querySelector('.prints') || innerWidth <= 700) return null;
+    var sc = document.querySelector('.scroller');
+    return sc && sc.scrollHeight > sc.clientHeight ? sc : null;
+  }
+  function wallRun(sc) {
+    if (wallRaf) return;
+    var tick = function () {
+      var d = wallTarget - sc.scrollTop;
+      if (Math.abs(d) < 0.5) { sc.scrollTop = wallTarget; wallRaf = null; return; }
+      sc.scrollTop += d * 0.12;
+      wallRaf = requestAnimationFrame(tick);
+    };
+    wallRaf = requestAnimationFrame(tick);
+  }
+  document.addEventListener('wheel', function (e) {
+    var sc = wallScroller();
+    if (!sc || e.ctrlKey || (e.target.closest && e.target.closest('.settings'))) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    e.preventDefault();
+    if (wallTarget === null || !wallRaf) wallTarget = sc.scrollTop;
+    var max = sc.scrollHeight - sc.clientHeight;
+    wallTarget = Math.max(0, Math.min(max, wallTarget + e.deltaY * (e.deltaMode === 1 ? 40 : 1)));
+    wallRun(sc);
+  }, { passive: false });
+  function initWallGlide() {
+    var sc = wallScroller();
+    if (!sc || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var from = Math.min(sc.scrollHeight - sc.clientHeight, innerHeight * 0.16), t0 = null, dur = 2600;
+    if (from < 20) return;
+    sc.scrollTop = from;
+    var step = function (t) {
+      if (t0 === null) t0 = t;
+      var k = Math.min(1, (t - t0) / dur), ease = 0.5 - 0.5 * Math.cos(Math.PI * k);
+      sc.scrollTop = from * (1 - ease);
+      glide = k < 1 ? requestAnimationFrame(step) : null;
+    };
+    stopGlide(); glide = requestAnimationFrame(step);
   }
 
   /* ---------- In-place page changes ---------- */

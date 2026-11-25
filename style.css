@@ -768,3 +768,13 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   .work-page .card { width: 72vw; }
 }
 
+/* Desktop: over an image that leads somewhere, the cursor becomes a gently
+   curved arrow pointing the way you'll go (Juan, 2026-11-25) */
+:root { --cur-next: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='24' viewBox='0 0 36 24'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg stroke='rgba(0,0,0,.45)' stroke-width='3.6'%3E%3Cpath d='M5 15.5Q18 4.5 31 13'/%3E%3Cpath d='M24.6 8.6 31 13 24.2 16.4'/%3E%3C/g%3E%3Cg stroke='%23fff' stroke-width='1.5'%3E%3Cpath d='M5 15.5Q18 4.5 31 13'/%3E%3Cpath d='M24.6 8.6 31 13 24.2 16.4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 18 12, e-resize; --cur-prev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='24' viewBox='0 0 36 24'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round' transform='translate(36 0) scale(-1 1)'%3E%3Cg stroke='rgba(0,0,0,.45)' stroke-width='3.6'%3E%3Cpath d='M5 15.5Q18 4.5 31 13'/%3E%3Cpath d='M24.6 8.6 31 13 24.2 16.4'/%3E%3C/g%3E%3Cg stroke='%23fff' stroke-width='1.5'%3E%3Cpath d='M5 15.5Q18 4.5 31 13'/%3E%3Cpath d='M24.6 8.6 31 13 24.2 16.4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 18 12, w-resize; }
+@media (hover: hover) and (pointer: fine) and (min-width: 761px) {
+  .frame[data-dir="next"] { cursor: var(--cur-next); }
+  .frame[data-dir="prev"] { cursor: var(--cur-prev); }
+  .project-main .slide-btn { display: none; }   /* the cursor shows the way instead */
+  .work-page .grid[data-dir="next"], .work-page .grid[data-dir="next"] a { cursor: var(--cur-next); }
+  .work-page .grid[data-dir="prev"], .work-page .grid[data-dir="prev"] a { cursor: var(--cur-prev); }
+}
