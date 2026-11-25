@@ -552,8 +552,21 @@ body {
 /* The copyright sits just above the settings button: one small bar up the left edge */
 @media (min-width: 701px) {
   /* on the page margin like the titles and the menu; bold so it reads a little brighter */
-  .site-footer { left: var(--edge); font-weight: 600; bottom: calc(var(--gutter) + var(--legal-w, 18px) + max(12px, calc(16 * var(--s)))); }
+  .site-footer {
+    --legal-gap: max(12px, calc(16 * var(--s)));
+    left: var(--edge); font-weight: 600; bottom: calc(var(--gutter) + var(--legal-w, 18px) + var(--legal-gap));
+    /* Turning point: the centre of the settings icon below. The text reads
+       upward (half a turn); on project and print pages it turns a further
+       quarter, clockwise around the icon, and lies to its right. The same
+       translate in both states makes the move a true turn around that point. */
+    transform-origin: 50% calc(100% + var(--legal-gap) + var(--legal-w, 18px) / 2);
+    transform: rotate(180deg) translate(0, calc(var(--legal-h, 90px) + 2 * var(--legal-gap) + var(--legal-w, 18px)));
+    transition: transform 1.2s cubic-bezier(.45, 0, .2, 1);
+  }
+  .site-footer.is-turned { transform: rotate(270deg) translate(0, calc(var(--legal-h, 90px) + 2 * var(--legal-gap) + var(--legal-w, 18px))); }
+  .site-footer.no-anim { transition: none; }
 }
+@media (prefers-reduced-motion: reduce) { .site-footer { transition: none !important; } }
 .settings { left: calc(var(--gutter) + max(30px, calc(36 * var(--s)))); right: auto; }
 
 /* Gallery: back-to-top button, a quarter bigger than the settings icon,
@@ -596,7 +609,7 @@ body {
 .nav-dot { display: none; }
 
 /* Print series "room": the menu and name step away; one print at a time */
-.room .site-header, .room .nav, .room .site-footer { display: none; }
+.room .site-header, .room .nav { display: none; }
 .room-page { min-height: 100vh; display: flex; flex-direction: column; padding: var(--gutter) calc(var(--gutter) * 1.5); }
 .room-top { display: flex; justify-content: space-between; align-items: center; }
 .room-where { font-family: var(--label-font, var(--font)); font-weight: var(--label-w, 400); font-size: calc(var(--nav-size) * var(--label-scale, 1)); letter-spacing: var(--label-track, .2em); text-transform: var(--label-case, uppercase); color: var(--ink-dim); }
