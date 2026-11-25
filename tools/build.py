@@ -112,7 +112,7 @@ TEXT_POSITION = "top"
 
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
-NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Prints", "/prints/"),
+NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Gallery", "/prints/"),
        ("about", "About", "/about/")]
 
 
@@ -211,7 +211,7 @@ def _page(title, section, body, body_class="", head_extra=""):
       <button type="button" data-pref="grad" data-val="off">Off</button>
     </div>
     <div class="settings-row">
-      <span class="settings-label">Prints layout</span>
+      <span class="settings-label">Gallery layout</span>
       <button type="button" data-pref="hang" data-val="rows">Rows</button>
       <button type="button" data-pref="hang" data-val="salon">Salon</button>
     </div>
@@ -221,7 +221,7 @@ def _page(title, section, body, body_class="", head_extra=""):
       <button type="button" data-pref="ptitle" data-val="below">Below</button>
     </div>
     <div class="settings-row settings-swatches">
-      <span class="settings-label">Prints wall</span>
+      <span class="settings-label">Gallery wall</span>
       <button type="button" data-pref="wall" data-val="page">Page colour</button>
       <button type="button" data-pref="wall" data-val="random">Random</button>
       <button type="button" class="swatch" data-pref="wall" data-val="beige" title="Beige" aria-label="Beige" style="--sw:#FAF9F5"></button>
@@ -416,8 +416,8 @@ def main():
             f'data-r="{dims[k][0] / dims[k][1]:.4f}" alt="{name}, print {k + 1} of {len(files)}" decoding="async" draggable="false">' for k, f in enumerate(files))
         room = f"""  <main class="room-page">
     <div class="room-top">
-      <span class="room-where"><a href="/prints/">Prints</a> / {name}</span>
-      <a class="room-close" href="/prints/" aria-label="Close and go back to Prints">&times;</a>
+      <span class="room-where"><a href="/prints/">Gallery</a> / {name}</span>
+      <a class="room-close" href="/prints/" aria-label="Close and go back to the Gallery">&times;</a>
     </div>
     <div class="room-layout" style="--ratio:{pw / ph:.4f}">
       <div class="slideshow room-show" data-count="{len(files)}">
@@ -439,10 +439,12 @@ def main():
     </div>
   </main>
 """
-        write(f"prints/{slug}/index.html", page(f"{name} \u00b7 Prints", "prints", room, "inner room"))
-    write("prints/index.html", page("Prints", "prints",
-        '  <main class="page page-wide prints-page">\n    <h1>Prints</h1>\n'
-        '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n', "inner"))
+        write(f"prints/{slug}/index.html", page(f"{name} \u00b7 Gallery", "prints", room, "inner room"))
+    write("prints/index.html", page("Gallery", "prints",
+        '  <main class="page page-wide prints-page">\n    <h1>Gallery</h1>\n'
+        '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n'
+        '  <button class="to-top" type="button" aria-label="Back to top" title="Back to top">'
+        '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15V5M5.5 9.5 10 5l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></button>\n', "inner"))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
     about_block = f"      <h1>About</h1>\n{about}\n"

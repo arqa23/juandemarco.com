@@ -434,39 +434,40 @@
       }
       return best;
     }
-    // Rows (after 6a's project collage): prints in a few widths on a
-    // five-column grid, hung in rows of three to five columns with every
-    // bottom on one line; rows shift left and right so the edges stay loose.
-    // Each row sits one gap below the tallest print of the row above.
+    // Rows (after 6a's project collage): every print in a row has the same
+    // height, so neighbours always meet one gap apart and nothing is left
+    // empty inside the hang. Rows take a few set heights and widths, and each
+    // row lines up with the wall edge, the centre, or an edge of the row above.
     function rows() {
-      var cols = narrow ? 2 : 5, u = (W - (cols - 1) * g) / cols;
-      var span = function (k) { return k * u + (k - 1) * g; };
       var order = items.slice();
       for (var i = order.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)), tmp = order[i]; order[i] = order[j]; order[j] = tmp; }
-      // portraits one column, landscapes mostly two, so the heights in a row stay close
-      order.forEach(function (it) {
-        var opts = narrow ? [1, 1, 2] : it.r < 0.9 ? [1] : it.r < 1.2 ? [1, 2] : it.r < 1.55 ? [2, 2, 2, 3] : [2, 2, 3];
-        it.k = Math.min(cols, opts[Math.floor(rand() * opts.length)]);
-      });
-      var out = [], y = 0, left = order.slice(), prevOff = -1;
-      while (left.length) {
-        // each row fills three to five columns, so the left and right edges stay loose
-        var target = narrow ? cols : 3 + Math.floor(rand() * 3), row = [], used = 0;
-        for (var q = 0; q < left.length && used < target; q++) {
-          var k = left[q].k;
-          if (used + k <= target) { row.push(left[q]); used += k; left.splice(q, 1); q--; }
+      var H0 = narrow ? W * 0.45 : W * 0.2, HS = narrow ? [1] : [0.85, 1, 1, 1.2];
+      var out = [], y = 0, prev = null, q = 0;
+      while (q < order.length) {
+        var H = H0 * HS[Math.floor(rand() * HS.length)];
+        var target = narrow ? W : W * (0.6 + rand() * 0.4), row = [], sum = 0;
+        while (q < order.length) {
+          var w = H * order[q].r, next = sum + (row.length ? g : 0) + w;
+          if (row.length && next > target + w * 0.4) break;   // closer to the target without this one
+          row.push(order[q]); sum = next; q++;
+          if (sum >= target) break;
         }
-        var spare = cols - used, off = Math.floor(rand() * (spare + 1));
-        if (spare && off === prevOff) off = (off + 1) % (spare + 1);
-        prevOff = off;
-        var x = off * (u + g), hMax = 0;
-        row.forEach(function (it) { it.rw = span(it.k); hMax = Math.max(hMax, it.rw / it.r); });
+        // stretch or shrink the row a little (same height for all) to land on the target width
+        var gaps = (row.length - 1) * g, k = Math.max(0.85, Math.min(1.15, (Math.min(target, W) - gaps) / (sum - gaps)));
+        if ((sum - gaps) * k + gaps > W) k = (W - gaps) / (sum - gaps);
+        H *= k;
+        var rw = (sum - gaps) * k + gaps;
+        var opts = [0, W - rw, (W - rw) / 2];
+        if (prev) opts.push(prev.x, prev.x + prev.w - rw);
+        opts = opts.filter(function (x) { return x >= -0.5 && x <= W - rw + 0.5 && (!prev || Math.abs(x - prev.x) > 1 || Math.abs(rw - prev.w) > 1); });
+        var x = opts.length ? opts[Math.floor(rand() * opts.length)] : (W - rw) / 2, x0 = x;
         row.forEach(function (it) {
-          var ih = it.rw / it.r;
-          out.push({ x: x, y: y + hMax - ih, w: it.rw, ih: ih, it: it });
-          x += it.rw + g;
+          var iw = H * it.r;
+          out.push({ x: x, y: y, w: iw, ih: H, it: it });
+          x += iw + g;
         });
-        y += hMax + gv;
+        prev = { x: x0, w: rw };
+        y += H + gv;
       }
       return { placed: out, top: 0, h: y - gv };
     }
@@ -496,7 +497,17 @@
   }
 
 
+  function initToTop() {
+    var btn = document.querySelector('.to-top');
+    if (!btn) return;
+    var sc = document.querySelector('.scroller'), src = sc || window;
+    var top = function () { return sc ? sc.scrollTop : (document.scrollingElement || document.documentElement).scrollTop; };
+    src.addEventListener('scroll', function () { btn.classList.toggle('is-on', top() > innerHeight * 0.5); }, { passive: true });
+    btn.addEventListener('click', function () { (sc || window).scrollTo({ top: 0, behavior: 'smooth' }); });
+  }
+
   function init() {
+    initToTop();
     layoutWall();
     applyPhotos(); applyWall();
     place();
