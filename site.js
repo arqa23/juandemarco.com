@@ -19,12 +19,14 @@
       ps.forEach(function (p) { if (wide && (cut || p.getBoundingClientRect().bottom > fb + 1)) { p.classList.add('past-image'); cut = true; } });
     }
     // settings button and back-to-top line up on the copyright's centre line
+    // (measured from the layout box, so it holds while the copyright is turned)
     var foot = document.querySelector('.site-footer');
     if (foot) {
-      var f = foot.getBoundingClientRect();
-      root.style.setProperty('--legal-mid', (f.left + f.width / 2) + 'px');
-      root.style.setProperty('--legal-w', f.width + 'px');
-      root.style.setProperty('--legal-top', (innerHeight - f.top) + 'px');
+      var cs = getComputedStyle(foot), fw = foot.offsetWidth, fh = foot.offsetHeight;
+      root.style.setProperty('--legal-mid', (parseFloat(cs.left) + fw / 2) + 'px');
+      root.style.setProperty('--legal-w', fw + 'px');
+      root.style.setProperty('--legal-h', fh + 'px');
+      root.style.setProperty('--legal-top', (parseFloat(cs.bottom) + fh) + 'px');
     }
   }
 
@@ -545,8 +547,25 @@
     btn.addEventListener('click', function () { (sc || window).scrollTo({ top: 0, behavior: 'smooth' }); });
   }
 
+  // Copyright: upright on most pages; on a project or print page it turns a
+  // quarter clockwise around the settings icon as the page arrives, and turns
+  // back on the way out. It starts from where it was on the last page.
+  var legalTurned = false;
+  function turnLegal() {
+    var foot = document.querySelector('.site-footer');
+    if (!foot) return;
+    var want = !!document.querySelector('.page.project, .room-page');
+    foot.classList.add('no-anim');
+    foot.classList.toggle('is-turned', legalTurned);
+    void foot.offsetWidth;   // settle the starting position before turning
+    foot.classList.remove('no-anim');
+    requestAnimationFrame(function () { requestAnimationFrame(function () { foot.classList.toggle('is-turned', want); }); });
+    legalTurned = want;
+  }
+
   function init() {
     initToTop();
+    turnLegal();
     layoutWall();
     applyPhotos(); applyWall();
     place();
