@@ -21,6 +21,14 @@
     // settings button and back-to-top line up on the copyright's centre line
     // (measured from the layout box, so it holds while the copyright is turned)
     var foot = document.querySelector('.site-footer');
+    if (!foot) {   // copyright now lives on the About page: the icon sits on the page margin
+      var logo = document.querySelector('.site-header .logo'), icon = Math.max(15, 18 * innerWidth / 1920);
+      var gut = parseFloat(getComputedStyle(document.querySelector('.settings-corner') || root).bottom) || 40;
+      var lx = logo ? logo.getBoundingClientRect().left : 50;
+      root.style.setProperty('--legal-mid', (lx + icon / 2) + 'px');
+      root.style.setProperty('--legal-w', icon + 'px');
+      root.style.setProperty('--legal-top', (gut + icon) + 'px');
+    }
     if (foot) {
       var cs = getComputedStyle(foot), fw = foot.offsetWidth, fh = foot.offsetHeight;
       root.style.setProperty('--legal-mid', (parseFloat(cs.left) + fw / 2) + 'px');
@@ -79,6 +87,8 @@
     panel.querySelector('#ts-size-out').textContent = o.size + '%';
   }
   function closeSettings() {
+    var pick = document.getElementById('mode-pick');
+    if (pick) pick.hidden = true;
     var panel = document.getElementById('settings'), btn = document.querySelector('.settings-btn');
     if (!panel || panel.hidden) return;
     panel.hidden = true;
@@ -99,8 +109,28 @@
   function initSettings() {
     var btn = document.querySelector('.settings-btn'), panel = document.getElementById('settings');
     if (!btn || !panel) return;
+    var pick = document.getElementById('mode-pick');
+    var markPick = function () { if (pick) pick.querySelectorAll('[data-pick]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.mode || PREF_DEFAULTS.mode) === b.dataset.pick); }); };
+    if (pick) {
+      pick.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var b = e.target.closest('[data-pick]'), src = b && panel.querySelector('[data-pref="mode"][data-val="' + b.dataset.pick + '"]');
+        if (src) src.click();
+        markPick();
+      });
+    }
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
+      // The full test panel is tabled for now (Juan, 2026-11-25): visitors get
+      // a simple Light / Dark choice. Shift- or Alt-click still opens the panel.
+      if (pick && !e.shiftKey && !e.altKey) {
+        closeSettings();
+        pick.hidden = !pick.hidden;
+        btn.setAttribute('aria-expanded', String(!pick.hidden));
+        markPick();
+        return;
+      }
+      if (pick) pick.hidden = true;
       panel.hidden = !panel.hidden;
       btn.setAttribute('aria-expanded', String(!panel.hidden));
       btn.classList.toggle('is-open', !panel.hidden);
@@ -779,6 +809,7 @@
     e.preventDefault();
     if (sc !== wallSc) { wallStop(); wallSc = sc; }
     if (wallTarget === null || !wallRaf) wallTarget = sc.scrollTop;
+    wallSet = sc.scrollTop;   // a scroll event still queued from before this wheel must not cancel it
     var max = sc.scrollHeight - sc.clientHeight;
     wallTarget = Math.max(0, Math.min(max, wallTarget + e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? sc.clientHeight : 1)));
     wallRun(sc);

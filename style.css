@@ -807,3 +807,24 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   .press { position: static; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .press .card { position: static; width: auto; opacity: 1; transform: none !important; }
 }
+
+/* View mode picker (Juan, 2026-11-25): two words beside the settings icon,
+   no box. The full test panel is tabled (Shift-click the icon to reach it). */
+.mode-pick {
+  position: fixed; z-index: 5; display: flex; gap: 1.4em;
+  left: calc(var(--legal-mid, 20px) + var(--legal-w, 18px) / 2 + max(12px, calc(16 * var(--s))));
+  bottom: var(--gutter); height: var(--legal-w, 18px); align-items: center;
+  animation: pick-in .35s ease both;
+}
+.mode-pick[hidden] { display: none; }
+.mode-pick button {
+  padding: 0; border: 0; background: none; cursor: pointer; color: var(--ink);
+  font: inherit; font-family: var(--label-font, var(--font)); font-weight: var(--label-w, 400);
+  font-size: calc(var(--nav-size) * var(--label-scale, 1)); letter-spacing: var(--label-track, .2em); text-transform: uppercase;
+  opacity: .45; transition: opacity .2s ease;
+}
+.mode-pick button:hover, .mode-pick button.is-on { opacity: 1; }
+.home .mode-pick button { color: #fff; }
+@keyframes pick-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+@media (max-width: 700px) { .mode-pick { left: auto; right: calc(var(--gutter) + var(--legal-w, 18px) + 14px); bottom: 18px; } }
+.page p.about-legal { margin-top: 2.4em; }

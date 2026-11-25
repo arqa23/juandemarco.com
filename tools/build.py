@@ -112,7 +112,7 @@ TEXT_POSITION = "top"
 
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
-NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("projects", "Projects", "/projects/"), ("prints", "Gallery", "/prints/"),
+NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Gallery", "/prints/"),
        ("about", "About", "/about/")]
 
 
@@ -183,7 +183,11 @@ def _page(title, section, body, body_class="", head_extra=""):
   <nav class="nav" aria-label="Main">
 {nav}
   </nav>
-  <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
+  <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="View mode" title="View mode"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
+  <div class="mode-pick" id="mode-pick" role="group" aria-label="View mode" hidden>
+    <button type="button" data-pick="light">Light</button>
+    <button type="button" data-pick="dark">Dark</button>
+  </div>
 
   <div class="settings" id="settings" hidden>
     <p class="settings-note">Test panel. Choices are kept in this browser only.</p>
@@ -264,10 +268,6 @@ def _page(title, section, body, body_class="", head_extra=""):
     <textarea id="ts-out" class="settings-out" rows="4" readonly hidden aria-label="Settings to copy"></textarea>
   </div>
 
-  <footer class="site-footer">
-    <span>&copy; {YEAR} Juan De Marco</span>
-    <span>All Rights Reserved</span>
-  </footer>
 </body>
 </html>
 """
@@ -344,12 +344,6 @@ def main():
         f'      </a>' for p in PROJECTS)
     write("work/index.html", page("Work", "work",
         f'  <main class="page page-wide work-page">\n    <h1 class="work-h">Work</h1>\n    <div class="grid">\n{cards}\n    </div>\n  </main>\n',
-        "inner"))
-
-    # Test page (Juan, 2026-11-25): small square tiles that slide in along a
-    # grid of horizontal lines, like type being set in a press.
-    write("projects/index.html", page("Projects", "projects",
-        f'  <main class="page page-wide press-page">\n    <h1 class="work-h">Projects</h1>\n    <div class="press-lines" aria-hidden="true"></div>\n    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n      <filter id="sil-white" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 -.2126 -.7152 -.0722 0 1"/><feComponentTransfer><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer></filter>\n      <filter id="sil-black" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -.2126 -.7152 -.0722 0 1"/><feComponentTransfer><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer></filter>\n    </defs></svg>\n    <div class="press">\n{cards}\n    </div>\n  </main>\n',
         "inner"))
 
     for i, p in enumerate(PROJECTS):
@@ -480,7 +474,9 @@ def main():
       </script>
 """
     # About and Contact are one page now: About text, then the contact text below.
-    write("about/index.html", page("About", "about", stacked(about_block + contact), "inner photo"))
+    legal = (f'      <p class="about-legal">&copy; {YEAR} Juan De Marco. All rights reserved. All artwork, images and text '
+             'on this site are the work of Juan De Marco and may not be reproduced without permission.</p>\n')
+    write("about/index.html", page("About", "about", stacked(about_block + contact + legal), "inner photo"))
     # Old /contact/ links land on About.
     write("contact/index.html", '<!doctype html>\n<meta charset="utf-8">\n<title>About</title>\n'
           '<meta http-equiv="refresh" content="0; url=/about/">\n<link rel="canonical" href="/about/">\n'
