@@ -48,7 +48,7 @@
     d.theme = 'light';
     d.mode = 'dark';   // the site's default mode (Juan, 2026-11-25)
     if (off) return;
-    ['colour', 'mat', 'photos', 'wall', 'mode', 'grad', 'hang', 'ptitle', 'tiles'].forEach(function (k) {
+    ['colour', 'mat', 'photos', 'wall', 'mode', 'grad', 'ptitle', 'tiles'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
       if (v) d[k] = v;
     });
