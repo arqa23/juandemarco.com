@@ -182,8 +182,8 @@ def _page(title, section, body, body_class="", head_extra=""):
 
   <nav class="nav" aria-label="Main">
 {nav}
-      <button class="settings-btn" type="button" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings"><svg class="settings-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.1" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   </nav>
+  <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="Settings" title="Settings"><svg class="settings-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" stroke-width="1.1" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
 
   <div class="settings" id="settings" hidden>
     <p class="settings-note">Test panel. Choices are kept in this browser only.</p>
@@ -444,7 +444,7 @@ def main():
         '  <main class="page page-wide prints-page">\n    <h1>Gallery</h1>\n'
         '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n'
         '  <button class="to-top" type="button" aria-label="Back to top" title="Back to top">'
-        '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15V5M5.5 9.5 10 5l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></button>\n', "inner"))
+        '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5 9.5 10 4.5l5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>\n', "inner"))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
     about_block = f"      <h1>About</h1>\n{about}\n"

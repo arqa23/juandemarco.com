@@ -434,40 +434,50 @@
       }
       return best;
     }
-    // Rows (after 6a's project collage): every print in a row has the same
-    // height, so neighbours always meet one gap apart and nothing is left
-    // empty inside the hang. Rows take a few set heights and widths, and each
-    // row lines up with the wall edge, the centre, or an edge of the row above.
+    // Rows, after 6a architects' home page: prints flow like words in centred
+    // text. Each takes one of five set widths whatever its shape, so heights
+    // vary freely; a row's prints share one bottom line, and the tallest print
+    // sits one gap below the row above. A row whose edges would land just off
+    // an edge of the row above shifts a little to meet it exactly.
     function rows() {
       var order = items.slice();
       for (var i = order.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)), tmp = order[i]; order[i] = order[j]; order[j] = tmp; }
-      var H0 = narrow ? W * 0.45 : W * 0.2, HS = narrow ? [1] : [0.85, 1, 1, 1.2];
-      var out = [], y = 0, prev = null, q = 0;
+      // 6a's widths, as parts of the wall: 262, 472, 678, 800, 1000 of 1513
+      var WS = narrow ? [0.48, 0.48, 1] : [0.173, 0.312, 0.448, 0.529, 0.661];
+      var pick = function (r) {
+        if (narrow) return WS[Math.floor(rand() * 3)];
+        var p = rand(), t = r < 0.9 ? [0.35, 0.97, 1, 1] : r < 1.2 ? [0.25, 0.85, 0.98, 1] : [0.12, 0.62, 0.9, 0.98];
+        for (var k = 0; k < 4; k++) if (p < t[k]) return WS[k];
+        return WS[4];
+      };
+      order.forEach(function (it) { it.rw = W * pick(it.r); });
+      var out = [], y = 0, q = 0, prevEdges = [];
       while (q < order.length) {
-        var H = H0 * HS[Math.floor(rand() * HS.length)];
-        var target = narrow ? W : W * (0.6 + rand() * 0.4), row = [], sum = 0;
+        var row = [], sum = 0;
         while (q < order.length) {
-          var w = H * order[q].r, next = sum + (row.length ? g : 0) + w;
-          if (row.length && next > target + w * 0.4) break;   // closer to the target without this one
+          var next = sum + (row.length ? g : 0) + order[q].rw;
+          if (row.length && next > W) break;
           row.push(order[q]); sum = next; q++;
-          if (sum >= target) break;
         }
-        // stretch or shrink the row a little (same height for all) to land on the target width
-        var gaps = (row.length - 1) * g, k = Math.max(0.85, Math.min(1.15, (Math.min(target, W) - gaps) / (sum - gaps)));
-        if ((sum - gaps) * k + gaps > W) k = (W - gaps) / (sum - gaps);
-        H *= k;
-        var rw = (sum - gaps) * k + gaps;
-        var opts = [0, W - rw, (W - rw) / 2];
-        if (prev) opts.push(prev.x, prev.x + prev.w - rw);
-        opts = opts.filter(function (x) { return x >= -0.5 && x <= W - rw + 0.5 && (!prev || Math.abs(x - prev.x) > 1 || Math.abs(rw - prev.w) > 1); });
-        var x = opts.length ? opts[Math.floor(rand() * opts.length)] : (W - rw) / 2, x0 = x;
-        row.forEach(function (it) {
-          var iw = H * it.r;
-          out.push({ x: x, y: y, w: iw, ih: H, it: it });
-          x += iw + g;
+        var x0 = (W - sum) / 2, edges = [], hMax = 0, x = 0;
+        row.forEach(function (it) { edges.push(x, x + it.rw); x += it.rw + g; hMax = Math.max(hMax, it.rw / it.r); });
+        // shift to meet an edge of the row above when one is close
+        var snap = g * 3, best = 0, bestD = Infinity;
+        edges.forEach(function (e) {
+          prevEdges.forEach(function (pe) {
+            var d = pe - (x0 + e);
+            if (Math.abs(d) > 0.5 && Math.abs(d) < snap && Math.abs(d) < bestD && x0 + d >= 0 && x0 + d + sum <= W) { best = d; bestD = Math.abs(d); }
+          });
         });
-        prev = { x: x0, w: rw };
-        y += H + gv;
+        x0 += best;
+        prevEdges = edges.map(function (e) { return x0 + e; });
+        x = x0;
+        row.forEach(function (it) {
+          var ih = it.rw / it.r;
+          out.push({ x: x, y: y + hMax - ih, w: it.rw, ih: ih, it: it });
+          x += it.rw + g;
+        });
+        y += hMax + gv;
       }
       return { placed: out, top: 0, h: y - gv };
     }
@@ -480,7 +490,7 @@
     wall.classList.add('is-hung');   // shown only once every print has its place
     // The stop sits two menu lines above the bottom line, where "Contact" was
     // when the menu had six lines. The top of the hang mirrors that distance.
-    var page = wall.closest('.page'), labels = document.querySelectorAll('.nav .nav-label, .nav .settings-btn');
+    var page = wall.closest('.page'), labels = document.querySelectorAll('.nav .nav-label');
     var gapBelow = 60;
     if (labels.length > 1 && !narrow) {
       var last = labels[labels.length - 1].getBoundingClientRect(), pitch = last.top - labels[labels.length - 2].getBoundingClientRect().top;

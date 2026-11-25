@@ -526,16 +526,23 @@ body {
 /* With titles on hover the prints hang closer: a quarter of the wall gap */
 :root:not([data-ptitle="below"]) .prints { --wall-gap: max(9px, calc(16.5 * var(--s))); }
 
-/* Gallery: back-to-top button, bottom left, once the page has scrolled */
+/* Settings button: on its own in the lower left corner (Juan, 2026-11-25) */
+.settings-corner { position: fixed; left: var(--gutter); bottom: var(--gutter); z-index: 4; color: var(--ink); }
+.settings { left: calc(var(--gutter) + max(30px, calc(36 * var(--s)))); right: auto; }
+
+/* Gallery: back-to-top button, a quarter bigger than the settings icon,
+   above it in the lower left, once the page has scrolled */
 .to-top {
-  position: fixed; left: var(--gutter); bottom: var(--gutter); z-index: 4;
-  width: 44px; height: 44px; padding: 0; border-radius: 50%;
+  --icon: max(15px, calc(18 * var(--s)));
+  position: fixed; z-index: 4;
+  width: calc(var(--icon) * 1.25); height: calc(var(--icon) * 1.25); padding: 0; border-radius: 50%;
+  left: calc(var(--gutter) - var(--icon) * .125); bottom: calc(var(--gutter) + var(--icon) * 1.9);
   border: 1px solid currentColor; background: transparent; color: var(--ink); cursor: pointer;
   display: grid; place-items: center;
   opacity: 0; pointer-events: none; transition: opacity .3s ease;
 }
-.to-top svg { width: 18px; height: 18px; }
-.to-top.is-on { opacity: .7; pointer-events: auto; }
+.to-top svg { width: 78%; height: 78%; }
+.to-top.is-on { opacity: .78; pointer-events: auto; }
 .to-top.is-on:hover { opacity: 1; }
 @media print { .to-top { display: none; } }
 
