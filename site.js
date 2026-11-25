@@ -10,6 +10,14 @@
     if (!labels.length) return;
     var bottom = labels[labels.length - 1].getBoundingClientRect().bottom;
     root.style.setProperty('--nav-bottom', bottom + 'px');
+    // project text never runs below the image: paragraphs that would are hidden
+    var frame = document.querySelector('.project-main .frame'), ps = document.querySelectorAll('.project-text p');
+    if (frame && ps.length) {
+      var fb = frame.getBoundingClientRect().bottom, wide = innerWidth > 700;
+      ps.forEach(function (p) { p.classList.remove('past-image'); });
+      var cut = false;
+      ps.forEach(function (p) { if (wide && (cut || p.getBoundingClientRect().bottom > fb + 1)) { p.classList.add('past-image'); cut = true; } });
+    }
     // settings button and back-to-top line up on the copyright's centre line
     var foot = document.querySelector('.site-footer');
     if (foot) {

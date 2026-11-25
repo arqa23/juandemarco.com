@@ -267,9 +267,11 @@ body {
 .project-layout {
   --side-w: max(200px, calc(300 * var(--s)));
   --gap: max(28px, calc(48 * var(--s)));
-  --frame-w: min(
+  --frame-w: calc(min(
     calc(100vw - var(--gutter) - var(--edge) - max(160px, calc(240 * var(--s))) - var(--side-w) - var(--gap)),
-    calc((100vh - var(--header-h) - var(--edge) * .35 - var(--gutter) * 2.2 - var(--title-size) * 1.8) * 16 / 9));
+    calc((100vh - var(--header-h) - var(--edge) * .35 - var(--gutter) * 2.2 - var(--title-size) * 1.8) * 16 / 9)) * .82);
+  /* .82: images scaled down from their top left corner (Juan, 2026-11-25) so the
+     counter under them clears the copyright and settings in the lower left */
   display: flex;
   gap: var(--gap);
   align-items: flex-start;
@@ -328,6 +330,10 @@ body {
   color: var(--ink-dim);
 }
 .project-text { width: var(--side-w); padding-top: calc(var(--title-size) * 1.2 + 1.2em); }
+/* Rule: project text never runs below the bottom edge of the image */
+@media (min-width: 701px) {
+  .project-text p.past-image { display: none; }   /* site.js hides any paragraph that would end below the image */
+}
 .project-text p { font-size: var(--text-size); }
 .meta { font-size: var(--nav-size) !important; letter-spacing: calc(.2em * var(--track)); text-transform: var(--case); }
 .pager {
@@ -546,7 +552,7 @@ body {
 /* The copyright sits just above the settings button: one small bar up the left edge */
 @media (min-width: 701px) {
   /* on the page margin like the titles and the menu; bold so it reads a little brighter */
-  .site-footer { left: var(--gutter); font-weight: 600; bottom: calc(var(--gutter) + var(--legal-w, 18px) + max(12px, calc(16 * var(--s)))); }
+  .site-footer { left: var(--edge); font-weight: 600; bottom: calc(var(--gutter) + var(--legal-w, 18px) + max(12px, calc(16 * var(--s)))); }
 }
 .settings { left: calc(var(--gutter) + max(30px, calc(36 * var(--s)))); right: auto; }
 
