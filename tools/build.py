@@ -210,6 +210,16 @@ def _page(title, section, body, body_class="", head_extra=""):
       <button type="button" data-pref="grad" data-val="on">On</button>
       <button type="button" data-pref="grad" data-val="off">Off</button>
     </div>
+    <div class="settings-row">
+      <span class="settings-label">Prints layout</span>
+      <button type="button" data-pref="hang" data-val="rows">Rows</button>
+      <button type="button" data-pref="hang" data-val="salon">Salon</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Print titles</span>
+      <button type="button" data-pref="ptitle" data-val="hover">On hover</button>
+      <button type="button" data-pref="ptitle" data-val="below">Below</button>
+    </div>
     <div class="settings-row settings-swatches">
       <span class="settings-label">Prints wall</span>
       <button type="button" data-pref="wall" data-val="page">Page colour</button>

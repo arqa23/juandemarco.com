@@ -523,6 +523,17 @@ body {
 .print-cap { display: block; margin-top: .9em; color: var(--ink-dim); white-space: nowrap; }
 .print-cap em { font-style: normal; color: var(--ink); }
 @media (max-width: 760px) { .prints { margin: 0; } }
+/* Print titles on hover (Settings > Print titles), like the Work tiles */
+@media (hover: hover) and (min-width: 761px) {
+  :root:not([data-ptitle="below"]) .print-cap {
+    position: absolute; inset: 0; margin: 0; padding: 1em;
+    display: flex; align-items: center; justify-content: center; text-align: center; white-space: normal;
+    background: color-mix(in srgb, var(--bg) 84%, transparent);
+    opacity: 0; transition: opacity .25s ease;
+  }
+  :root:not([data-ptitle="below"]) .print:hover .print-cap, :root:not([data-ptitle="below"]) .print:focus-visible .print-cap { opacity: 1; }
+  :root:not([data-ptitle="below"]) .print:hover img { opacity: 1; }
+}
 
 /* No menu dots (Juan, 2026-11-21) */
 .nav-dot { display: none; }
