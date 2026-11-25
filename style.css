@@ -553,6 +553,7 @@ body {
     display: flex; align-items: center; justify-content: center; text-align: center; white-space: normal;
     background: color-mix(in srgb, var(--bg) 84%, transparent);
     opacity: 0; transition: opacity .25s ease;
+    font-size: calc(var(--nav-size) * var(--caption-scale, .7) / .7) !important;   /* on the print: back to the label size */
   }
   :root:not([data-ptitle="below"]) .print:hover .print-cap, :root:not([data-ptitle="below"]) .print:focus-visible .print-cap { opacity: 1; }
   :root:not([data-ptitle="below"]) .print:hover img { opacity: 1; }
