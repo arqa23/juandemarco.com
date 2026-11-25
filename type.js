@@ -6,16 +6,16 @@
     jost: '"Jost"', inter: '"inter"', instrument: '"instrument-sans"', geist: '"geist-sans"',
     host: '"host-grotesk"', franklin: '"libre-franklin"', albert: '"albert-sans"'
   };
-  // Defaults reproduce the site as it was before the test.
+  // Defaults: Juan's chosen settings (2026-11-25).
   var DEFAULTS = {
-    name:  { font: 'jost', w: 300, size: 100, track: 0.42, 'case': 'uppercase' },
-    title: { font: 'jost', w: 300, size: 100, track: 0.3,  'case': 'uppercase' },
+    name:  { font: 'jost', w: 500, size: 100, track: 0.42, 'case': 'uppercase' },
+    title: { font: 'jost', w: 300, size: 100, track: 0.2,  'case': 'uppercase' },
     text:  { font: 'jost', w: 300, size: 100, track: 0,    'case': 'none' },
     label: { font: 'jost', w: 400, size: 100, track: 0.2,  'case': 'uppercase' },
     // Print captions on the Prints wall: own size, 30% smaller than the labels
     caption: { font: 'jost', w: 400, size: 70, track: 0.2,  'case': 'uppercase' },
     // The menu (bottom right): 100% = the size of the email on the About page
-    menu:    { font: 'jost', w: 400, size: 100, track: 0.2,  'case': 'uppercase' }
+    menu:    { font: 'jost', w: 300, size: 60,  track: 0.2,  'case': 'uppercase' }
   };
   function load() {
     var saved = {};
@@ -46,6 +46,7 @@
   try {
     var d = document.documentElement.dataset;
     d.theme = 'light';
+    d.mode = 'dark';   // the site's default mode (Juan, 2026-11-25)
     if (off) return;
     ['colour', 'mat', 'photos', 'wall', 'mode', 'grad', 'hang', 'ptitle'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);

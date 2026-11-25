@@ -22,7 +22,7 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'page', mode: 'light', grad: 'off', hang: 'rows', ptitle: 'hover' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'page', mode: 'dark', grad: 'off', hang: 'rows', ptitle: 'hover' };
   // Prints wall colours (Settings > Prints wall): beige, charcoal, plus up to four
   // colours Juan picks (kept in this browser as jdm-wallcolours). "random" picks
   // one of all of these each time the Prints page opens. Dark walls switch the
@@ -111,7 +111,7 @@
       b.addEventListener('click', function () {
         var k = b.dataset.pref, v = b.dataset.val;
         previewWall = null;
-        if (v === PREF_DEFAULTS[k]) delete root.dataset[k]; else root.dataset[k] = v;
+        if (v === PREF_DEFAULTS[k] && k !== 'mode') delete root.dataset[k]; else root.dataset[k] = v;   // mode always kept on <html> (the CSS keys on it)
         try { localStorage.setItem('jdm-' + k, v); } catch (err) {}
         if (k === 'mode') {   // a new mode brings the Prints wall back to the page colour
           delete root.dataset.wall;
@@ -162,6 +162,7 @@
       try { localStorage.removeItem('jdm-type'); localStorage.removeItem('jdm-wallcolours'); } catch (err) {}
       previewWall = null;
       for (var k in PREF_DEFAULTS) { delete root.dataset[k]; try { localStorage.removeItem('jdm-' + k); } catch (err) {} }
+      root.dataset.mode = PREF_DEFAULTS.mode;
       root.removeAttribute('style');
       window.jdmType.apply(window.jdmType.load());
       applyPhotos(); applyWall(); markSettings(); place(); layoutWall();
