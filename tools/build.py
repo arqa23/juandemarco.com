@@ -441,7 +441,7 @@ def main():
 """
         write(f"prints/{slug}/index.html", page(f"{name} \u00b7 Gallery", "prints", room, "inner room"))
     write("prints/index.html", page("Gallery", "prints",
-        '  <main class="page page-wide prints-page">\n    <h1>Gallery</h1>\n'
+        '  <main class="page page-wide prints-page">\n    <h1 class="visually-hidden">Gallery</h1>\n'
         '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n'
         '  <button class="to-top" type="button" aria-label="Back to top" title="Back to top">'
         '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5 9.5 10 4.5l5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>\n', "inner"))
