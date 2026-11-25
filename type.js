@@ -1,5 +1,5 @@
 // Text-style test (Settings). Loaded in <head> so saved choices apply before
-// the page paints. Four styles: name, title, text, label. Temporary, for
+// the page paints. Five styles: name, title, text, label, caption. Temporary, for
 // choosing the type with Juan; delete with the Settings panel when done.
 (function () {
   var FONTS = {
@@ -11,7 +11,9 @@
     name:  { font: 'jost', w: 300, size: 100, track: 0.42, 'case': 'uppercase' },
     title: { font: 'jost', w: 300, size: 100, track: 0.3,  'case': 'uppercase' },
     text:  { font: 'jost', w: 300, size: 100, track: 0,    'case': 'none' },
-    label: { font: 'jost', w: 400, size: 100, track: 0.2,  'case': 'uppercase' }
+    label: { font: 'jost', w: 400, size: 100, track: 0.2,  'case': 'uppercase' },
+    // Print captions on the Prints wall: own size, 30% smaller than the labels
+    caption: { font: 'jost', w: 400, size: 70, track: 0.2,  'case': 'uppercase' }
   };
   function load() {
     var saved = {};
