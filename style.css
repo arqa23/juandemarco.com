@@ -811,12 +811,20 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 /* View mode picker (Juan, 2026-11-25): two words beside the settings icon,
    no box. The full test panel is tabled (Shift-click the icon to reach it). */
 .mode-pick {
-  position: fixed; z-index: 5; display: flex; gap: 1.4em;
-  left: calc(var(--legal-mid, 20px) + var(--legal-w, 18px) / 2 + max(12px, calc(16 * var(--s))));
-  bottom: var(--gutter); height: var(--legal-w, 18px); align-items: center;
-  animation: pick-in .35s ease both;
+  position: fixed; z-index: 5;
+  left: calc(var(--legal-mid, 20px) + var(--legal-w, 18px) / 2 + max(10px, calc(12 * var(--s))));
+  bottom: calc(var(--gutter) - 9px);
+  display: flex; flex-direction: column; gap: 7px;
+  padding: 8px 12px 7px;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  border-radius: 2px;
+  color: var(--ink);
+  animation: pick-in .3s ease both;
 }
 .mode-pick[hidden] { display: none; }
+.mode-pick-modes { display: flex; gap: 1.3em; }
 .mode-pick button {
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--ink);
   font: inherit; font-family: var(--label-font, var(--font)); font-weight: var(--label-w, 400);
@@ -824,7 +832,20 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   opacity: .45; transition: opacity .2s ease;
 }
 .mode-pick button:hover, .mode-pick button.is-on { opacity: 1; }
-.home .mode-pick button { color: #fff; }
+.mode-pick-legal {
+  margin: 0; white-space: nowrap; color: var(--ink-dim);
+  font-family: var(--caption-font, var(--font)); font-size: calc(var(--nav-size) * .72); letter-spacing: .12em;
+}
 @keyframes pick-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
-@media (max-width: 700px) { .mode-pick { left: auto; right: calc(var(--gutter) + var(--legal-w, 18px) + 14px); bottom: 18px; } }
-.page p.about-legal { margin-top: 2.4em; }
+@media (max-width: 700px) { .mode-pick { left: auto; right: calc(var(--gutter) + var(--legal-w, 18px) + 12px); bottom: 10px; } }
+.page p.about-legal { margin-top: 2.6em; font-size: calc(var(--nav-size) * .85); letter-spacing: .12em; color: var(--ink-dim); }
+
+/* Gallery, Index layout: number left, title right, always shown under each print */
+:root .prints.is-index { --wall-gap: max(8px, calc(12 * var(--s))); }
+.prints.is-index .print .print-cap {
+  position: relative; inset: auto; display: block; margin: .75em 0 0; padding: 0 0 0 3.2em;
+  background: none; opacity: 1; text-align: right; overflow: hidden; text-overflow: ellipsis;
+  font-size: calc(var(--nav-size) * var(--caption-scale, .7)) !important;
+}
+.prints.is-index .print .print-cap::before { content: attr(data-no); position: absolute; left: 0; top: 0; color: var(--ink-dim); }
+.prints.is-index .print:hover img { opacity: .9; }

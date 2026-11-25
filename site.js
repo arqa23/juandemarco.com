@@ -40,7 +40,7 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'page', mode: 'dark', grad: 'off', hang: 'rows', ptitle: 'hover', tiles: 'image' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'page', mode: 'dark', grad: 'off', hang: 'index', ptitle: 'hover', tiles: 'image' };
   // Prints wall colours (Settings > Prints wall): beige, charcoal, plus up to four
   // colours Juan picks (kept in this browser as jdm-wallcolours). "random" picks
   // one of all of these each time the Prints page opens. Dark walls switch the
@@ -296,6 +296,9 @@
     if (!wall) return;
     var W = wall.clientWidth, g = parseFloat(getComputedStyle(wall).columnGap) || 60;
     var narrow = W < 600, base = W * (narrow ? 0.4 : 0.185), cx = W / 2;
+    var hang = document.documentElement.dataset.hang || PREF_DEFAULTS.hang;
+    wall.classList.toggle('is-index', hang === 'index');
+    if (hang === 'index') g = parseFloat(getComputedStyle(wall).columnGap) || 12;
     var capH = 0, cap0 = wall.querySelector('.print-cap');
     var overlay = cap0 && getComputedStyle(cap0).position === 'absolute';   // titles on hover take no room
     if (cap0 && !overlay) capH = cap0.offsetHeight + parseFloat(getComputedStyle(cap0).marginTop);
@@ -314,8 +317,36 @@
       var size = SIZES[Math.floor(rand() * SIZES.length)];
       return { a: a, r: r, cw: cap && !overlay ? capWidth(cap) : 0, w0: Math.min(W * (narrow ? 1 : 0.5), base * Math.sqrt(size * r)) };
     });
-    var hang = document.documentElement.dataset.hang || PREF_DEFAULTS.hang;
-    var best = hang === 'salon' ? salon() : hang === 'flow' ? rows() : even();
+    var best = hang === 'salon' ? salon() : hang === 'flow' ? rows() : hang === 'rows' ? even() : index();
+    // Index (default; after sort-office.com's index): rows of three that fill
+    // the wall edge to edge, tight gaps across, each print at its own shape
+    // (so heights vary, tops aligned), a number and title under each, and
+    // more air between rows. Widths change on every visit; order and numbers
+    // stay the same.
+    function index() {
+      var MAX = narrow ? 2 : 3, out = [], y = 0, q = 0, bottom = 0, mod = W / 48;
+      var all = [].slice.call(wall.querySelectorAll('.print'));
+      var list = items.slice().sort(function (a, b) { return all.indexOf(a.a) - all.indexOf(b.a); });
+      list.forEach(function (it, n) { var c = it.a.querySelector('.print-cap'); if (c) c.dataset.no = '[' + (n + 1 < 10 ? '0' : '') + (n + 1) + ']'; });
+      var down = capH + g * 3.5;
+      while (q < list.length) {
+        var row = list.slice(q, q + MAX); q += row.length;
+        var avail = W - g * (MAX - 1), wt = row.map(function (it) { return Math.pow(it.r, 0.75) * (0.8 + rand() * 0.45); });
+        var sum = wt.reduce(function (a, b) { return a + b; }, 0), full = row.length === MAX;
+        var ws = wt.map(function (v) { return full ? v / sum * avail : v / (sum / row.length) * avail / MAX; });
+        ws = ws.map(function (w) { return Math.max(mod * 8, Math.round(w / mod) * mod); });
+        if (full) { var used = ws.reduce(function (a, b) { return a + b; }, 0) - ws[ws.length - 1]; ws[ws.length - 1] = avail - used; }
+        var x = 0, hMax = 0;
+        row.forEach(function (it, n) {
+          var h = ws[n] / it.r;
+          out.push({ x: x, y: y, w: ws[n], ih: h, it: it });
+          x += ws[n] + g; hMax = Math.max(hMax, h);
+        });
+        bottom = y + hMax + capH;
+        y += hMax + down;
+      }
+      return { placed: out, top: 0, h: bottom };
+    }
     // Even (default): every print the same height, every gap the same, across
     // and down. Rows hold up to three prints and sit centred on the wall.
     function even() {
@@ -679,6 +710,7 @@
     initWallGlide();
     initPress();
     startDrift();
+    document.querySelectorAll('.yr').forEach(function (e) { e.textContent = new Date().getFullYear(); });   // the year updates itself
     if (document.fonts) document.fonts.ready.then(function () { place(); layoutWall(); });
   }
 

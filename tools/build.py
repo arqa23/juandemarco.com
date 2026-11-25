@@ -185,8 +185,11 @@ def _page(title, section, body, body_class="", head_extra=""):
   </nav>
   <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="View mode" title="View mode"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   <div class="mode-pick" id="mode-pick" role="group" aria-label="View mode" hidden>
-    <button type="button" data-pick="light">Light</button>
-    <button type="button" data-pick="dark">Dark</button>
+    <div class="mode-pick-modes">
+      <button type="button" data-pick="light">Light</button>
+      <button type="button" data-pick="dark">Dark</button>
+    </div>
+    <p class="mode-pick-legal">&copy; Juan De Marco | <span class="yr">{YEAR}</span></p>
   </div>
 
   <div class="settings" id="settings" hidden>
@@ -216,6 +219,7 @@ def _page(title, section, body, body_class="", head_extra=""):
     </div>
     <div class="settings-row">
       <span class="settings-label">Gallery layout</span>
+      <button type="button" data-pref="hang" data-val="index">Index</button>
       <button type="button" data-pref="hang" data-val="rows">Even</button>
       <button type="button" data-pref="hang" data-val="flow">Flow</button>
       <button type="button" data-pref="hang" data-val="salon">Salon</button>
@@ -474,8 +478,7 @@ def main():
       </script>
 """
     # About and Contact are one page now: About text, then the contact text below.
-    legal = (f'      <p class="about-legal">&copy; {YEAR} Juan De Marco. All rights reserved. All artwork, images and text '
-             'on this site are the work of Juan De Marco and may not be reproduced without permission.</p>\n')
+    legal = f'      <p class="about-legal">&copy; Juan De Marco | <span class="yr">{YEAR}</span></p>\n'
     write("about/index.html", page("About", "about", stacked(about_block + contact + legal), "inner photo"))
     # Old /contact/ links land on About.
     write("contact/index.html", '<!doctype html>\n<meta charset="utf-8">\n<title>About</title>\n'
