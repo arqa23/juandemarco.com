@@ -523,6 +523,22 @@ body {
 .print-cap { display: block; margin-top: .9em; color: var(--ink-dim); white-space: nowrap; }
 .print-cap em { font-style: normal; color: var(--ink); }
 @media (max-width: 760px) { .prints { margin: 0; } }
+/* With titles on hover the prints hang closer: a quarter of the wall gap */
+:root:not([data-ptitle="below"]) .prints { --wall-gap: max(9px, calc(16.5 * var(--s))); }
+
+/* Gallery: back-to-top button, bottom left, once the page has scrolled */
+.to-top {
+  position: fixed; left: var(--gutter); bottom: var(--gutter); z-index: 4;
+  width: 44px; height: 44px; padding: 0; border-radius: 50%;
+  border: 1px solid currentColor; background: transparent; color: var(--ink); cursor: pointer;
+  display: grid; place-items: center;
+  opacity: 0; pointer-events: none; transition: opacity .3s ease;
+}
+.to-top svg { width: 18px; height: 18px; }
+.to-top.is-on { opacity: .7; pointer-events: auto; }
+.to-top.is-on:hover { opacity: 1; }
+@media print { .to-top { display: none; } }
+
 /* Print titles on hover (Settings > Print titles), like the Work tiles */
 @media (hover: hover) and (min-width: 761px) {
   :root:not([data-ptitle="below"]) .print-cap {
