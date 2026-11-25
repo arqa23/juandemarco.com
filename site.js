@@ -435,49 +435,61 @@
       return best;
     }
     // Rows, after 6a architects' home page: prints flow like words in centred
-    // text. Each takes one of five set widths whatever its shape, so heights
-    // vary freely; a row's prints share one bottom line, and the tallest print
-    // sits one gap below the row above. A row whose edges would land just off
-    // an edge of the row above shifts a little to meet it exactly.
+    // text, at most three to a row, each in one of five set widths whatever
+    // its shape. A row lines its prints up along the bottom or (less often)
+    // along the top. Rows lean toward the centre; the outer prints of a row
+    // may sit a little apart or float within the row, and some rows leave
+    // open wall above them, so clusters never grow into one solid mass.
+    // Edges that would land just off another edge are moved to meet it.
     function rows() {
       var order = items.slice();
       for (var i = order.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)), tmp = order[i]; order[i] = order[j]; order[j] = tmp; }
-      // 6a's widths, as parts of the wall: 262, 472, 678, 800, 1000 of 1513
-      var WS = narrow ? [0.48, 0.48, 1] : [0.173, 0.312, 0.448, 0.529, 0.661];
+      // 6a's widths as parts of the wall (262, 472, 678, 800, 1000 of 1513), the smallest 25% bigger
+      var WS = narrow ? [0.6, 0.6, 1] : [0.216, 0.312, 0.448, 0.529, 0.661];
       var pick = function (r) {
         if (narrow) return WS[Math.floor(rand() * 3)];
-        var p = rand(), t = r < 0.9 ? [0.35, 0.97, 1, 1] : r < 1.2 ? [0.25, 0.85, 0.98, 1] : [0.12, 0.62, 0.9, 0.98];
+        var p = rand(), t = r < 0.9 ? [0.4, 0.97, 1, 1] : r < 1.2 ? [0.3, 0.88, 0.99, 1] : [0.15, 0.68, 0.94, 0.99];
         for (var k = 0; k < 4; k++) if (p < t[k]) return WS[k];
         return WS[4];
       };
       order.forEach(function (it) { it.rw = W * pick(it.r); });
-      var out = [], y = 0, q = 0, prevEdges = [];
+      var out = [], y = 0, q = 0, prevEdges = [], MAX = narrow ? 2 : 3, snapV = g * 2.5;
       while (q < order.length) {
-        var row = [], sum = 0;
-        while (q < order.length) {
-          var next = sum + (row.length ? g : 0) + order[q].rw;
-          if (row.length && next > W) break;
-          row.push(order[q]); sum = next; q++;
+        // open wall above some rows
+        if (q && !narrow && rand() < 0.4) y += g * (3 + rand() * 6);
+        var row = [], sum = 0, gaps = [];
+        while (q < order.length && row.length < MAX) {
+          var gap = row.length ? (!narrow && rand() < 0.3 ? g * (2 + rand() * 5) : g) : 0;
+          if (row.length && sum + gap + order[q].rw > W) break;
+          if (row.length) gaps.push(gap);
+          row.push(order[q]); sum += gap + order[q].rw; q++;
         }
-        var x0 = (W - sum) / 2, edges = [], hMax = 0, x = 0;
-        row.forEach(function (it) { edges.push(x, x + it.rw); x += it.rw + g; hMax = Math.max(hMax, it.rw / it.r); });
-        // shift to meet an edge of the row above when one is close
-        var snap = g * 3, best = 0, bestD = Infinity;
+        // lean toward the centre: a narrow row can drift further than a wide one
+        var spare = W - sum, x0 = spare / 2 + (rand() - 0.5) * spare * 0.6;
+        var edges = [], hMax = 0, x = 0;
+        row.forEach(function (it, n) { if (n) x += gaps[n - 1]; edges.push(x, x + it.rw); x += it.rw; hMax = Math.max(hMax, it.rw / it.r); });
+        var best = 0, bestD = Infinity;
         edges.forEach(function (e) {
           prevEdges.forEach(function (pe) {
             var d = pe - (x0 + e);
-            if (Math.abs(d) > 0.5 && Math.abs(d) < snap && Math.abs(d) < bestD && x0 + d >= 0 && x0 + d + sum <= W) { best = d; bestD = Math.abs(d); }
+            if (Math.abs(d) > 0.5 && Math.abs(d) < g * 3 && Math.abs(d) < bestD && x0 + d >= 0 && x0 + d + sum <= W) { best = d; bestD = Math.abs(d); }
           });
         });
         x0 += best;
         prevEdges = edges.map(function (e) { return x0 + e; });
-        x = x0;
-        row.forEach(function (it) {
-          var ih = it.rw / it.r;
-          out.push({ x: x, y: y + hMax - ih, w: it.rw, ih: ih, it: it });
-          x += it.rw + g;
+        var top = rand() < 0.35, x = x0, bot = 0;
+        row.forEach(function (it, n) {
+          var ih = it.rw / it.r, room = hMax - ih, yy = y + (top ? 0 : room);
+          // an outer print may float within the row, unless that lands just off the line
+          if (row.length > 1 && (n === 0 || n === row.length - 1) && rand() < 0.35) {
+            var f = y + rand() * room;
+            if (Math.abs(f - y) > snapV && Math.abs(f - (y + room)) > snapV) yy = f;
+          }
+          out.push({ x: x, y: yy, w: it.rw, ih: ih, it: it });
+          bot = Math.max(bot, yy + ih);
+          x += it.rw + (gaps[n] || 0);
         });
-        y += hMax + gv;
+        y = bot + gv;
       }
       return { placed: out, top: 0, h: y - gv };
     }
