@@ -112,7 +112,7 @@ TEXT_POSITION = "top"
 
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
-NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Gallery", "/prints/"),
+NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("projects", "Projects", "/projects/"), ("prints", "Gallery", "/prints/"),
        ("about", "About", "/about/")]
 
 
@@ -220,6 +220,11 @@ def _page(title, section, body, body_class="", head_extra=""):
       <span class="settings-label">Print titles</span>
       <button type="button" data-pref="ptitle" data-val="hover">On hover</button>
       <button type="button" data-pref="ptitle" data-val="below">Below</button>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Project tiles</span>
+      <button type="button" data-pref="tiles" data-val="image">Image</button>
+      <button type="button" data-pref="tiles" data-val="silhouette">Silhouette</button>
     </div>
     <div class="settings-row settings-swatches">
       <span class="settings-label">Gallery wall</span>
@@ -339,6 +344,12 @@ def main():
         f'      </a>' for p in PROJECTS)
     write("work/index.html", page("Work", "work",
         f'  <main class="page page-wide work-page">\n    <h1 class="work-h">Work</h1>\n    <div class="grid">\n{cards}\n    </div>\n  </main>\n',
+        "inner"))
+
+    # Test page (Juan, 2026-11-25): small square tiles that slide in along a
+    # grid of horizontal lines, like type being set in a press.
+    write("projects/index.html", page("Projects", "projects",
+        f'  <main class="page page-wide press-page">\n    <h1 class="work-h">Projects</h1>\n    <div class="press-lines" aria-hidden="true"></div>\n    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>\n      <filter id="sil-white" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 -.2126 -.7152 -.0722 0 1"/><feComponentTransfer><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer></filter>\n      <filter id="sil-black" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -.2126 -.7152 -.0722 0 1"/><feComponentTransfer><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer></filter>\n    </defs></svg>\n    <div class="press">\n{cards}\n    </div>\n  </main>\n',
         "inner"))
 
     for i, p in enumerate(PROJECTS):
