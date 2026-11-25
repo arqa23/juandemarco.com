@@ -265,12 +265,16 @@ body {
 
 /* Project page: title + small project links above a fixed frame, text to the right */
 .project-layout {
+  --count-h: calc(var(--nav-size) * 1.3);
   --side-w: max(200px, calc(300 * var(--s)));
   --gap: max(28px, calc(48 * var(--s)));
   --frame-w: calc(min(
     calc(100vw - var(--gutter) - var(--edge) - max(160px, calc(240 * var(--s))) - var(--side-w) - var(--gap)),
-    calc((100vh - var(--header-h) - var(--edge) * .35 - var(--gutter) * 2.2 - var(--title-size) * 1.8) * 16 / 9)) * .92);
-  /* .92: images scaled down from their top left corner (Juan, 2026-11-25) so the
+    calc((100vh - var(--header-h) - var(--edge) * .35 - var(--gutter) * 2.2 - var(--title-size) * 1.8) * 16 / 9)) * .92
+    + var(--count-h) * 16 / 9);
+  /* + --count-h: the image grows by one counter line and the counter drops by
+     the same amount (Juan, 2026-11-25), keeping the gap between them.
+     .92: images scaled down from their top left corner (Juan, 2026-11-25) so the
      counter under them clears the copyright and settings in the lower left */
   display: flex;
   gap: var(--gap);
@@ -581,6 +585,7 @@ body {
   opacity: 0; pointer-events: none; transition: opacity .3s ease;
 }
 .to-top svg { width: 78%; height: 78%; }
+@media (min-width: 701px) { .legal-flat .to-top { bottom: calc(var(--gutter) + var(--legal-w, 18px) + max(12px, calc(16 * var(--s)))); } }
 .to-top.is-on { opacity: .78; pointer-events: auto; }
 .to-top.is-on:hover { opacity: 1; }
 @media print { .to-top { display: none; } }
@@ -691,7 +696,7 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 /* Settings button: a small sliders icon at the foot of the menu */
 .settings-icon { width: max(15px, calc(18 * var(--s))); height: max(15px, calc(18 * var(--s))); fill: currentColor; opacity: .78; transition: opacity .15s ease; }
 .settings-btn:hover .settings-icon, .settings-btn.is-open .settings-icon { opacity: 1; }
-.settings-icon circle { fill: none; stroke: currentColor; stroke-width: 1.1; }   /* open dots: the background shows through */
+.settings-icon circle { fill: none; stroke: currentColor; stroke-width: .75; }   /* open dots: the background shows through */
 .home .settings-icon circle { fill: #fff; }   /* over the home image the dots match the white name and menu */
 
 /* Dark mode (Settings > Mode): charcoal paper, warm off-white ink */
@@ -759,7 +764,8 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   scrollbar-width: none;
 }
 .work-page .grid::-webkit-scrollbar { display: none; }
-.work-page .card { flex: 0 0 auto; width: calc(100vh - 2 * var(--strip-pad)); }
+.work-page .card { flex: 0 0 auto; width: calc((100vh - 2 * var(--strip-pad)) * var(--k, 1)); }
+.work-page .grid { align-items: center; }
 .work-page .grid { cursor: grab; user-select: none; -webkit-user-select: none; }
 .work-page .grid.is-dragging { cursor: grabbing; }
 .work-page .grid.is-dragging .card { pointer-events: none; }
