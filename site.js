@@ -562,14 +562,14 @@
     btn.addEventListener('click', function () { (sc || window).scrollTo({ top: 0, behavior: 'smooth' }); });
   }
 
-  // Copyright: upright on most pages; on a project or print page it turns a
+  // Copyright: upright on most pages; on a project page it turns a
   // quarter clockwise around the settings icon as the page arrives, and turns
   // back on the way out. It starts from where it was on the last page.
   var legalTurned = false;
   function turnLegal() {
     var foot = document.querySelector('.site-footer');
     if (!foot) return;
-    var want = !!document.querySelector('.page.project, .room-page');
+    var want = !!document.querySelector('.page.project');
     foot.classList.add('no-anim');
     foot.classList.toggle('is-turned', legalTurned);
     void foot.offsetWidth;   // settle the starting position before turning
@@ -620,13 +620,13 @@
      project). */
   var drag = null, dragMoved = false, glide = null;
   function stopGlide() { if (glide) { cancelAnimationFrame(glide); glide = null; } }
-  ['wheel', 'pointerdown', 'keydown', 'touchstart'].forEach(function (t) {
+  ['wheel', 'keydown', 'touchstart'].forEach(function (t) {
     window.addEventListener(t, stopGlide, { passive: true, capture: true });
   });
   window.addEventListener('pointermove', function (e) {
     if (!drag) return;
     var dx = e.clientX - drag.x;
-    if (!dragMoved && Math.abs(dx) > 5) { dragMoved = true; drag.g.classList.add('is-dragging'); }
+    if (!dragMoved && Math.abs(dx) > 5) { dragMoved = true; stopGlide(); drag.g.classList.add('is-dragging'); }
     if (dragMoved) drag.g.scrollLeft = drag.left - dx;
   });
   window.addEventListener('pointerup', function () {
@@ -675,7 +675,8 @@
 
   /* Gallery: arrives with a slow glide up into place, like the Work strip, and
      the wheel moves it smoothly (a little drift after each turn of the wheel). */
-  var wallTarget = null, wallRaf = null;
+  var wallTarget = null, wallRaf = null, wallSc = null, wallSet = null;
+  function wallStop() { if (wallRaf) cancelAnimationFrame(wallRaf); wallRaf = null; wallTarget = null; }
   function wallScroller() {
     if (!document.querySelector('.prints') || innerWidth <= 700) return null;
     var sc = document.querySelector('.scroller');
@@ -684,9 +685,15 @@
   function wallRun(sc) {
     if (wallRaf) return;
     var tick = function () {
+      // Stop when the page has changed, the target is reached, or the
+      // scroller will not move any further (end of the wall, rounding).
+      if (sc !== wallSc || !sc.isConnected) { wallStop(); return; }
       var d = wallTarget - sc.scrollTop;
-      if (Math.abs(d) < 0.5) { sc.scrollTop = wallTarget; wallRaf = null; return; }
-      sc.scrollTop += d * 0.12;
+      if (Math.abs(d) < 1) { sc.scrollTop = wallTarget; wallStop(); return; }
+      var before = sc.scrollTop;
+      sc.scrollTop += d > 0 ? Math.max(1, d * 0.12) : Math.min(-1, d * 0.12);
+      wallSet = sc.scrollTop;
+      if (sc.scrollTop === before) { wallStop(); return; }
       wallRaf = requestAnimationFrame(tick);
     };
     wallRaf = requestAnimationFrame(tick);
@@ -696,11 +703,16 @@
     if (!sc || e.ctrlKey || (e.target.closest && e.target.closest('.settings'))) return;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     e.preventDefault();
+    if (sc !== wallSc) { wallStop(); wallSc = sc; }
     if (wallTarget === null || !wallRaf) wallTarget = sc.scrollTop;
     var max = sc.scrollHeight - sc.clientHeight;
-    wallTarget = Math.max(0, Math.min(max, wallTarget + e.deltaY * (e.deltaMode === 1 ? 40 : 1)));
+    wallTarget = Math.max(0, Math.min(max, wallTarget + e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? sc.clientHeight : 1)));
     wallRun(sc);
   }, { passive: false });
+  // Scrollbar, keys or a jump to the top take over from the wheel drift.
+  document.addEventListener('scroll', function (e) {
+    if (wallRaf && e.target === wallSc && Math.abs(wallSc.scrollTop - wallSet) > 2) wallStop();
+  }, true);
   function initWallGlide() {
     var sc = wallScroller();
     if (!sc || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
