@@ -491,6 +491,16 @@ body {
   text-transform: var(--caption-case, uppercase);
 }
 
+/* Menu (Settings > Text style > Menu): its own style, 100% = the About email size */
+.nav { gap: calc(var(--text-size) * 1.25 * var(--menu-scale, 1) * 1.05); }
+.nav a {
+  font-family: var(--menu-font, var(--font));
+  font-weight: var(--menu-w, 400);
+  font-size: calc(var(--text-size) * 1.25 * var(--menu-scale, 1)) !important;
+  letter-spacing: var(--menu-track, .2em);
+  text-transform: var(--menu-case, uppercase);
+}
+
 /* Settings panel controls */
 .settings { max-height: calc(100vh - 2 * var(--gutter)); overflow-y: auto; }
 .settings-note { margin: 0; opacity: .55; text-transform: none; letter-spacing: .02em; }
