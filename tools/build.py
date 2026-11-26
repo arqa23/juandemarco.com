@@ -118,6 +118,13 @@ ABOUT = [
 #   "bottom" = text block's bottom edge lines up with the bottom of the menu
 TEXT_POSITION = "top"
 
+# Settings box mode (Juan, 2026-11-26). ONE LINE TO SWITCH:
+#   "public"  = what visitors see: Dark mode, Framed, Full screen (and nothing else)
+#   "working" = the same, plus every Work layout listed to click, and the
+#               Strip 1B sliders, for designing together
+SETTINGS_MODE = "working"
+WORK_LAYOUTS = [("squares", "Squares"), ("grid", "Grid V1"), ("grid2", "Grid V2"), ("1a", "Strip 1A"), ("1b", "Strip 1B")]
+
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
 NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Gallery", "/prints/"),
@@ -170,6 +177,15 @@ def _page(title, section, body, body_class="", head_extra=""):
         # copyright never move when a scroll bar appears.
         cover = HOME_BODY if "photo" in body_class else ""
         body = f'{cover}  <div class="scroller">\n{body}  </div>\n'
+    working_rows = "" if SETTINGS_MODE == "public" else (
+        '    <div class="pick-layouts">\n      <span class="pick-head">Work layout</span>\n'
+        + "".join(f'      <button type="button" class="pick-row pick-opt" data-wv="{k}">{v}</button>\n' for k, v in WORK_LAYOUTS)
+        + '    </div>\n'
+        '    <div class="mode-pick-work">\n'
+        '      <label>Space <input type="range" data-wk="gap" min="0" max="120" step="1"><output></output></label>\n'
+        '      <label>Up <input type="range" data-wk="up" min="0" max="45" step="1"><output></output></label>\n'
+        '      <label>Down <input type="range" data-wk="down" min="0" max="45" step="1"><output></output></label>\n'
+        '    </div>\n')
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -198,13 +214,7 @@ def _page(title, section, body, body_class="", head_extra=""):
     <button type="button" class="pick-row" data-tog="mode">Dark mode: <span></span></button>
     <button type="button" class="pick-row" data-tog="frame">Framed: <span></span></button>
     <button type="button" class="pick-row" data-tog="fs">Full screen: <span></span></button>
-    <button type="button" class="pick-row pick-layout" data-tog="work">Layout: <span></span></button>
-    <div class="mode-pick-work">
-      <label>Space <input type="range" data-wk="gap" min="0" max="120" step="1"><output></output></label>
-      <label>Up <input type="range" data-wk="up" min="0" max="45" step="1"><output></output></label>
-      <label>Down <input type="range" data-wk="down" min="0" max="45" step="1"><output></output></label>
-    </div>
-  </div>
+{working_rows}  </div>
 
   <div class="settings" id="settings" hidden>
     <p class="settings-note">Test panel. Choices are kept in this browser only.</p>

@@ -54,7 +54,7 @@
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
     ['mode', 'frame', 'work'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
-      if (k === 'work' && !/^(squares|grid|1a|1b)$/.test(v || '')) v = null;   // old slider data used this key
+      if (k === 'work' && !/^(squares|grid|grid2|1a|1b)$/.test(v || '')) v = null;   // old slider data used this key
       if (v) d[k] = v;
     });
   } catch (e) { document.documentElement.dataset.theme = 'light'; }
