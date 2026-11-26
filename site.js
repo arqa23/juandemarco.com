@@ -127,12 +127,16 @@
     var pick = document.getElementById('mode-pick');
     var markPick = function () {
       if (!pick) return;
-      pick.querySelectorAll('[data-pick]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.mode || PREF_DEFAULTS.mode) === b.dataset.pick); });
-      pick.querySelectorAll('button[data-frame]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.frame || 'on') === b.dataset.frame); });
-      pick.querySelectorAll('button[data-fs]').forEach(function (b) { b.classList.toggle('is-on', !!document.fullscreenElement); });
+      // one line per setting, "Name: value"; a click switches it (Juan, 2026-11-26)
+      var val = {
+        mode: (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark' ? 'On' : 'Off',
+        frame: (root.dataset.frame || 'on') === 'on' ? 'On' : 'Off',
+        fs: document.fullscreenElement ? 'On' : 'Off',
+        work: WORK_NAMES[workView()] || 'Squares'
+      };
+      pick.querySelectorAll('button[data-tog]').forEach(function (b) { b.querySelector('span').textContent = val[b.dataset.tog]; });
       pick.classList.toggle('on-work', !!document.querySelector('.work-page'));
       pick.classList.toggle('on-1b', workView() === '1b');
-      pick.querySelectorAll('button[data-wv]').forEach(function (b) { b.classList.toggle('is-on', workView() === b.dataset.wv); });
       pick.querySelectorAll('input[data-wk]').forEach(function (inp) { inp.value = workSet()[inp.dataset.wk]; inp.nextElementSibling.textContent = inp.value; });
     };
     if (pick) {
@@ -147,29 +151,30 @@
       });
       pick.addEventListener('click', function (e) {
         e.stopPropagation();
-        var fb = e.target.closest('button[data-frame]');   // not <html>, which carries data-frame too
-        if (fb) {
-          root.dataset.frame = fb.dataset.frame;
-          try { localStorage.setItem('jdm-frame', fb.dataset.frame); } catch (err) {}
+        var t = e.target.closest('button[data-tog]');
+        if (!t) return;
+        var k = t.dataset.tog;
+        if (k === 'frame') {
+          root.dataset.frame = (root.dataset.frame || 'on') === 'on' ? 'off' : 'on';
+          try { localStorage.setItem('jdm-frame', root.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
         }
-        var wv = e.target.closest('button[data-wv]');
-        if (wv) {
-          try { localStorage.setItem('jdm-work', wv.dataset.wv); } catch (err) {}
+        if (k === 'work') {   // next layout in turn
+          var order = ['squares', 'grid', '1a', '1b'], nx = order[(order.indexOf(workView()) + 1) % order.length];
+          try { localStorage.setItem('jdm-work', nx); } catch (err) {}
           location.reload(); return;
         }
-        if (e.target.closest('button[data-fs]')) {
+        if (k === 'fs') {
           var de = document.documentElement;
           if (document.fullscreenElement) document.exitFullscreen && document.exitFullscreen();
           else if (de.requestFullscreen) de.requestFullscreen().catch(function () {});
           return;
         }
-        var b = e.target.closest('button[data-pick]');
-        if (!b) return;
-        // set the mode directly (not through the tabled test panel)
-        root.dataset.mode = b.dataset.pick;
+        // mode: set directly (not through the tabled test panel)
+        var m = (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark' ? 'light' : 'dark';
+        root.dataset.mode = m;
         delete root.dataset.wall; previewWall = null;
-        try { localStorage.setItem('jdm-mode', b.dataset.pick); localStorage.removeItem('jdm-wall'); } catch (err) {}
+        try { localStorage.setItem('jdm-mode', m); localStorage.removeItem('jdm-wall'); } catch (err) {}
         applyPhotos(); applyWall(); markSettings(); markPick();
       });
     }
@@ -781,6 +786,7 @@
   function strip() { var w = workView(); return w === '1a' || w === '1b' ? document.querySelector('.work-page .grid') : null; }
   // Work strip test sliders: gap in design px, up / down in % of tile height
   var WORK_DEFAULTS = { gap: 18, up: 20, down: 20 };
+  var WORK_NAMES = { squares: 'Squares', grid: 'Grid V1', '1a': 'Strip 1A', '1b': 'Strip 1B' };
   function workSet() {
     var w = {}; try { w = JSON.parse(localStorage.getItem('jdm-strip') || '{}') || {}; } catch (e) {}
     var o = {}; for (var k in WORK_DEFAULTS) o[k] = w[k] != null ? w[k] : WORK_DEFAULTS[k];
