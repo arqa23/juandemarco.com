@@ -22,9 +22,15 @@
     // (measured from the layout box, so it holds while the copyright is turned)
     var foot = document.querySelector('.site-footer');
     if (!foot) {   // copyright now lives on the About page: the icon sits on the page margin
-      var logo = document.querySelector('.site-header .logo'), icon = Math.max(15, 18 * innerWidth / 1920);
+      var icon = Math.max(15, 18 * innerWidth / 1920);
       var gut = parseFloat(getComputedStyle(document.querySelector('.settings-corner') || root).bottom) || 40;
-      var lx = logo ? logo.getBoundingClientRect().left : 50;
+      // the page margin (--edge), measured with a probe so it holds on pages
+      // that hide the name, like the print rooms
+      var probe = document.createElement('div');
+      probe.style.cssText = 'position:absolute;visibility:hidden;width:var(--edge)';
+      document.body.appendChild(probe);
+      var lx = probe.getBoundingClientRect().width || 50;
+      probe.remove();
       root.style.setProperty('--legal-mid', (lx + icon / 2) + 'px');
       root.style.setProperty('--legal-w', icon + 'px');
       root.style.setProperty('--legal-top', (gut + icon) + 'px');
@@ -127,15 +133,19 @@
     if (pick) {
       pick.addEventListener('click', function (e) {
         e.stopPropagation();
-        var fb = e.target.closest('[data-frame]');
+        var fb = e.target.closest('button[data-frame]');   // not <html>, which carries data-frame too
         if (fb) {
           root.dataset.frame = fb.dataset.frame;
           try { localStorage.setItem('jdm-frame', fb.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
         }
-        var b = e.target.closest('[data-pick]'), src = b && panel.querySelector('[data-pref="mode"][data-val="' + b.dataset.pick + '"]');
-        if (src) src.click();
-        markPick();
+        var b = e.target.closest('button[data-pick]');
+        if (!b) return;
+        // set the mode directly (not through the tabled test panel)
+        root.dataset.mode = b.dataset.pick;
+        delete root.dataset.wall; previewWall = null;
+        try { localStorage.setItem('jdm-mode', b.dataset.pick); localStorage.removeItem('jdm-wall'); } catch (err) {}
+        applyPhotos(); applyWall(); markSettings(); markPick();
       });
     }
     btn.addEventListener('click', function (e) {
