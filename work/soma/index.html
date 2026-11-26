@@ -7,41 +7,38 @@
   <meta name="description" content="Juan De Marco">
   <meta name="robots" content="noai, noimageai">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/style.css?v=143fcadb">
-  <script src="/type.js?v=143fcadb"></script>
-  <script src="/images.js?v=143fcadb"></script>
-  <script src="/site.js?v=143fcadb" defer></script>
+  <link rel="stylesheet" href="/style.css?v=1f7717ed">
+  <script src="/type.js?v=1f7717ed"></script>
+  <script src="/images.js?v=1f7717ed"></script>
+  <script src="/site.js?v=1f7717ed" defer></script>
 </head>
-<body class="inner">
+<body class="inner room">
   <div class="scroller">
-  <main class="page page-wide project">
-    <div class="project-layout">
-      <div class="project-main">
-        <div class="slideshow" data-count="4">
-          <div class="frame">
-        <img class="slide is-on contain" src="/images/work/soma/01.webp" alt="SOMA, image 1" decoding="async">
-        <img class="slide contain" data-src="/images/work/soma/02.webp" alt="SOMA, image 2" decoding="async">
-        <img class="slide contain" data-src="/images/work/soma/03.webp" alt="SOMA, image 3" decoding="async">
-        <img class="slide contain" data-src="/images/work/soma/04.webp" alt="SOMA, image 4" decoding="async">
-            <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
-            <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
-          </div>
+  <main class="room-page project-room">
+    <div class="room-top">
+      <span class="room-where"><a href="/work/">Work</a> / SOMA</span>
+      <a class="room-close" href="/work/" aria-label="Close and go back to Work">&times;</a>
+    </div>
+    <div class="room-layout" style="--ratio:1.7778">
+      <div class="slideshow room-show" data-count="4">
+        <div class="frame">
+        <img class="slide contain is-on" src="/images/work/soma/01.webp" data-r="1.7778" alt="SOMA, image 1 of 4" decoding="async" draggable="false">
+        <img class="slide contain" data-src="/images/work/soma/02.webp" data-r="1.7778" alt="SOMA, image 2 of 4" decoding="async" draggable="false">
+        <img class="slide contain" data-src="/images/work/soma/03.webp" data-r="1.7778" alt="SOMA, image 3 of 4" decoding="async" draggable="false">
+        <img class="slide contain" data-src="/images/work/soma/04.webp" data-r="1.7778" alt="SOMA, image 4 of 4" decoding="async" draggable="false">
+          <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
+          <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
         </div>
+        <div class="room-under"><div class="slide-count"><span class="slide-i">1</span> / 4</div>
+          <button class="room-zoom" type="button" aria-pressed="false" aria-label="Magnify" title="Magnify"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M13 13l5 5" stroke="currentColor" stroke-width="1.3"/></svg></button></div>
       </div>
-      <div class="project-text">
+      <div class="room-text">
         <h1>SOMA</h1>
         <p class="meta">2024 · Pigment print</p>
-        <div class="slide-count"><span class="slide-i">1</span> / 4</div>
-        <nav class="project-nav" aria-label="Projects">
+        <nav class="project-nav room-pnav" aria-label="Projects">
           <a href="/work/frankls-purposive-intention/" title="Frankl’s Purposive Intention">&lsaquo; Prev</a>
-          <a href="/work/">All</a>
           <a href="/work/julius-ii/" title="Julius II">Next &rsaquo;</a>
         </nav>
-        <div class="project-desc">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus, posuere velit aliquet. Donec ullamcorper nulla non metus auctor fringilla, vitae elementum lacus vehicula. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui.</p>
-      <p>Maecenas faucibus mollis interdum. Cras mattis consectetur purus sit amet fermentum. Nullam quis risus eget urna mollis ornare vel eu leo. Aenean lacinia bibendum nulla sed consectetur, et lucem in umbra quaerit. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam.</p>
-      <p>Vestibulum id ligula porta felis euismod semper. Curabitur blandit tempus porttitor, sed posuere consectetur est at lobortis. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante.</p>
-        </div>
       </div>
     </div>
   </main>
@@ -69,6 +66,12 @@
     </div>
     <div class="mode-pick-modes">
       <button type="button" data-fs>Full screen</button>
+    </div>
+    <div class="mode-pick-modes mode-pick-layout">
+      <button type="button" data-wv="squares">Squares</button>
+      <button type="button" data-wv="grid">Grid V1</button>
+      <button type="button" data-wv="1a">Strip 1A</button>
+      <button type="button" data-wv="1b">Strip 1B</button>
     </div>
     <div class="mode-pick-work">
       <label>Space <input type="range" data-wk="gap" min="0" max="120" step="1"><output></output></label>

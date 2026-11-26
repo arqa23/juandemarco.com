@@ -894,3 +894,46 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   .project-main .slide.contain { object-position: right top; }
   :root[data-ptext="off"] .project-main .slide.contain { object-position: right bottom; }
 }
+
+/* ---------- Work layouts (Juan, 2026-11-26), picked in the view box ---------- */
+.mode-pick-layout { display: none; }
+.mode-pick.on-work .mode-pick-layout { display: flex; }
+.mode-pick .mode-pick-work { display: none; }
+.mode-pick.on-work.on-1b .mode-pick-work { display: flex; }
+
+/* Filmstrip 1A (as before PR #50): equal squares, small even gaps, no growing */
+:root[data-work="1a"] .work-page { --tile-gap: max(6px, calc(10 * var(--s))); }
+:root[data-work="1a"] .work-page .grid { padding: 0; }
+
+@media (hover: hover) and (min-width: 761px) {
+  /* Squares Grid V1 (as on juandemarco.us): four columns of squares, page
+     scrolls, the title shows over the square on hover */
+  :root[data-work="grid"] .work-page { position: static; display: block; padding: calc(var(--header-h) + var(--edge) * .35) calc(var(--gutter) + max(160px, calc(240 * var(--s)))) calc(var(--gutter) * 3) var(--edge) !important; }
+  :root[data-work="grid"] .work-page .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: max(12px, calc(28 * var(--s))); overflow: visible; padding: 0; cursor: default; }
+  :root[data-work="grid"] .work-page .card { width: auto; top: 0; }
+  :root[data-work="grid"] .work-page .card img { aspect-ratio: 1; }
+
+  /* Squares (Tyler Hobbs-style): placed by site.js */
+  :root[data-work="squares"] .work-page .grid { display: block; overflow: visible; padding: 0; cursor: default; }
+  :root[data-work="squares"] .work-page .card { position: fixed; width: var(--sq, 180px); top: 0; overflow: visible; visibility: hidden; }
+  :root[data-work="squares"] .work-page.is-squares .card { visibility: visible; }
+  :root[data-work="squares"] .work-page .card img { aspect-ratio: 1; }
+  :root[data-work="squares"] .work-page .card:hover img { transform: none; opacity: .88; }
+  :root[data-work="squares"] .work-page .card-title {
+    position: static; display: block; opacity: 1; background: none; padding: 0; margin-top: .7em;
+    text-align: left; white-space: nowrap; overflow: visible; color: var(--ink-dim);
+    font-family: var(--caption-font, var(--font)); font-weight: var(--caption-w, 400);
+    font-size: calc(var(--nav-size) * var(--caption-scale, .7)) !important;
+    letter-spacing: var(--caption-track, .2em); text-transform: var(--caption-case, uppercase);
+  }
+  :root[data-work="squares"] .work-page .card:hover .card-title { color: var(--ink); }
+}
+
+/* Project pages in the print-room format: the project label to the right */
+.room-text .room-pnav { margin-top: 1.6em; gap: 1.4em; }
+.room-text .room-pnav a { color: var(--ink); }
+/* phones: Squares and Grid V1 become two columns of squares, titles under them */
+@media (hover: none), (max-width: 760px) {
+  :root[data-work="squares"] .work-page .grid, :root[data-work="grid"] .work-page .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; overflow: visible; padding: 0 var(--gutter); }
+  :root[data-work="squares"] .work-page .card, :root[data-work="grid"] .work-page .card { width: auto; }
+}
