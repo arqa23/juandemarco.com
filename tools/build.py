@@ -118,6 +118,8 @@ NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Gallery", 
 
 # Print series (MOCKUP names and text). slug, name, source, short text.
 PRINT_SERIES = [
+    ("sketches", "Sketches", "Gallery sketches, 2026",
+     "Line studies drawn for print, 2:3 sheets at 8 \u00d7 12 in. Series text to come."),
     ("silhouettes", "Silhouettes", "From March of the Silhouettes, 2014",
      "Ink figures cut from the March of the Silhouettes drawings. Series text to come."),
     ("elevations", "Elevations", "From American Promise, 2016",
@@ -188,6 +190,10 @@ def _page(title, section, body, body_class="", head_extra=""):
     <div class="mode-pick-modes">
       <button type="button" data-pick="light">Light</button>
       <button type="button" data-pick="dark">Dark</button>
+    </div>
+    <div class="mode-pick-modes mode-pick-frame">
+      <button type="button" data-frame="on">Framed</button>
+      <button type="button" data-frame="off">Unframed</button>
     </div>
     <p class="mode-pick-legal">&copy; Juan De Marco | <span class="yr">{YEAR}</span></p>
   </div>
@@ -398,13 +404,26 @@ def main():
     import random
     from PIL import Image
     rnd = random.Random(23)
+
+    def bare_attr(slug, f):   # the same print without its paper, when there is one
+        return f' data-bare="/images/prints/{slug}/bare/{f}"' if (ROOT / "images" / "prints" / slug / "bare" / f).exists() else ""
     allp = []
     for slug, name, source, blurb in PRINT_SERIES:
         files = sorted(f.name for f in (ROOT / "images" / "prints" / slug).glob("[0-9]*.webp"))
         for k, f in enumerate(files):
             w, h = Image.open(ROOT / "images" / "prints" / slug / f).size
             allp.append((slug, name, k, f, w, h))
-    rnd.shuffle(allp)
+    # Gallery test (Juan, 2026-11-25): only the six Gallery sketches, each hung
+    # five times, so the wall shows 30 prints. The older mockup series keep their
+    # rooms but are off the wall for now.
+    six = [p for p in allp if p[0] == "sketches"]
+    allp = []
+    for _ in range(5):   # five rounds of all six, so a row never repeats a print
+        r = six[:]
+        rnd.shuffle(r)
+        while allp and r[0] == allp[-1]:
+            rnd.shuffle(r)
+        allp += r
     # Gallery wall: shuffled prints of random sizes on a 12-column grid with one
     # gutter size both ways; site.js sets each print's height in 4px rows (masonry).
     items = []
@@ -412,7 +431,7 @@ def main():
         size = rnd.choice([0.55, 0.75, 1, 1, 1.3, 1.6, 2.1, 2.7])
         items.append(
             f'      <a class="print" href="/prints/{slug}/#{k + 1}" data-size="{size}">\n'
-            f'        <img src="/images/prints/{slug}/{f}" width="{w}" height="{h}" alt="{name}, print {k + 1}" loading="lazy" decoding="async" draggable="false">\n'
+            f'        <img src="/images/prints/{slug}/{f}"{bare_attr(slug, f)} width="{w}" height="{h}" alt="{name}, print {k + 1}" loading="lazy" decoding="async" draggable="false">\n'
             f'        <span class="print-cap"><em>{name}</em>, No. {k + 1}</span>\n      </a>')
     for slug, name, source, blurb in PRINT_SERIES:
         files = sorted(f.name for f in (ROOT / "images" / "prints" / slug).glob("[0-9]*.webp"))
@@ -424,6 +443,7 @@ def main():
         slides = "\n".join(
             f'        <img class="slide contain{" is-on" if k == 0 else ""}" {"src" if k == 0 else "data-src"}="/images/prints/{slug}/{f}" '
             f'data-r="{dims[k][0] / dims[k][1]:.4f}" alt="{name}, print {k + 1} of {len(files)}" decoding="async" draggable="false">' for k, f in enumerate(files))
+        mock = "" if slug == "sketches" else '        <p class="room-mock">Mockup: sections of existing drawings stand in for the final prints.</p>'
         room = f"""  <main class="room-page">
     <div class="room-top">
       <span class="room-where"><a href="/prints/">Gallery</a> / {name}</span>
@@ -444,7 +464,7 @@ def main():
         <p class="meta">Series of {len(files)} &middot; {fmt} &middot; {source}</p>
         <p>{blurb}</p>
         <p class="room-buy">Print options coming soon</p>
-        <p class="room-mock">Mockup: sections of existing drawings stand in for the final prints.</p>
+{mock}
       </div>
     </div>
   </main>

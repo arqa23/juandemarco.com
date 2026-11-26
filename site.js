@@ -95,6 +95,15 @@
     btn.classList.remove('is-open');
     btn.setAttribute('aria-expanded', 'false');
   }
+  // Gallery prints with or without their paper (view box: Framed / Unframed)
+  function applyFrame() {
+    var off = root.dataset.frame === 'off';
+    document.querySelectorAll('.print img[data-bare]').forEach(function (im) {
+      if (!im.dataset.framed) im.dataset.framed = im.getAttribute('src');
+      var want = off ? im.dataset.bare : im.dataset.framed;
+      if (im.getAttribute('src') !== want) im.setAttribute('src', want);
+    });
+  }
   function applyPhotos() {
     var b = document.body;
     if (b.classList.contains('photo')) b.dataset.photoPage = '1';
@@ -110,10 +119,20 @@
     var btn = document.querySelector('.settings-btn'), panel = document.getElementById('settings');
     if (!btn || !panel) return;
     var pick = document.getElementById('mode-pick');
-    var markPick = function () { if (pick) pick.querySelectorAll('[data-pick]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.mode || PREF_DEFAULTS.mode) === b.dataset.pick); }); };
+    var markPick = function () {
+      if (!pick) return;
+      pick.querySelectorAll('[data-pick]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.mode || PREF_DEFAULTS.mode) === b.dataset.pick); });
+      pick.querySelectorAll('[data-frame]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.frame || 'on') === b.dataset.frame); });
+    };
     if (pick) {
       pick.addEventListener('click', function (e) {
         e.stopPropagation();
+        var fb = e.target.closest('[data-frame]');
+        if (fb) {
+          root.dataset.frame = fb.dataset.frame;
+          try { localStorage.setItem('jdm-frame', fb.dataset.frame); } catch (err) {}
+          applyFrame(); markPick(); return;
+        }
         var b = e.target.closest('[data-pick]'), src = b && panel.querySelector('[data-pref="mode"][data-val="' + b.dataset.pick + '"]');
         if (src) src.click();
         markPick();
@@ -702,7 +721,7 @@
     initToTop();
     turnLegal();
     layoutWall();
-    applyPhotos(); applyWall();
+    applyPhotos(); applyWall(); applyFrame();
     place();
     initSettings();
     initSlideshow();
