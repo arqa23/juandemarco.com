@@ -195,6 +195,10 @@ def _page(title, section, body, body_class="", head_extra=""):
       <button type="button" data-frame="on">Framed</button>
       <button type="button" data-frame="off">Unframed</button>
     </div>
+    <div class="mode-pick-modes mode-pick-frame">
+      <button type="button" data-ptext="on">Text</button>
+      <button type="button" data-ptext="off">No text</button>
+    </div>
     <p class="mode-pick-legal">&copy; Juan De Marco | <span class="yr">{YEAR}</span></p>
   </div>
 

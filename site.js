@@ -128,7 +128,8 @@
     var markPick = function () {
       if (!pick) return;
       pick.querySelectorAll('[data-pick]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.mode || PREF_DEFAULTS.mode) === b.dataset.pick); });
-      pick.querySelectorAll('[data-frame]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.frame || 'on') === b.dataset.frame); });
+      pick.querySelectorAll('button[data-frame]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.frame || 'on') === b.dataset.frame); });
+      pick.querySelectorAll('button[data-ptext]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.ptext || 'on') === b.dataset.ptext); });
     };
     if (pick) {
       pick.addEventListener('click', function (e) {
@@ -138,6 +139,12 @@
           root.dataset.frame = fb.dataset.frame;
           try { localStorage.setItem('jdm-frame', fb.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
+        }
+        var tb = e.target.closest('button[data-ptext]');
+        if (tb) {
+          root.dataset.ptext = tb.dataset.ptext;
+          try { localStorage.setItem('jdm-ptext', tb.dataset.ptext); } catch (err) {}
+          markPick(); return;
         }
         var b = e.target.closest('button[data-pick]');
         if (!b) return;
@@ -802,19 +809,66 @@
     if (d) g.dataset.dir = d; else delete g.dataset.dir;
     g._cutBy = by;
   }
+  /* Endless strip (Juan, 2026-11-26, after wschupfer.com/new-york): each tile
+     gets a slightly different shape and sits a little higher or lower, at
+     equal gaps along the strip. The set of projects is hung three times in a
+     row; when the middle of the window passes into the first or last copy,
+     the strip jumps by one set to the matching tile, so it never ends. */
+  function endlessStrip(g) {
+    var orig = [].slice.call(g.querySelectorAll('.card')), n = orig.length, prev = 0;
+    if (n < 2) return;
+    orig.forEach(function (c) {
+      var ar = 0.84 + Math.random() * 0.36;                        // width/height 0.84 to 1.2
+      var sign = Math.random() < 0.7 ? -Math.sign(prev || 1) : Math.sign(prev || 1);
+      var dy = sign * (0.03 + Math.random() * 0.09);               // up to 12% of the tile height
+      prev = dy;
+      c.style.setProperty('--ar', ar.toFixed(3));
+      c.style.setProperty('--dy', dy.toFixed(3));
+    });
+    for (var r = 0; r < 2; r++) orig.forEach(function (c) {
+      var x = c.cloneNode(true);
+      x.setAttribute('aria-hidden', 'true'); x.tabIndex = -1;
+      g.appendChild(x);
+    });
+    g._n = n;
+    var cards = g.querySelectorAll('.card');
+    g._base = cards[n].getBoundingClientRect().left - cards[0].getBoundingClientRect().left;
+    g.addEventListener('scroll', function () { wrapStrip(g); }, { passive: true });
+  }
+  function wrapStrip(g) {
+    var n = g._n; if (!n) return;
+    var c = g.querySelectorAll('.card'), gr = g.getBoundingClientRect(), mid = gr.left + gr.width / 2;
+    var dir = mid < c[n].getBoundingClientRect().left ? 1 : mid > c[2 * n].getBoundingClientRect().left ? -1 : 0;
+    if (!dir) return;
+    // anchor: the tile nearest the middle; its twin one set along takes its place
+    var a = 0, best = Infinity;
+    c.forEach(function (el, i) { var r = el.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid); if (d < best) { best = d; a = i; } });
+    var b = a + dir * n; if (b < 0 || b >= 3 * n) return;
+    var leftA = c[a].getBoundingClientRect().left, ks = [];
+    c.forEach(function (el) { ks.push(el._k || 1); });
+    c.forEach(function (el, j) { var k = ks[j - dir * n]; k = k == null ? 1 : k; el._k = k; el.style.setProperty('--k', k.toFixed(4)); });
+    var d = c[b].getBoundingClientRect().left - leftA, before = g.scrollLeft;
+    g.scrollLeft = before + d; d = g.scrollLeft - before;
+    g._base += d;
+    if (drag && drag.g === g) drag.left += d;
+    if (drift.el === g) { drift.pos += d; if (drift.ease) { drift.ease.from += d; drift.ease.to += d; } }
+  }
   function initFilmstrip() {
     var g = strip();
     if (!g || g.dataset.ready) return;
     g.dataset.ready = '1';
+    g._base = 0;
+    if (matchMedia('(hover: hover) and (min-width: 761px)').matches) endlessStrip(g);
     var card = g.querySelector('.card');
-    var from = Math.min(g.scrollWidth - g.clientWidth, card ? card.offsetWidth * 0.9 : 500);
+    var from = Math.min(g.scrollWidth - g.clientWidth - g._base, card ? card.offsetWidth * 0.9 : 500);
+    g.scrollLeft = g._base;
     if (from > 0 && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
       var t0 = null, dur = 4850;   // 30% slower than before (3400)
-      g.scrollLeft = from;
+      g.scrollLeft = g._base + from;
       var step = function (t) {
         if (t0 === null) t0 = t;
         var k = Math.min(1, (t - t0) / dur), e = 0.5 - 0.5 * Math.cos(Math.PI * k);
-        g.scrollLeft = from * (1 - e);
+        g.scrollLeft = g._base + from * (1 - e);
         glide = k < 1 ? requestAnimationFrame(step) : null;
       };
       stopGlide(); glide = requestAnimationFrame(step);
@@ -932,7 +986,7 @@
     var cards = T.items, el = T.el;
     if (!cards.length || (drag && dragMoved)) return 0;
     var base = innerHeight, rects = [], change = false;
-    cards.forEach(function (c, n) { c._k = c._k || 1; var r = c.getBoundingClientRect(); rects.push(r); if (!n) base = r.width / c._k; });
+    cards.forEach(function (c, n) { c._k = c._k || 1; var r = c.getBoundingClientRect(); rects.push(r); if (!n) base = r.height / c._k; });
     var R = base * 1.1, ks = [];
     cards.forEach(function (c, n) {
       var r = rects[n], t = 1;
@@ -988,7 +1042,8 @@
       drift.ramp = Math.min(1, drift.ramp + dt / 2.5);
       drift.slow += ((1 - 0.95 * prox) - drift.slow) * Math.min(1, dt * 2.5);
       drift.pos += (T.x ? 7 : 10) * drift.slow * drift.ramp * drift.ramp * drift.dir * dt;
-      if (drift.pos >= max) { drift.pos = max; drift.dir = -1; } else if (drift.pos <= 0) { drift.pos = 0; drift.dir = 1; }
+      if (T.x && el._n) drift.dir = 1;   // endless strip: no ends to turn at
+      else if (drift.pos >= max) { drift.pos = max; drift.dir = -1; } else if (drift.pos <= 0) { drift.pos = 0; drift.dir = 1; }
       set(drift.pos);
     }
     drift.raf = requestAnimationFrame(driftTick);
