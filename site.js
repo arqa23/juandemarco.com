@@ -132,7 +132,11 @@
         mode: (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark' ? 'On' : 'Off',
         frame: (root.dataset.frame || 'on') === 'on' ? 'On' : 'Off',
         fs: document.fullscreenElement ? 'On' : 'Off',
+        art: 'ArtView' + (root.dataset.art || '2'),
       };
+      pick.querySelectorAll('button[data-hv]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.hang || PREF_DEFAULTS.hang) === b.dataset.hv); });
+      pick.classList.toggle('on-gal', !!document.querySelector('.prints'));
+      pick.classList.toggle('on-room', document.body.classList.contains('room'));
       pick.querySelectorAll('button[data-wv]').forEach(function (b) { b.classList.toggle('is-on', workView() === b.dataset.wv); });
       pick.classList.toggle('on-g2', workView() === 'grid2');
       pick.querySelectorAll('button[data-shapes] span').forEach(function (sp) { sp.textContent = tileShapes() === 'mixed' ? 'Mixed' : 'Squares'; });
@@ -159,6 +163,12 @@
           if (document.querySelector('.work-page')) location.reload(); else markPick();
           return;
         }
+        var hv = e.target.closest('button[data-hv]');   // working mode: pick a Gallery layout
+        if (hv) {
+          root.dataset.hang = hv.dataset.hv;
+          try { localStorage.setItem('jdm-hang', hv.dataset.hv); } catch (err) {}
+          layoutWall(); markPick(); return;
+        }
         if (e.target.closest('button[data-shapes]')) {
           try { localStorage.setItem('jdm-shapes', tileShapes() === 'mixed' ? 'square' : 'mixed'); } catch (err) {}
           location.reload(); return;
@@ -170,6 +180,11 @@
           root.dataset.frame = (root.dataset.frame || 'on') === 'on' ? 'off' : 'on';
           try { localStorage.setItem('jdm-frame', root.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
+        }
+        if (k === 'art') {   // ArtView1 (as of 2026-11-26) or ArtView2
+          root.dataset.art = (root.dataset.art || '2') === '2' ? '1' : '2';
+          try { localStorage.setItem('jdm-art', root.dataset.art); } catch (err) {}
+          location.reload(); return;
         }
         if (k === 'fs') {
           var de = document.documentElement;
@@ -310,26 +325,54 @@
     function load(k) {
       var s = slides[(k + slides.length) % slides.length];
       if (s && s.dataset.src) { s.src = s.dataset.src; s.removeAttribute('data-src'); }
+      return s;
     }
-    var layout = show.closest('.room-layout');
+    var layout = show.closest('.room-layout'), frame = show.querySelector('.frame');
     function fit() { if (layout && slides[i].dataset.r) layout.style.setProperty('--ratio', slides[i].dataset.r); }
-    function go(k) {
-      slides[i].classList.remove('is-on');
-      i = (k + slides.length) % slides.length;
-      load(i);
-      slides[i].classList.add('is-on');
-      counter.textContent = i + 1;
-      load(i + 1); load(i - 1);
-      fit();
+    // ArtView2 (Juan, 2026-11-26): inside a band from 8% to 91% of the window
+    // height, every image of a series gets the same width, set by its tallest
+    // image, so the text beside it never moves; heights vary. ArtView1 (the
+    // earlier view) is kept as a choice: <html data-art="1">.
+    function art2() { return !!layout && root.dataset.art !== '1' && matchMedia('(min-width: 761px)').matches; }
+    function sizeArt() {
+      if (!layout) return;
+      if (!art2()) { layout.style.removeProperty('--aw'); return; }
+      var minR = Infinity;
+      slides.forEach(function (s) { minR = Math.min(minR, +s.dataset.r || 1); });
+      var cs = getComputedStyle(layout), gap = parseFloat(cs.columnGap) || 40;
+      var txt = layout.querySelector('.room-text'), tw = txt ? txt.getBoundingClientRect().width : 0;
+      var maxW = layout.clientWidth - 2 * (tw + gap), maxH = layout.clientHeight;
+      layout.style.setProperty('--aw', Math.floor(Math.min(maxW, maxH * minR)) + 'px');
     }
-    fit();
+    // the image is decoded and sized before it shows, then fades in
+    function ready(s) { return s.decode ? s.decode().catch(function () {}) : Promise.resolve(); }
+    var seq = 0;
+    function go(k) {
+      var n = (k + slides.length) % slides.length, my = ++seq, s = load(n);
+      counter.textContent = n + 1;
+      load(n + 1); load(n - 1);
+      if (!art2()) {
+        slides[i].classList.remove('is-on'); i = n; slides[i].classList.add('is-on'); fit();
+        return;
+      }
+      frame.classList.add('is-out');
+      Promise.all([ready(s), new Promise(function (r) { setTimeout(r, 200); })]).then(function () {
+        if (my !== seq) return;
+        slides[i].classList.remove('is-on'); i = n; slides[i].classList.add('is-on'); fit();
+        requestAnimationFrame(function () { if (my === seq) frame.classList.remove('is-out'); });
+      });
+    }
+    fit(); sizeArt();
+    if (layout) {
+      addEventListener('resize', function () { if (document.contains(layout)) sizeArt(); });
+      ready(slides[0]).then(function () { layout.classList.add('is-sized'); });
+    }
     initZoom(show, function () { return slides[i]; });
     load(1); load(-1);
     var start = parseInt(location.hash.slice(1), 10);
     if (start > 1 && start <= slides.length) { load(start - 1); go(start - 1); }
     // Desktop: the cursor over the image shows the way (left half back, right
     // half on) and a click there turns the image.
-    var frame = show.querySelector('.frame');
     if (frame && slides.length > 1) {
       frame.addEventListener('mousemove', function (e) {
         if (frame.classList.contains('zooming')) { delete frame.dataset.dir; return; }
@@ -363,8 +406,9 @@
     var W = wall.clientWidth, g = parseFloat(getComputedStyle(wall).columnGap) || 60;
     var narrow = W < 600, base = W * (narrow ? 0.4 : 0.185), cx = W / 2;
     var hang = document.documentElement.dataset.hang || PREF_DEFAULTS.hang;
-    wall.classList.toggle('is-index', hang === 'index');
-    if (hang === 'index') g = parseFloat(getComputedStyle(wall).columnGap) || 12;
+    var idx = hang === 'index' || hang === 'cluster';   // both: number + title under each print
+    wall.classList.toggle('is-index', idx);
+    if (idx) g = parseFloat(getComputedStyle(wall).columnGap) || 12;
     var capH = 0, cap0 = wall.querySelector('.print-cap');
     var overlay = cap0 && getComputedStyle(cap0).position === 'absolute';   // titles on hover take no room
     if (cap0 && !overlay) capH = cap0.offsetHeight + parseFloat(getComputedStyle(cap0).marginTop);
@@ -383,7 +427,61 @@
       var size = SIZES[Math.floor(rand() * SIZES.length)];
       return { a: a, r: r, cw: cap && !overlay ? capWidth(cap) : 0, w0: Math.min(W * (narrow ? 1 : 0.5), base * Math.sqrt(size * r)) };
     });
-    var best = hang === 'salon' ? salon() : hang === 'flow' ? rows() : hang === 'rows' ? even() : index();
+    var best = hang === 'cluster' ? cluster() : hang === 'salon' ? salon() : hang === 'flow' ? rows() : hang === 'rows' ? even() : index();
+    function numberPrints() {
+      [].forEach.call(wall.querySelectorAll('.print'), function (a, n) {
+        var c = a.querySelector('.print-cap'); if (c) c.dataset.no = '[' + (n + 1 < 10 ? '0' : '') + (n + 1) + ']';
+      });
+    }
+    // Cluster (Juan, 2026-11-26): the Grid V2 way of packing on the Work page.
+    // Prints keep the Index sizes (about a third of the wall wide, varying a
+    // little with shape and per visit) and true shapes; the largest go first,
+    // each to the free spot nearest the top centre of the wall, one gap from its
+    // neighbours (its caption counts as part of it). No rows.
+    function cluster() {
+      numberPrints();
+      var MAX = narrow ? 2 : 3, avail = W - g * (MAX - 1), cx = W / 2, cy = 0, placed = [];
+      var mean = 0; items.forEach(function (it) { mean += Math.pow(it.r, 0.75); }); mean = mean / items.length * 1.025;
+      var dims = items.map(function (it) {
+        var w = Math.min(avail * 0.4, avail / MAX * Math.pow(Math.pow(it.r, 0.75) / mean, 0.5) * (0.78 + rand() * 0.34));
+        return { it: it, w: w, ih: w / it.r, h: w / it.r + capH, j: rand() };
+      });
+      // a few of the largest first, then the rest in a shuffled order, so big and
+      // small mix all the way down instead of the big ones making one column
+      dims.sort(function (p, q) { return q.w * q.h - p.w * p.h; });
+      var head = dims.slice(0, 3), rest = dims.slice(3);
+      for (var i = rest.length - 1; i > 0; i--) { var j = Math.floor(rand() * (i + 1)), t = rest[i]; rest[i] = rest[j]; rest[j] = t; }
+      dims = head.concat(rest);
+      var free = function (x, y, w, h) {
+        if (x < -0.5 || x + w > W + 0.5 || y < -0.5) return false;
+        for (var k = 0; k < placed.length; k++) {
+          var P = placed[k];
+          if (x < P.x + P.w + g - 0.5 && x + w > P.x - g + 0.5 && y < P.y + P.h + g - 0.5 && y + h > P.y - g + 0.5) return false;
+        }
+        return true;
+      };
+      var clamp = function (v, lo, hi) { return Math.max(lo, Math.min(hi, v)); };
+      dims.forEach(function (d) {
+        var w = d.w, h = d.h, best = null, bs = Infinity, cands = [];
+        if (!placed.length) cands.push([cx - w / 2, 0]);
+        placed.forEach(function (P) {
+          var ys = [P.y, P.y + P.h - h, 0];
+          var xs = [P.x, P.x + P.w - w, clamp(cx - w / 2, P.x - w + g, P.x + P.w - g), 0, W - w];
+          ys.forEach(function (y) { cands.push([P.x + P.w + g, y], [P.x - g - w, y], [0, y], [W - w, y]); });
+          xs.forEach(function (x) { cands.push([x, P.y + P.h + g], [x, P.y - g - h]); });
+        });
+        cands.forEach(function (c) {
+          if (!free(c[0], c[1], w, h)) return;
+          var dx = c[0] + w / 2 - cx, dy = (c[1] + h / 2 - cy) * 3, sc = dx * dx + dy * dy;   // hangs from the top centre
+          if (sc < bs) { bs = sc; best = c; }
+        });
+        if (!best) best = [0, placed.reduce(function (m, P) { return Math.max(m, P.y + P.h + g); }, 0)];
+        placed.push({ x: best[0], y: best[1], w: w, h: h, ih: d.ih, it: d.it });
+      });
+      var top = Math.min.apply(null, placed.map(function (P) { return P.y; }));
+      var bot = Math.max.apply(null, placed.map(function (P) { return P.y + P.h; }));
+      return { placed: placed, top: top, h: bot - top };
+    }
     // Index (default; after sort-office.com's index): rows of three that fill
     // the wall edge to edge, tight gaps across, each print at its own shape
     // (so heights vary, tops aligned), a number and title under each, and

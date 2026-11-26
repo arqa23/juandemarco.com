@@ -973,3 +973,32 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 
 .mode-pick .pick-shapes { display: none; }
 .mode-pick.on-work.on-g2 .pick-shapes { display: block; }
+
+/* ArtView2 (Juan, 2026-11-26): no title top left, no arrows beside the image
+   (the cursor turns it); the image sits in a band from 8% to 91% of the
+   window height, every image of a series the same width (site.js sets --aw
+   from the tallest one), so the text to the right never moves. Only the
+   count and magnifier follow the image's lower edge. Each image is sized
+   before it fades in. ArtView1 = <html data-art="1">. */
+@media (min-width: 761px) {
+  :root:not([data-art="1"]) .room-where { visibility: hidden; }
+  :root:not([data-art="1"]) .room-show .slide-btn { display: none; }
+  :root:not([data-art="1"]) .room-layout {
+    position: fixed; top: 8vh; bottom: 9vh; left: calc(var(--gutter) * 1.5); right: calc(var(--gutter) * 1.5);
+    grid-template-columns: var(--text-w) var(--aw, 40vw) var(--text-w); align-items: center;
+  }
+  :root:not([data-art="1"]) .room-show { padding: 0; position: relative; opacity: 0; transition: opacity .45s ease; }
+  :root:not([data-art="1"]) .room-layout.is-sized .room-show { opacity: 1; }
+  :root:not([data-art="1"]) .room-show .frame { width: var(--aw, 40vw); transition: opacity .2s ease; }
+  :root:not([data-art="1"]) .room-show .frame:not(.is-out) { transition: opacity .45s ease; }
+  :root:not([data-art="1"]) .room-show .frame.is-out { opacity: 0; }
+  :root:not([data-art="1"]) .room-show .slide { transition: none; }
+  :root:not([data-art="1"]) .room-under { position: absolute; top: 100%; left: 0; right: 0; width: auto; }
+}
+/* project links: one per line, so they don't read as next image */
+.room-text .room-pnav { flex-direction: column; align-items: flex-start; gap: .55em; }
+
+/* working settings: the Gallery layouts show on the Gallery, Art view in the rooms */
+.mode-pick .pick-hangs, .mode-pick .pick-art { display: none; }
+.mode-pick.on-gal .pick-hangs { display: flex; }
+.mode-pick.on-room .pick-art { display: block; }
