@@ -134,6 +134,8 @@
         fs: document.fullscreenElement ? 'On' : 'Off',
       };
       pick.querySelectorAll('button[data-wv]').forEach(function (b) { b.classList.toggle('is-on', workView() === b.dataset.wv); });
+      pick.classList.toggle('on-g2', workView() === 'grid2');
+      pick.querySelectorAll('button[data-shapes] span').forEach(function (sp) { sp.textContent = tileShapes() === 'mixed' ? 'Mixed' : 'Squares'; });
       pick.querySelectorAll('button[data-tog]').forEach(function (b) { b.querySelector('span').textContent = val[b.dataset.tog]; });
       pick.classList.toggle('on-work', !!document.querySelector('.work-page'));
       pick.classList.toggle('on-1b', workView() === '1b');
@@ -156,6 +158,10 @@
           try { localStorage.setItem('jdm-work', wv.dataset.wv); } catch (err) {}
           if (document.querySelector('.work-page')) location.reload(); else markPick();
           return;
+        }
+        if (e.target.closest('button[data-shapes]')) {
+          try { localStorage.setItem('jdm-shapes', tileShapes() === 'mixed' ? 'square' : 'mixed'); } catch (err) {}
+          location.reload(); return;
         }
         var t = e.target.closest('button[data-tog]');
         if (!t) return;
@@ -957,44 +963,74 @@
     });
   }
   addEventListener('resize', function () { clearTimeout(layoutSquares._t); layoutSquares._t = setTimeout(layoutSquares, 60); });
-  /* Grid V2 (Juan, 2026-11-26, after 6a.co.uk): squares of a few sizes, in
-     rows whose bottoms line up, each row shifted along the wall; the same gap
-     as Grid V1 between squares and between rows. Sizes and shifts are drawn
-     once per visit; a resize re-measures them. */
-  var G2_SIZES = [0.14, 0.18, 0.22, 0.27];
+  /* Grid V2 (Juan, 2026-11-26): the tiles pack together around one centre of
+     gravity. Biggest first, each tile goes to the free spot nearest the centre
+     of the wall, touching a tile already placed at exactly one gap, never
+     overlapping, inside the two wall margins (as on the Gallery). Sizes (and,
+     with "Tile shapes: Mixed", shapes) are drawn once per visit; a resize
+     re-packs them. */
+  var G2_SIZES = [0.17, 0.2, 0.235, 0.27];
+  function tileShapes() { try { return localStorage.getItem('jdm-shapes') || 'square'; } catch (e) { return 'square'; } }
   function initGrid2() {
     var g = document.querySelector('.work-page .grid');
     if (!g || workView() !== 'grid2' || g._g2) return;
     if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
-    var cards = [].slice.call(g.querySelectorAll('.card'));
-    g._g2 = { cards: cards, size: cards.map(function () { return G2_SIZES[Math.floor(Math.random() * G2_SIZES.length)]; }), shift: [] };
+    var cards = [].slice.call(g.querySelectorAll('.card')), mixed = tileShapes() === 'mixed';
+    var LAND = [1, 1, 1.2, 1.33, 1.5];
+    g._g2 = { cards: cards,
+      size: cards.map(function () { return G2_SIZES[Math.floor(Math.random() * G2_SIZES.length)]; }),
+      ar: cards.map(function (c) { return !mixed ? 1 : c.dataset.tall ? 0.68 + Math.random() * 0.1 : LAND[Math.floor(Math.random() * LAND.length)]; }),
+      jit: cards.map(function () { return Math.random(); }) };
+    cards.forEach(function (c, i) { c.style.setProperty('--ar', g._g2.ar[i].toFixed(3)); });
     layoutGrid2();
     g.classList.add('is-g2');
   }
   function layoutGrid2() {
     var g = document.querySelector('.work-page .grid'); if (!g || !g._g2) return;
-    var Q = g._g2, W = g.clientWidth, gap = parseFloat(getComputedStyle(g).columnGap) || 16;
-    var rows = [], row = [], w = 0;
-    Q.cards.forEach(function (c, i) {
-      var sz = Q.size[i] * W;
-      if (row.length && (w + gap + sz > W || row.length >= 4)) { rows.push(row); row = []; w = 0; }
-      row.push(i); w += (row.length > 1 ? gap : 0) + sz;
-    });
-    if (row.length) rows.push(row);
-    var y = 0;
-    rows.forEach(function (r, ri) {
-      var rw = r.reduce(function (a, i) { return a + Q.size[i] * W; }, 0) + gap * (r.length - 1);
-      var hmax = Math.max.apply(null, r.map(function (i) { return Q.size[i] * W; }));
-      if (Q.shift[ri] == null) Q.shift[ri] = Math.random();
-      var x = (W - rw) * Q.shift[ri];
-      r.forEach(function (i) {
-        var c = Q.cards[i], sz = Q.size[i] * W;
-        c.style.width = sz + 'px'; c.style.left = x + 'px'; c.style.top = (y + hmax - sz) + 'px';
-        x += sz + gap;
+    var Q = g._g2, W = g.clientWidth, gap = parseFloat(getComputedStyle(g).columnGap) || 12;
+    var cx = W / 2, cy = 0, placed = [];
+    // equal area for a given size, whatever the shape
+    var dims = Q.cards.map(function (c, i) { var a = Q.size[i] * W, r = Math.sqrt(Q.ar[i]); return { w: a * r, h: a / r, i: i }; });
+    var order = dims.slice().sort(function (p, q) { return (q.w * q.h) * (0.85 + Q.jit[q.i] * 0.3) - (p.w * p.h) * (0.85 + Q.jit[p.i] * 0.3); });
+    var free = function (x, y, w, h) {
+      if (x < -0.5 || x + w > W + 0.5) return false;
+      for (var k = 0; k < placed.length; k++) {
+        var P = placed[k];
+        if (x < P.x + P.w + gap - 0.5 && x + w > P.x - gap + 0.5 && y < P.y + P.h + gap - 0.5 && y + h > P.y - gap + 0.5) return false;
+      }
+      return true;
+    };
+    var clamp = function (v, lo, hi) { return Math.max(lo, Math.min(hi, v)); };
+    order.forEach(function (d) {
+      var w = d.w, h = d.h, best = null, bs = Infinity;
+      var cands = [];
+      if (!placed.length) cands.push([cx - w / 2, cy - h / 2]);
+      placed.forEach(function (P) {
+        var ys = [P.y, P.y + P.h - h, clamp(cy - h / 2, P.y - h + gap, P.y + P.h - gap)];
+        var xs = [P.x, P.x + P.w - w, clamp(cx - w / 2, P.x - w + gap, P.x + P.w - gap)];
+        ys.forEach(function (y) { cands.push([P.x + P.w + gap, y], [P.x - gap - w, y]); });
+        xs.forEach(function (x) { cands.push([x, P.y + P.h + gap], [x, P.y - gap - h]); });
       });
-      y += hmax + gap;
+      cands.forEach(function (c) {
+        var x = c[0], y = c[1];
+        if (!free(x, y, w, h)) return;
+        var dx = x + w / 2 - cx, dy = (y + h / 2 - cy) * 1.25;   // a little wider than tall
+        var sc = dx * dx + dy * dy;
+        if (sc < bs) { bs = sc; best = [x, y]; }
+      });
+      if (!best) best = [0, placed.reduce(function (m, P) { return Math.max(m, P.y + P.h + gap); }, 0)];
+      placed.push({ x: best[0], y: best[1], w: w, h: h, i: d.i });
     });
-    g.style.height = (y - gap) + 'px';
+    var top = Math.min.apply(null, placed.map(function (P) { return P.y; }));
+    var bot = Math.max.apply(null, placed.map(function (P) { return P.y + P.h; }));
+    // centred in the window below the name when it fits; otherwise from the top
+    var gr = g.getBoundingClientRect(), room = innerHeight - gr.top - 40, H = bot - top;
+    var off = Math.max(0, (room - H) / 2) - top;
+    placed.forEach(function (P) {
+      var c = Q.cards[P.i];
+      c.style.left = P.x + 'px'; c.style.top = (P.y + off) + 'px'; c.style.width = P.w + 'px';
+    });
+    g.style.height = Math.max(H, room) + 'px';
   }
   addEventListener('resize', function () { clearTimeout(layoutGrid2._t); layoutGrid2._t = setTimeout(layoutGrid2, 60); });
   function initFilmstrip() {
