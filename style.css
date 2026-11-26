@@ -750,8 +750,9 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
    (wheel, drag or arrow keys), first project to last, edge to edge; it glides
    in slowly on arrival. Previous: full-screen grid (PR #24). */
 .work-page {
-  --tile-gap: max(6px, calc(10 * var(--s)));
+  --tile-gap: max(16px, calc(44 * var(--s)));   /* was 10: a little more air (Juan, 2026-11-26) */
   --strip-pad: calc(var(--gutter) + 180 * var(--s) + 20px);
+  --tile-h: calc(100vh - 2 * var(--strip-pad));
   position: fixed; inset: 0; z-index: 1;
   display: flex; align-items: center;
   padding: 0 !important; margin: 0 !important; max-width: none;
@@ -764,14 +765,19 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   scrollbar-width: none;
 }
 .work-page .grid::-webkit-scrollbar { display: none; }
-.work-page .card { flex: 0 0 auto; width: calc((100vh - 2 * var(--strip-pad)) * var(--k, 1)); }
+.work-page .card { flex: 0 0 auto; width: calc(var(--tile-h) * var(--ar, 1) * var(--k, 1)); transform: translateY(calc(var(--tile-h) * var(--dy, 0))); }
+.work-page .card img { aspect-ratio: var(--ar, 1); }
+/* room above and below for tiles hung higher or lower, and for the magnified one */
+.work-page .grid { padding: calc(var(--tile-h) * .25) 0; }
 .work-page .grid { align-items: center; }
 .work-page .grid { cursor: grab; user-select: none; -webkit-user-select: none; }
 .work-page .grid.is-dragging { cursor: grabbing; }
 .work-page .grid.is-dragging .card { pointer-events: none; }
 @media (hover: none), (max-width: 760px) {
   .work-page { position: static; display: block; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) 0 90px !important; }
-  .work-page .card { width: 72vw; }
+  .work-page .card { width: 72vw; transform: none; }
+  .work-page .card img { aspect-ratio: 1; }
+  .work-page .grid { padding: 0; }
 }
 
 /* Desktop: over an image that leads somewhere, the cursor becomes a gently
@@ -854,3 +860,9 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 :root[data-frame="off"] .print img[data-bare] { box-shadow: none; background: none; }
 :root[data-frame="off"][data-mode="dark"] .print img[data-ink] { filter: invert(1); }   /* line drawings only, not the colour prints */
 .mode-pick-frame { padding-top: 6px; border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); }
+
+/* Test (Juan, 2026-11-26): project pages without the description text, the
+   images centred in the window. View box: Text / No text. */
+:root[data-ptext="off"] .project-text { display: none; }
+:root[data-ptext="off"] .project-main { margin-left: calc((100vw - var(--frame-w)) / 2 - var(--edge)); }
+@media (max-width: 760px) { :root[data-ptext="off"] .project-main { margin-left: 0; } }
