@@ -963,8 +963,13 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 /* Grid V2 (6a-style packing of squares of a few sizes), placed by site.js */
 @media (hover: hover) and (min-width: 761px) {
   :root[data-work="grid2"] .work-page { position: static; display: block; padding: calc(var(--header-h) + var(--edge) * .35) calc(var(--gutter) + max(160px, calc(240 * var(--s)))) calc(var(--gutter) * 3) var(--edge) !important; }
-  :root[data-work="grid2"] .work-page .grid { display: block; position: relative; column-gap: max(7px, calc(16.8 * var(--s))); overflow: visible; padding: 0; cursor: default; }
+  /* two wall margins, as on the Gallery; gap 30% less than Grid V1 (Juan, 2026-11-26) */
+  :root[data-work="grid2"] .work-page .grid { display: block; position: relative; column-gap: max(5px, calc(11.8 * var(--s))); overflow: visible; padding: 0; cursor: default;
+    width: auto; margin: 0 0 0 calc(max(160px, calc(240 * var(--s))) + var(--gutter) - var(--edge)); }
   :root[data-work="grid2"] .work-page .card { position: absolute; top: 0; visibility: hidden; }
   :root[data-work="grid2"] .work-page .grid.is-g2 .card { visibility: visible; }
-  :root[data-work="grid2"] .work-page .card img { aspect-ratio: 1; }
+  :root[data-work="grid2"] .work-page .card img { aspect-ratio: var(--ar, 1); }
 }
+
+.mode-pick .pick-shapes { display: none; }
+.mode-pick.on-work.on-g2 .pick-shapes { display: block; }

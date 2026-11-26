@@ -181,6 +181,7 @@ def _page(title, section, body, body_class="", head_extra=""):
         '    <div class="pick-layouts">\n      <span class="pick-head">Work layout</span>\n'
         + "".join(f'      <button type="button" class="pick-row pick-opt" data-wv="{k}">{v}</button>\n' for k, v in WORK_LAYOUTS)
         + '    </div>\n'
+        '    <button type="button" class="pick-row pick-shapes" data-shapes>Tile shapes: <span></span></button>\n'
         '    <div class="mode-pick-work">\n'
         '      <label>Space <input type="range" data-wk="gap" min="0" max="120" step="1"><output></output></label>\n'
         '      <label>Up <input type="range" data-wk="up" min="0" max="45" step="1"><output></output></label>\n'
