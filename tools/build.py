@@ -406,7 +406,11 @@ def main():
     rnd = random.Random(23)
 
     def bare_attr(slug, f):   # the same print without its paper, when there is one
-        return f' data-bare="/images/prints/{slug}/bare/{f}"' if (ROOT / "images" / "prints" / slug / "bare" / f).exists() else ""
+        d, _, name = f.rpartition("/")
+        b = (d + "/" if d else "") + "bare/" + name
+        if not (ROOT / "images" / "prints" / slug / b).exists():
+            return ""
+        return f' data-bare="/images/prints/{slug}/{b}"' + (' data-ink="1"' if slug == "sketches" else "")
     allp = []
     for slug, name, source, blurb in PRINT_SERIES:
         files = sorted(f.name for f in (ROOT / "images" / "prints" / slug).glob("[0-9]*.webp"))
@@ -416,6 +420,7 @@ def main():
     # Gallery test (Juan, 2026-11-25): only the six Gallery sketches, each hung
     # five times, so the wall shows 30 prints. The older mockup series keep their
     # rooms but are off the wall for now.
+    allp_all = allp
     six = [p for p in allp if p[0] == "sketches"]
     allp = []
     for _ in range(5):   # five rounds of all six, so a row never repeats a print
@@ -424,6 +429,12 @@ def main():
         while allp and r[0] == allp[-1]:
             rnd.shuffle(r)
         allp += r
+    # a few of the line drawings hang turned a quarter (Juan, 2026-11-25)
+    allp = [(sl, nm, k, "rot/" + f, h, w) if rnd.random() < 0.27 else (sl, nm, k, f, w, h)
+            for sl, nm, k, f, w, h in allp]
+    # and the SOMA prints, once each, somewhere along the wall
+    for p in [p for p in allp_all if p[0] == "soma"]:
+        allp.insert(rnd.randrange(len(allp) + 1), p)
     # Gallery wall: shuffled prints of random sizes on a 12-column grid with one
     # gutter size both ways; site.js sets each print's height in 4px rows (masonry).
     items = []
