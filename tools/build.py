@@ -200,6 +200,12 @@ def _page(title, section, body, body_class="", head_extra=""):
     <div class="mode-pick-modes">
       <button type="button" data-fs>Full screen</button>
     </div>
+    <div class="mode-pick-modes mode-pick-layout">
+      <button type="button" data-wv="squares">Squares</button>
+      <button type="button" data-wv="grid">Grid V1</button>
+      <button type="button" data-wv="1a">Strip 1A</button>
+      <button type="button" data-wv="1b">Strip 1B</button>
+    </div>
     <div class="mode-pick-work">
       <label>Space <input type="range" data-wk="gap" min="0" max="120" step="1"><output></output></label>
       <label>Up <input type="range" data-wk="up" min="0" max="45" step="1"><output></output></label>
@@ -357,6 +363,7 @@ TALL_TILES = {"american-promise", "the-conflicted-icon"}
 
 def main():
     global ASSET_V
+    from PIL import Image
     ASSET_V = asset_version()
     thumbs()
     write("index.html", page("Home", "home", HOME_BODY, "home"))
@@ -382,43 +389,49 @@ def main():
             for k, f in enumerate(files))
         meta = html.escape(p.get("meta", "Year \u00b7 Medium"))
         text = "\n".join(f"      <p>{html.escape(t)}</p>" for t in p.get("text", ["Description coming soon."]))
-        # One compact label beside the image: title, year/medium, image count,
-        # prev / all / next, then the description (Juan, 2026-11-26)
-        body = f"""  <main class="page page-wide project">
-    <div class="project-layout">
-      <div class="project-main">
-        <div class="slideshow" data-count="{len(files)}">
-          <div class="frame">
-{slides}
-            <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
-            <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
-          </div>
+        # Project pages use the Gallery print-room format (Juan, 2026-11-26):
+        # name and menu step away, one image at a time centred, its frame in the
+        # image's own proportions, arrows either side, count + magnifier under
+        # it, the label to the right, x back to Work.
+        dims = [Image.open(ROOT / "images" / "work" / p["slug"] / f).size for f in files]
+        rslides = "\n".join(
+            f'        <img class="slide contain{" is-on" if k == 0 else ""}" {"src" if k == 0 else "data-src"}="/images/work/{p["slug"]}/{f}" '
+            f'data-r="{dims[k][0] / dims[k][1]:.4f}" alt="{html.escape(p["title"])}, image {k + 1} of {len(files)}" decoding="async" draggable="false">'
+            for k, f in enumerate(files))
+        title = html.escape(p["title"])
+        body = f"""  <main class="room-page project-room">
+    <div class="room-top">
+      <span class="room-where"><a href="/work/">Work</a> / {title}</span>
+      <a class="room-close" href="/work/" aria-label="Close and go back to Work">&times;</a>
+    </div>
+    <div class="room-layout" style="--ratio:{dims[0][0] / dims[0][1]:.4f}">
+      <div class="slideshow room-show" data-count="{len(files)}">
+        <div class="frame">
+{rslides}
+          <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
+          <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
         </div>
+        <div class="room-under"><div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
+          <button class="room-zoom" type="button" aria-pressed="false" aria-label="Magnify" title="Magnify"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M13 13l5 5" stroke="currentColor" stroke-width="1.3"/></svg></button></div>
       </div>
-      <div class="project-text">
-        <h1>{html.escape(p["title"])}</h1>
+      <div class="room-text">
+        <h1>{title}</h1>
         <p class="meta">{meta}</p>
-        <div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
-        <nav class="project-nav" aria-label="Projects">
+        <nav class="project-nav room-pnav" aria-label="Projects">
           <a href="/work/{prev_p["slug"]}/" title="{html.escape(prev_p["title"])}">&lsaquo; Prev</a>
-          <a href="/work/">All</a>
           <a href="/work/{next_p["slug"]}/" title="{html.escape(next_p["title"])}">Next &rsaquo;</a>
         </nav>
-        <div class="project-desc">
-{text}
-        </div>
       </div>
     </div>
   </main>
 """
-        write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner"))
+        write(f"work/{p['slug']}/index.html", page(p["title"], "work", body, "inner room"))
 
     # Prints. MOCKUP: 2:3 sheets cut from existing drawings by tools/print_mockups.py.
     # Each series opens as its own "room": one print at a time, text to the side.
     # Free placement: prints are shuffled, then packed row by row on a 12-column
     # grid with random widths, gaps and drops (fixed seed, so it's stable between builds).
     import random
-    from PIL import Image
     rnd = random.Random(23)
 
     def bare_attr(slug, f):   # the same print without its paper, when there is one

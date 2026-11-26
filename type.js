@@ -47,11 +47,14 @@
     var d = document.documentElement.dataset;
     d.theme = 'light';
     d.mode = 'dark';   // the site's default mode (Juan, 2026-11-25)
-    d.ptext = 'off';   // project pages without text by default (Juan, 2026-11-26)
+    d.ptext = 'off';
+    // Work page layout (Juan, 2026-11-26): squares | grid | 1b | 1a
+    d.work = 'squares';   // project pages without text by default (Juan, 2026-11-26)
     if (off) return;
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
-    ['mode', 'frame'].forEach(function (k) {
+    ['mode', 'frame', 'work'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
+      if (k === 'work' && !/^(squares|grid|1a|1b)$/.test(v || '')) v = null;   // old slider data used this key
       if (v) d[k] = v;
     });
   } catch (e) { document.documentElement.dataset.theme = 'light'; }

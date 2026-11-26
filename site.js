@@ -130,7 +130,9 @@
       pick.querySelectorAll('[data-pick]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.mode || PREF_DEFAULTS.mode) === b.dataset.pick); });
       pick.querySelectorAll('button[data-frame]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.frame || 'on') === b.dataset.frame); });
       pick.querySelectorAll('button[data-fs]').forEach(function (b) { b.classList.toggle('is-on', !!document.fullscreenElement); });
-      pick.classList.toggle('on-work', !!strip());
+      pick.classList.toggle('on-work', !!document.querySelector('.work-page'));
+      pick.classList.toggle('on-1b', workView() === '1b');
+      pick.querySelectorAll('button[data-wv]').forEach(function (b) { b.classList.toggle('is-on', workView() === b.dataset.wv); });
       pick.querySelectorAll('input[data-wk]').forEach(function (inp) { inp.value = workSet()[inp.dataset.wk]; inp.nextElementSibling.textContent = inp.value; });
     };
     if (pick) {
@@ -139,7 +141,7 @@
       pick.addEventListener('input', function (e) {
         var inp = e.target.closest('input[data-wk]'); if (!inp) return;
         var w = workSet(); w[inp.dataset.wk] = +inp.value;
-        try { localStorage.setItem('jdm-work', JSON.stringify(w)); } catch (err) {}
+        try { localStorage.setItem('jdm-strip', JSON.stringify(w)); } catch (err) {}
         inp.nextElementSibling.textContent = inp.value;
         applyWork();
       });
@@ -150,6 +152,11 @@
           root.dataset.frame = fb.dataset.frame;
           try { localStorage.setItem('jdm-frame', fb.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
+        }
+        var wv = e.target.closest('button[data-wv]');
+        if (wv) {
+          try { localStorage.setItem('jdm-work', wv.dataset.wv); } catch (err) {}
+          location.reload(); return;
         }
         if (e.target.closest('button[data-fs]')) {
           var de = document.documentElement;
@@ -754,6 +761,7 @@
     initSettings();
     initSlideshow();
     initFilmstrip();
+    initSquares();
     initWallGlide();
     initPress();
     startDrift();
@@ -768,16 +776,18 @@
   document.addEventListener('dragstart', function (e) { if (e.target.tagName === 'IMG') e.preventDefault(); });
 
   /* ---------- Work filmstrip: wheel and arrow keys move it sideways ---------- */
-  function strip() { return document.querySelector('.work-page .grid'); }
+  // the filmstrip behaviour (wheel, drift, drag) runs only in the Filmstrip layouts
+  function workView() { return root.dataset.work || 'squares'; }
+  function strip() { var w = workView(); return w === '1a' || w === '1b' ? document.querySelector('.work-page .grid') : null; }
   // Work strip test sliders: gap in design px, up / down in % of tile height
   var WORK_DEFAULTS = { gap: 18, up: 20, down: 20 };
   function workSet() {
-    var w = {}; try { w = JSON.parse(localStorage.getItem('jdm-work') || '{}') || {}; } catch (e) {}
+    var w = {}; try { w = JSON.parse(localStorage.getItem('jdm-strip') || '{}') || {}; } catch (e) {}
     var o = {}; for (var k in WORK_DEFAULTS) o[k] = w[k] != null ? w[k] : WORK_DEFAULTS[k];
     return o;
   }
   function applyWork() {
-    var pg = document.querySelector('.work-page'); if (!pg) return;
+    var pg = document.querySelector('.work-page'); if (!pg || workView() !== '1b') return;
     var w = workSet();
     pg.style.setProperty('--tile-gap', 'max(' + (w.gap ? 2 : 0) + 'px, calc(' + w.gap + ' * var(--s)))');
     pg.style.setProperty('--up', w.up / 100);
@@ -881,13 +891,61 @@
     if (drag && drag.g === g) drag.left += d;
     if (drift.el === g) { drift.pos += d; if (drift.ease) { drift.ease.from += d; drift.ease.to += d; } }
   }
+  /* Squares (Juan, 2026-11-26, after Tyler Hobbs' index): square tiles with
+     their titles under them, on four invisible horizontal lines between the
+     name and the foot of the window, clear of the menu. Each row's squares are
+     spaced at random (never closer than one gap); every tile drifts in from
+     the left or right and fades up at the same speed, each at its own moment. */
+  function initSquares() {
+    var pg = document.querySelector('.work-page');
+    if (!pg || workView() !== 'squares' || pg.dataset.sq) return;
+    if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
+    pg.dataset.sq = '1';
+    var cards = [].slice.call(pg.querySelectorAll('.card'));
+    var cs = getComputedStyle(root), s = innerWidth / 1920;
+    var px = function (v) { var d = document.createElement('div'); d.style.cssText = 'position:absolute;visibility:hidden;width:' + v; document.body.appendChild(d); var w = d.getBoundingClientRect().width; d.remove(); return w; };
+    var edge = px('var(--edge)'), gutter = px('var(--gutter)');
+    var logo = document.querySelector('.site-header .logo, .site-header a, .logo');
+    var top = logo ? logo.getBoundingClientRect().bottom + Math.max(40, 70 * s) : 160;
+    var nav = document.querySelector('.nav'), navL = nav ? nav.getBoundingClientRect().left : innerWidth - 260;
+    var gap = Math.max(18, 36 * s);                       // the least space between two squares
+    var left = edge, right = navL - gap * 2;              // the menu column stays clear
+    var bottom = innerHeight - gutter;
+    var cap = Math.max(16, 26 * s);                       // title line under each square
+    var rowH = (bottom - top) / 4;
+    var counts = [3, 3, 2, 2].sort(function () { return Math.random() - .5; });
+    while (counts.reduce(function (a, b) { return a + b; }) < cards.length) counts[counts.indexOf(Math.min.apply(null, counts))]++;
+    var kmax = Math.max.apply(null, counts);
+    var S = Math.min(rowH - cap - gap * 0.6, (right - left - (kmax - 1) * gap * 1.6) / kmax);
+    pg.style.setProperty('--sq', S + 'px');
+    var n = 0, order = [];
+    counts.forEach(function (k, r) {
+      var row = cards.slice(n, n + k); n += k;
+      var free = right - left - k * S - (k - 1) * gap, w = [], tot = 0;
+      for (var j = 0; j <= k; j++) { var x = Math.random() + 0.15; w.push(x); tot += x; }
+      var x0 = left + free * w[0] / tot;
+      row.forEach(function (c, j) {
+        c.style.left = x0 + 'px';
+        c.style.top = top + r * rowH + 'px';
+        order.push(c);
+        x0 += S + gap + free * w[j + 1] / tot;
+      });
+    });
+    pg.classList.add('is-squares');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    order.forEach(function (c) {
+      var from = (Math.random() < .5 ? -1 : 1) * (40 + Math.random() * 80);
+      c.animate([{ opacity: 0, transform: 'translateX(' + from + 'px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 1800, delay: 150 + Math.random() * 2600, easing: 'cubic-bezier(.16, .7, .25, 1)', fill: 'backwards' });
+    });
+  }
   function initFilmstrip() {
     var g = strip();
     if (!g || g.dataset.ready) return;
     g.dataset.ready = '1';
     g._base = 0;
     applyWork();
-    if (matchMedia('(hover: hover) and (min-width: 761px)').matches) endlessStrip(g);
+    if (workView() === '1b' && matchMedia('(hover: hover) and (min-width: 761px)').matches) endlessStrip(g);
     var card = g.querySelector('.card');
     var from = Math.min(g.scrollWidth - g.clientWidth - g._base, card ? card.offsetWidth * 0.9 : 500);
     g.scrollLeft = g._base;
@@ -1013,7 +1071,7 @@
   }
   function magnify(T, dt) {
     var cards = T.items, el = T.el;
-    if (!cards.length || (drag && dragMoved)) return 0;
+    if (!cards.length || (drag && dragMoved) || workView() === '1a') return 0;   // 1A: tiles keep their size
     var base = innerHeight, rects = [], change = false;
     cards.forEach(function (c, n) { c._k = c._k || 1; var r = c.getBoundingClientRect(); rects.push(r); if (!n) base = r.height / c._k; });
     var R = base * 1.1, ks = [];

@@ -7,42 +7,40 @@
   <meta name="description" content="Juan De Marco">
   <meta name="robots" content="noai, noimageai">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/style.css?v=143fcadb">
-  <script src="/type.js?v=143fcadb"></script>
-  <script src="/images.js?v=143fcadb"></script>
-  <script src="/site.js?v=143fcadb" defer></script>
+  <link rel="stylesheet" href="/style.css?v=1f7717ed">
+  <script src="/type.js?v=1f7717ed"></script>
+  <script src="/images.js?v=1f7717ed"></script>
+  <script src="/site.js?v=1f7717ed" defer></script>
 </head>
-<body class="inner">
+<body class="inner room">
   <div class="scroller">
-  <main class="page page-wide project">
-    <div class="project-layout">
-      <div class="project-main">
-        <div class="slideshow" data-count="6">
-          <div class="frame">
-        <img class="slide is-on contain" src="/images/work/american-promise/01.webp" alt="American Promise, image 1" decoding="async">
-        <img class="slide contain" data-src="/images/work/american-promise/02.webp" alt="American Promise, image 2" decoding="async">
-        <img class="slide contain" data-src="/images/work/american-promise/03.webp" alt="American Promise, image 3" decoding="async">
-        <img class="slide contain" data-src="/images/work/american-promise/04.webp" alt="American Promise, image 4" decoding="async">
-        <img class="slide contain" data-src="/images/work/american-promise/05.webp" alt="American Promise, image 5" decoding="async">
-        <img class="slide contain" data-src="/images/work/american-promise/06.webp" alt="American Promise, image 6" decoding="async">
-            <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
-            <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
-          </div>
+  <main class="room-page project-room">
+    <div class="room-top">
+      <span class="room-where"><a href="/work/">Work</a> / American Promise</span>
+      <a class="room-close" href="/work/" aria-label="Close and go back to Work">&times;</a>
+    </div>
+    <div class="room-layout" style="--ratio:1.7778">
+      <div class="slideshow room-show" data-count="6">
+        <div class="frame">
+        <img class="slide contain is-on" src="/images/work/american-promise/01.webp" data-r="1.7778" alt="American Promise, image 1 of 6" decoding="async" draggable="false">
+        <img class="slide contain" data-src="/images/work/american-promise/02.webp" data-r="2.3033" alt="American Promise, image 2 of 6" decoding="async" draggable="false">
+        <img class="slide contain" data-src="/images/work/american-promise/03.webp" data-r="1.6951" alt="American Promise, image 3 of 6" decoding="async" draggable="false">
+        <img class="slide contain" data-src="/images/work/american-promise/04.webp" data-r="1.7778" alt="American Promise, image 4 of 6" decoding="async" draggable="false">
+        <img class="slide contain" data-src="/images/work/american-promise/05.webp" data-r="2.2015" alt="American Promise, image 5 of 6" decoding="async" draggable="false">
+        <img class="slide contain" data-src="/images/work/american-promise/06.webp" data-r="1.6410" alt="American Promise, image 6 of 6" decoding="async" draggable="false">
+          <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
+          <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
         </div>
+        <div class="room-under"><div class="slide-count"><span class="slide-i">1</span> / 6</div>
+          <button class="room-zoom" type="button" aria-pressed="false" aria-label="Magnify" title="Magnify"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M13 13l5 5" stroke="currentColor" stroke-width="1.3"/></svg></button></div>
       </div>
-      <div class="project-text">
+      <div class="room-text">
         <h1>American Promise</h1>
         <p class="meta">2016 · Photomontage and elevation drawings</p>
-        <div class="slide-count"><span class="slide-i">1</span> / 6</div>
-        <nav class="project-nav" aria-label="Projects">
+        <nav class="project-nav room-pnav" aria-label="Projects">
           <a href="/work/parnell-residence/" title="Parnell Residence">&lsaquo; Prev</a>
-          <a href="/work/">All</a>
           <a href="/work/march-of-the-silhouettes/" title="March of the Silhouettes">Next &rsaquo;</a>
         </nav>
-        <div class="project-desc">
-      <p>Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla, in ac dui quis mi consectetuer lacinia. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante.</p>
-      <p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing, phasellus ullamcorper ipsum rutrum nunc. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur.</p>
-        </div>
       </div>
     </div>
   </main>
@@ -70,6 +68,12 @@
     </div>
     <div class="mode-pick-modes">
       <button type="button" data-fs>Full screen</button>
+    </div>
+    <div class="mode-pick-modes mode-pick-layout">
+      <button type="button" data-wv="squares">Squares</button>
+      <button type="button" data-wv="grid">Grid V1</button>
+      <button type="button" data-wv="1a">Strip 1A</button>
+      <button type="button" data-wv="1b">Strip 1B</button>
     </div>
     <div class="mode-pick-work">
       <label>Space <input type="range" data-wk="gap" min="0" max="120" step="1"><output></output></label>
