@@ -849,3 +849,8 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 }
 .prints.is-index .print .print-cap::before { content: attr(data-no); position: absolute; left: 0; top: 0; color: var(--ink-dim); }
 .prints.is-index .print:hover img { opacity: .9; }
+
+/* Unframed prints: only the drawn lines, no paper, no shadow; white lines in dark mode */
+:root[data-frame="off"] .print img[data-bare] { box-shadow: none; background: none; }
+:root[data-frame="off"][data-mode="dark"] .print img[data-bare] { filter: invert(1); }
+.mode-pick-frame { padding-top: 6px; border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); }
