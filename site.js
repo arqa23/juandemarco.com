@@ -11,7 +11,7 @@
     var bottom = labels[labels.length - 1].getBoundingClientRect().bottom;
     root.style.setProperty('--nav-bottom', bottom + 'px');
     // project text never runs below the image: paragraphs that would are hidden
-    var frame = document.querySelector('.project-main .frame'), ps = document.querySelectorAll('.project-text p');
+    var frame = document.querySelector('.project-main .frame'), ps = document.querySelectorAll('.project-desc p');
     if (frame && ps.length) {
       var fb = frame.getBoundingClientRect().bottom, wide = innerWidth > 700;
       ps.forEach(function (p) { p.classList.remove('past-image'); });
@@ -129,7 +129,7 @@
       if (!pick) return;
       pick.querySelectorAll('[data-pick]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.mode || PREF_DEFAULTS.mode) === b.dataset.pick); });
       pick.querySelectorAll('button[data-frame]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.frame || 'on') === b.dataset.frame); });
-      pick.querySelectorAll('button[data-ptext]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.ptext || 'on') === b.dataset.ptext); });
+      pick.querySelectorAll('button[data-ptext]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.ptext || 'off') === b.dataset.ptext); });
     };
     if (pick) {
       pick.addEventListener('click', function (e) {
@@ -143,7 +143,7 @@
         var tb = e.target.closest('button[data-ptext]');
         if (tb) {
           root.dataset.ptext = tb.dataset.ptext;
-          try { localStorage.setItem('jdm-ptext', tb.dataset.ptext); } catch (err) {}
+          try { localStorage.setItem('jdm-text', tb.dataset.ptext); } catch (err) {}
           markPick(); return;
         }
         var b = e.target.closest('button[data-pick]');
@@ -276,7 +276,7 @@
     slideStep = null;
     var show = document.querySelector('.slideshow');
     if (!show) return;
-    var slides = show.querySelectorAll('.slide'), counter = show.querySelector('.slide-i'), i = 0;
+    var slides = show.querySelectorAll('.slide'), counter = (show.closest('.project-layout') || show).querySelector('.slide-i'), i = 0;
     function load(k) {
       var s = slides[(k + slides.length) % slides.length];
       if (s && s.dataset.src) { s.src = s.dataset.src; s.removeAttribute('data-src'); }
@@ -315,7 +315,7 @@
     show.querySelector('.prev').addEventListener('click', function () { go(i - 1); });
     show.querySelector('.next').addEventListener('click', function () { go(i + 1); });
     slideStep = function (d) { go(i + d); };
-    if (slides.length < 2) show.classList.add('single');
+    if (slides.length < 2) (show.closest('.project-layout') || show).classList.add('single');
   }
 
   /* ---------- Prints wall: salon hang, even gaps between print edges ---------- */
@@ -818,9 +818,12 @@
     var orig = [].slice.call(g.querySelectorAll('.card')), n = orig.length, prev = 0;
     if (n < 2) return;
     orig.forEach(function (c) {
-      var ar = 0.84 + Math.random() * 0.36;                        // width/height 0.84 to 1.2
-      var sign = Math.random() < 0.7 ? -Math.sign(prev || 1) : Math.sign(prev || 1);
-      var dy = sign * (0.03 + Math.random() * 0.09);               // up to 12% of the tile height
+      var ar = c.dataset.tall ? 0.68 + Math.random() * 0.1        // upright: 0.68 to 0.78
+                              : 0.84 + Math.random() * 0.36;       // width/height 0.84 to 1.2
+      // up or down by up to 20% of the tile height, mostly the other way from
+      // the last one, by an uneven amount (Juan, 2026-11-26: more variation)
+      var sign = Math.random() < 0.65 ? -Math.sign(prev || 1) : Math.sign(prev || 1);
+      var dy = sign * (0.015 + Math.pow(Math.random(), 0.8) * 0.185);
       prev = dy;
       c.style.setProperty('--ar', ar.toFixed(3));
       c.style.setProperty('--dy', dy.toFixed(3));
