@@ -197,9 +197,13 @@ def _page(title, section, body, body_class="", head_extra=""):
       <button type="button" data-frame="on">Framed</button>
       <button type="button" data-frame="off">Unframed</button>
     </div>
-    <div class="mode-pick-modes mode-pick-frame">
-      <button type="button" data-ptext="on">Text</button>
-      <button type="button" data-ptext="off">No text</button>
+    <div class="mode-pick-modes">
+      <button type="button" data-fs>Full screen</button>
+    </div>
+    <div class="mode-pick-work">
+      <label>Space <input type="range" data-wk="gap" min="0" max="120" step="1"><output></output></label>
+      <label>Up <input type="range" data-wk="up" min="0" max="45" step="1"><output></output></label>
+      <label>Down <input type="range" data-wk="down" min="0" max="45" step="1"><output></output></label>
     </div>
     <p class="mode-pick-legal">&copy; Juan De Marco | <span class="yr">{YEAR}</span></p>
   </div>

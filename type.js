@@ -49,8 +49,9 @@
     d.mode = 'dark';   // the site's default mode (Juan, 2026-11-25)
     d.ptext = 'off';   // project pages without text by default (Juan, 2026-11-26)
     if (off) return;
-    ['mode', 'frame', 'ptext'].forEach(function (k) {
-      var v = localStorage.getItem('jdm-' + (k === 'ptext' ? 'text' : k));
+    // project text: off for good (Juan, 2026-11-26); the Text option is gone
+    ['mode', 'frame'].forEach(function (k) {
+      var v = localStorage.getItem('jdm-' + k);
       if (v) d[k] = v;
     });
   } catch (e) { document.documentElement.dataset.theme = 'light'; }
