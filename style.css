@@ -952,3 +952,6 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .mode-pick.on-work .pick-layout { display: block; }
 .mode-pick-work label { text-transform: none; letter-spacing: .01em; font-size: max(10px, calc(var(--nav-size) * .8)); }
 .mode-pick-legal { margin-top: 3px; }
+
+/* About: the text column half as wide, so it runs longer down the page (Juan, 2026-11-26) */
+@media (min-width: 701px) { .page.stacked { max-width: max(320px, calc(410 * var(--s))); } }

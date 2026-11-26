@@ -98,13 +98,19 @@ def project_images(slug):
     return sorted(f.name for f in (ROOT / "images" / "work" / slug).glob("[0-9]*.webp"))
 
 
+# About text (Juan, 2026-11-26): placeholder built from juandemarco.us; the
+# previous text is kept in project-files juandemarco-site/VERSIONS.md ("About v1").
 ABOUT = [
-    "Juan De Marco makes images, objects and software. The work moves between drawing, "
-    "color studies, digital tools and built form, guided by an interest in light, "
-    "atmosphere and how space is perceived.",
-    "He trained as an architect, with a Master of Architecture from Princeton University "
-    "and a Bachelor of Architecture from the Illinois Institute of Technology, and has "
-    "worked at Snøhetta, Reiser + Umemoto and FXCollaborative. He is a licensed architect.",
+    "Juan De Marco is an artist and a licensed architect. He makes things: "
+    "architecture, objects and drawings.",
+    "His work is guided by history: the architectural canon, the cultures and people "
+    "that buildings serve, and the ways architects of earlier eras met the problems of "
+    "their own time with invention and conviction. His drawings and objects are a way "
+    "of studying those precedents closely and carrying their lessons forward.",
+    "He holds a Master of Architecture from Princeton University and a Bachelor of "
+    "Architecture from the Illinois Institute of Technology, and has worked at the "
+    "offices of Snøhetta, Reiser + Umemoto and FXCollaborative on a range of cultural "
+    "and institutional projects.",
 ]
 
 # Where the About / Contact / Login text sits on desktop:
@@ -198,7 +204,6 @@ def _page(title, section, body, body_class="", head_extra=""):
       <label>Up <input type="range" data-wk="up" min="0" max="45" step="1"><output></output></label>
       <label>Down <input type="range" data-wk="down" min="0" max="45" step="1"><output></output></label>
     </div>
-    <p class="mode-pick-legal">&copy; Juan De Marco | <span class="yr">{YEAR}</span></p>
   </div>
 
   <div class="settings" id="settings" hidden>
