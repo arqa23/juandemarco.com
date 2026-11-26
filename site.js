@@ -132,8 +132,8 @@
         mode: (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark' ? 'On' : 'Off',
         frame: (root.dataset.frame || 'on') === 'on' ? 'On' : 'Off',
         fs: document.fullscreenElement ? 'On' : 'Off',
-        work: WORK_NAMES[workView()] || 'Squares'
       };
+      pick.querySelectorAll('button[data-wv]').forEach(function (b) { b.classList.toggle('is-on', workView() === b.dataset.wv); });
       pick.querySelectorAll('button[data-tog]').forEach(function (b) { b.querySelector('span').textContent = val[b.dataset.tog]; });
       pick.classList.toggle('on-work', !!document.querySelector('.work-page'));
       pick.classList.toggle('on-1b', workView() === '1b');
@@ -151,6 +151,12 @@
       });
       pick.addEventListener('click', function (e) {
         e.stopPropagation();
+        var wv = e.target.closest('button[data-wv]');   // working mode: pick a Work layout
+        if (wv) {
+          try { localStorage.setItem('jdm-work', wv.dataset.wv); } catch (err) {}
+          if (document.querySelector('.work-page')) location.reload(); else markPick();
+          return;
+        }
         var t = e.target.closest('button[data-tog]');
         if (!t) return;
         var k = t.dataset.tog;
@@ -158,11 +164,6 @@
           root.dataset.frame = (root.dataset.frame || 'on') === 'on' ? 'off' : 'on';
           try { localStorage.setItem('jdm-frame', root.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
-        }
-        if (k === 'work') {   // next layout in turn
-          var order = ['squares', 'grid', '1a', '1b'], nx = order[(order.indexOf(workView()) + 1) % order.length];
-          try { localStorage.setItem('jdm-work', nx); } catch (err) {}
-          location.reload(); return;
         }
         if (k === 'fs') {
           var de = document.documentElement;
@@ -767,6 +768,7 @@
     initSlideshow();
     initFilmstrip();
     initSquares();
+    initGrid2();
     initWallGlide();
     initPress();
     startDrift();
@@ -786,7 +788,6 @@
   function strip() { var w = workView(); return w === '1a' || w === '1b' ? document.querySelector('.work-page .grid') : null; }
   // Work strip test sliders: gap in design px, up / down in % of tile height
   var WORK_DEFAULTS = { gap: 18, up: 20, down: 20 };
-  var WORK_NAMES = { squares: 'Squares', grid: 'Grid V1', '1a': 'Strip 1A', '1b': 'Strip 1B' };
   function workSet() {
     var w = {}; try { w = JSON.parse(localStorage.getItem('jdm-strip') || '{}') || {}; } catch (e) {}
     var o = {}; for (var k in WORK_DEFAULTS) o[k] = w[k] != null ? w[k] : WORK_DEFAULTS[k];
@@ -956,6 +957,46 @@
     });
   }
   addEventListener('resize', function () { clearTimeout(layoutSquares._t); layoutSquares._t = setTimeout(layoutSquares, 60); });
+  /* Grid V2 (Juan, 2026-11-26, after 6a.co.uk): squares of a few sizes, in
+     rows whose bottoms line up, each row shifted along the wall; the same gap
+     as Grid V1 between squares and between rows. Sizes and shifts are drawn
+     once per visit; a resize re-measures them. */
+  var G2_SIZES = [0.14, 0.18, 0.22, 0.27];
+  function initGrid2() {
+    var g = document.querySelector('.work-page .grid');
+    if (!g || workView() !== 'grid2' || g._g2) return;
+    if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
+    var cards = [].slice.call(g.querySelectorAll('.card'));
+    g._g2 = { cards: cards, size: cards.map(function () { return G2_SIZES[Math.floor(Math.random() * G2_SIZES.length)]; }), shift: [] };
+    layoutGrid2();
+    g.classList.add('is-g2');
+  }
+  function layoutGrid2() {
+    var g = document.querySelector('.work-page .grid'); if (!g || !g._g2) return;
+    var Q = g._g2, W = g.clientWidth, gap = parseFloat(getComputedStyle(g).columnGap) || 16;
+    var rows = [], row = [], w = 0;
+    Q.cards.forEach(function (c, i) {
+      var sz = Q.size[i] * W;
+      if (row.length && (w + gap + sz > W || row.length >= 4)) { rows.push(row); row = []; w = 0; }
+      row.push(i); w += (row.length > 1 ? gap : 0) + sz;
+    });
+    if (row.length) rows.push(row);
+    var y = 0;
+    rows.forEach(function (r, ri) {
+      var rw = r.reduce(function (a, i) { return a + Q.size[i] * W; }, 0) + gap * (r.length - 1);
+      var hmax = Math.max.apply(null, r.map(function (i) { return Q.size[i] * W; }));
+      if (Q.shift[ri] == null) Q.shift[ri] = Math.random();
+      var x = (W - rw) * Q.shift[ri];
+      r.forEach(function (i) {
+        var c = Q.cards[i], sz = Q.size[i] * W;
+        c.style.width = sz + 'px'; c.style.left = x + 'px'; c.style.top = (y + hmax - sz) + 'px';
+        x += sz + gap;
+      });
+      y += hmax + gap;
+    });
+    g.style.height = (y - gap) + 'px';
+  }
+  addEventListener('resize', function () { clearTimeout(layoutGrid2._t); layoutGrid2._t = setTimeout(layoutGrid2, 60); });
   function initFilmstrip() {
     var g = strip();
     if (!g || g.dataset.ready) return;

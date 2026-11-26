@@ -908,7 +908,7 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   /* Squares Grid V1 (as on juandemarco.us): four columns of squares, page
      scrolls, the title shows over the square on hover */
   :root[data-work="grid"] .work-page { position: static; display: block; padding: calc(var(--header-h) + var(--edge) * .35) calc(var(--gutter) + max(160px, calc(240 * var(--s)))) calc(var(--gutter) * 3) var(--edge) !important; }
-  :root[data-work="grid"] .work-page .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: max(12px, calc(28 * var(--s))); overflow: visible; padding: 0; cursor: default; }
+  :root[data-work="grid"] .work-page .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: max(7px, calc(16.8 * var(--s)));   /* 28 less 40% (Juan, 2026-11-26) */ overflow: visible; padding: 0; cursor: default; }
   :root[data-work="grid"] .work-page .card { width: auto; top: 0; }
   :root[data-work="grid"] .work-page .card img { aspect-ratio: 1; }
 
@@ -933,8 +933,8 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .room-text .room-pnav a { color: var(--ink); }
 /* phones: Squares and Grid V1 become two columns of squares, titles under them */
 @media (hover: none), (max-width: 760px) {
-  :root[data-work="squares"] .work-page .grid, :root[data-work="grid"] .work-page .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; overflow: visible; padding: 0 var(--gutter); }
-  :root[data-work="squares"] .work-page .card, :root[data-work="grid"] .work-page .card { width: auto; }
+  :root[data-work="squares"] .work-page .grid, :root[data-work="grid"] .work-page .grid, :root[data-work="grid2"] .work-page .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; overflow: visible; padding: 0 var(--gutter); }
+  :root[data-work="squares"] .work-page .card, :root[data-work="grid"] .work-page .card, :root[data-work="grid2"] .work-page .card { width: auto; }
 }
 
 /* View box, simple (Juan, 2026-11-26, from his screen grab): a small solid
@@ -948,10 +948,23 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 }
 .mode-pick .pick-row:hover { opacity: 1; }
 .mode-pick .pick-row span { margin-left: .25em; }
-.mode-pick .pick-layout { display: none; }
-.mode-pick.on-work .pick-layout { display: block; }
+/* working mode: every Work layout listed under a small heading */
+.pick-layouts { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+.pick-head { font-size: max(10px, calc(var(--nav-size) * .8)); color: var(--ink-dim); letter-spacing: .01em; }
+.mode-pick .pick-opt { opacity: .5; padding-left: .9em !important; }
+.mode-pick .pick-opt.is-on { opacity: 1; }
+.mode-pick .pick-opt.is-on::before { content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: currentColor; margin: 0 .55em .2em -.95em; vertical-align: middle; }
 .mode-pick-work label { text-transform: none; letter-spacing: .01em; font-size: max(10px, calc(var(--nav-size) * .8)); }
 .mode-pick-legal { margin-top: 3px; }
 
 /* About: the text column half as wide, so it runs longer down the page (Juan, 2026-11-26) */
-@media (min-width: 701px) { .page.stacked { max-width: max(320px, calc(410 * var(--s))); } }
+@media (min-width: 701px) { .page.stacked { max-width: max(416px, calc(533 * var(--s))); } }   /* +30%: fits one screen */
+
+/* Grid V2 (6a-style packing of squares of a few sizes), placed by site.js */
+@media (hover: hover) and (min-width: 761px) {
+  :root[data-work="grid2"] .work-page { position: static; display: block; padding: calc(var(--header-h) + var(--edge) * .35) calc(var(--gutter) + max(160px, calc(240 * var(--s)))) calc(var(--gutter) * 3) var(--edge) !important; }
+  :root[data-work="grid2"] .work-page .grid { display: block; position: relative; column-gap: max(7px, calc(16.8 * var(--s))); overflow: visible; padding: 0; cursor: default; }
+  :root[data-work="grid2"] .work-page .card { position: absolute; top: 0; visibility: hidden; }
+  :root[data-work="grid2"] .work-page .grid.is-g2 .card { visibility: visible; }
+  :root[data-work="grid2"] .work-page .card img { aspect-ratio: 1; }
+}
