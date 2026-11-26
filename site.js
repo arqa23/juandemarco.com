@@ -129,9 +129,20 @@
       if (!pick) return;
       pick.querySelectorAll('[data-pick]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.mode || PREF_DEFAULTS.mode) === b.dataset.pick); });
       pick.querySelectorAll('button[data-frame]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.frame || 'on') === b.dataset.frame); });
-      pick.querySelectorAll('button[data-ptext]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.ptext || 'off') === b.dataset.ptext); });
+      pick.querySelectorAll('button[data-fs]').forEach(function (b) { b.classList.toggle('is-on', !!document.fullscreenElement); });
+      pick.classList.toggle('on-work', !!strip());
+      pick.querySelectorAll('input[data-wk]').forEach(function (inp) { inp.value = workSet()[inp.dataset.wk]; inp.nextElementSibling.textContent = inp.value; });
     };
     if (pick) {
+      document.addEventListener('fullscreenchange', markPick);
+      // Work sliders (test): space between tiles, how far up, how far down
+      pick.addEventListener('input', function (e) {
+        var inp = e.target.closest('input[data-wk]'); if (!inp) return;
+        var w = workSet(); w[inp.dataset.wk] = +inp.value;
+        try { localStorage.setItem('jdm-work', JSON.stringify(w)); } catch (err) {}
+        inp.nextElementSibling.textContent = inp.value;
+        applyWork();
+      });
       pick.addEventListener('click', function (e) {
         e.stopPropagation();
         var fb = e.target.closest('button[data-frame]');   // not <html>, which carries data-frame too
@@ -140,11 +151,11 @@
           try { localStorage.setItem('jdm-frame', fb.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
         }
-        var tb = e.target.closest('button[data-ptext]');
-        if (tb) {
-          root.dataset.ptext = tb.dataset.ptext;
-          try { localStorage.setItem('jdm-text', tb.dataset.ptext); } catch (err) {}
-          markPick(); return;
+        if (e.target.closest('button[data-fs]')) {
+          var de = document.documentElement;
+          if (document.fullscreenElement) document.exitFullscreen && document.exitFullscreen();
+          else if (de.requestFullscreen) de.requestFullscreen().catch(function () {});
+          return;
         }
         var b = e.target.closest('button[data-pick]');
         if (!b) return;
@@ -758,6 +769,20 @@
 
   /* ---------- Work filmstrip: wheel and arrow keys move it sideways ---------- */
   function strip() { return document.querySelector('.work-page .grid'); }
+  // Work strip test sliders: gap in design px, up / down in % of tile height
+  var WORK_DEFAULTS = { gap: 18, up: 20, down: 20 };
+  function workSet() {
+    var w = {}; try { w = JSON.parse(localStorage.getItem('jdm-work') || '{}') || {}; } catch (e) {}
+    var o = {}; for (var k in WORK_DEFAULTS) o[k] = w[k] != null ? w[k] : WORK_DEFAULTS[k];
+    return o;
+  }
+  function applyWork() {
+    var pg = document.querySelector('.work-page'); if (!pg) return;
+    var w = workSet();
+    pg.style.setProperty('--tile-gap', 'max(' + (w.gap ? 2 : 0) + 'px, calc(' + w.gap + ' * var(--s)))');
+    pg.style.setProperty('--up', w.up / 100);
+    pg.style.setProperty('--down', w.down / 100);
+  }
   document.addEventListener('wheel', function (e) {
     var g = strip();
     if (!g || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
@@ -823,10 +848,10 @@
       // up or down by up to 20% of the tile height, mostly the other way from
       // the last one, by an uneven amount (Juan, 2026-11-26: more variation)
       var sign = Math.random() < 0.65 ? -Math.sign(prev || 1) : Math.sign(prev || 1);
-      var dy = sign * (0.015 + Math.pow(Math.random(), 0.8) * 0.185);
-      prev = dy;
+      var amt = 0.075 + Math.pow(Math.random(), 0.8) * 0.925;     // share of the Up / Down slider
+      prev = sign;
       c.style.setProperty('--ar', ar.toFixed(3));
-      c.style.setProperty('--dy', dy.toFixed(3));
+      c.style.setProperty(sign < 0 ? '--u' : '--d', amt.toFixed(3));
     });
     for (var r = 0; r < 2; r++) orig.forEach(function (c) {
       var x = c.cloneNode(true);
@@ -861,6 +886,7 @@
     if (!g || g.dataset.ready) return;
     g.dataset.ready = '1';
     g._base = 0;
+    applyWork();
     if (matchMedia('(hover: hover) and (min-width: 761px)').matches) endlessStrip(g);
     var card = g.querySelector('.card');
     var from = Math.min(g.scrollWidth - g.clientWidth - g._base, card ? card.offsetWidth * 0.9 : 500);
