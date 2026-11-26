@@ -908,43 +908,54 @@
     if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
     pg.dataset.sq = '1';
     var cards = [].slice.call(pg.querySelectorAll('.card'));
-    var cs = getComputedStyle(root), s = innerWidth / 1920;
+    // three rows (Juan, 2026-11-26); which squares share a row and how the
+    // spare room in each row is split are drawn once per visit, so a resize
+    // (or full screen) keeps the same arrangement, just re-measured
+    var counts = [4, 3, 3].sort(function () { return Math.random() - .5; });
+    while (counts.reduce(function (x, y) { return x + y; }) < cards.length) counts[counts.indexOf(Math.min.apply(null, counts))]++;
+    var weights = counts.map(function (k) { var w = []; for (var j = 0; j <= k; j++) w.push(Math.random() + 0.15); return w; });
+    pg._sq = { cards: cards, counts: counts, weights: weights };
+    layoutSquares();
+    pg.classList.add('is-squares');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // a short slide and a quicker fade, all in within about two seconds
+    cards.forEach(function (c) {
+      var from = (Math.random() < .5 ? -1 : 1) * (16 + Math.random() * 30), delay = 80 + Math.random() * 1300;
+      c.animate([{ transform: 'translateX(' + from + 'px)' }, { transform: 'none' }],
+        { duration: 1100, delay: delay, easing: 'cubic-bezier(.16, .7, .25, 1)', fill: 'backwards' });
+      c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 650, delay: delay, easing: 'ease-out', fill: 'backwards' });
+    });
+  }
+  /* The squares live in one band (Juan's red box, 2026-11-26): from a little
+     under the name down to about 73% of the window, edge to edge, above the
+     menu. Squares are 30% larger than before, or as large as three rows allow. */
+  function layoutSquares() {
+    var pg = document.querySelector('.work-page.is-squares, .work-page[data-sq]');
+    if (!pg || !pg._sq) return;
+    var Q = pg._sq, s = innerWidth / 1920;
     var px = function (v) { var d = document.createElement('div'); d.style.cssText = 'position:absolute;visibility:hidden;width:' + v; document.body.appendChild(d); var w = d.getBoundingClientRect().width; d.remove(); return w; };
     var edge = px('var(--edge)'), gutter = px('var(--gutter)');
-    var logo = document.querySelector('.site-header .logo, .site-header a, .logo');
-    var top = logo ? logo.getBoundingClientRect().bottom + Math.max(40, 70 * s) : 160;
-    var nav = document.querySelector('.nav'), navL = nav ? nav.getBoundingClientRect().left : innerWidth - 260;
-    var gap = Math.max(18, 36 * s);                       // the least space between two squares
-    var left = edge, right = navL - gap * 2;              // the menu column stays clear
-    var bottom = innerHeight - gutter;
-    var cap = Math.max(16, 26 * s);                       // title line under each square
-    var rowH = (bottom - top) / 4;
-    var counts = [3, 3, 2, 2].sort(function () { return Math.random() - .5; });
-    while (counts.reduce(function (a, b) { return a + b; }) < cards.length) counts[counts.indexOf(Math.min.apply(null, counts))]++;
-    var kmax = Math.max.apply(null, counts);
-    var S = Math.min(rowH - cap - gap * 0.6, (right - left - (kmax - 1) * gap * 1.6) / kmax);
+    var logo = document.querySelector('.site-header .logo');
+    var top = (logo ? logo.getBoundingClientRect().bottom : 90) + Math.max(36, 64 * s);
+    var bottom = innerHeight * 0.73;
+    var left = edge, right = innerWidth - gutter;
+    var gap = Math.max(18, 36 * s), cap = Math.max(16, 26 * s), rowGap = Math.max(10, 18 * s);
+    var rows = Q.counts.length, rowH = (bottom - top) / rows, kmax = Math.max.apply(null, Q.counts);
+    var S = Math.min(1.3 * Math.max(120, 174 * s), rowH - cap - rowGap, (right - left - (kmax - 1) * gap * 1.6) / kmax);
     pg.style.setProperty('--sq', S + 'px');
-    var n = 0, order = [];
-    counts.forEach(function (k, r) {
-      var row = cards.slice(n, n + k); n += k;
-      var free = right - left - k * S - (k - 1) * gap, w = [], tot = 0;
-      for (var j = 0; j <= k; j++) { var x = Math.random() + 0.15; w.push(x); tot += x; }
-      var x0 = left + free * w[0] / tot;
+    var n = 0;
+    Q.counts.forEach(function (k, r) {
+      var row = Q.cards.slice(n, n + k), w = Q.weights[r], tot = w.reduce(function (x, y) { return x + y; });
+      n += k;
+      var free = right - left - k * S - (k - 1) * gap, x0 = left + free * w[0] / tot;
       row.forEach(function (c, j) {
         c.style.left = x0 + 'px';
         c.style.top = top + r * rowH + 'px';
-        order.push(c);
         x0 += S + gap + free * w[j + 1] / tot;
       });
     });
-    pg.classList.add('is-squares');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    order.forEach(function (c) {
-      var from = (Math.random() < .5 ? -1 : 1) * (40 + Math.random() * 80);
-      c.animate([{ opacity: 0, transform: 'translateX(' + from + 'px)' }, { opacity: 1, transform: 'none' }],
-        { duration: 1800, delay: 150 + Math.random() * 2600, easing: 'cubic-bezier(.16, .7, .25, 1)', fill: 'backwards' });
-    });
   }
+  addEventListener('resize', function () { clearTimeout(layoutSquares._t); layoutSquares._t = setTimeout(layoutSquares, 60); });
   function initFilmstrip() {
     var g = strip();
     if (!g || g.dataset.ready) return;

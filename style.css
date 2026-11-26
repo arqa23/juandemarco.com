@@ -851,7 +851,7 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 }
 @keyframes pick-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
 @media (max-width: 700px) { .mode-pick { left: auto; right: calc(var(--gutter) + var(--legal-w, 18px) + 12px); bottom: 10px; } }
-.page p.about-legal { margin-top: 2.6em; font-size: calc(var(--nav-size) * .85); letter-spacing: .12em; color: var(--ink-dim); }
+.page p.about-legal.about-legal.about-legal { margin-top: 2.6em; font-size: calc(var(--nav-size) * .85); letter-spacing: .12em; color: var(--ink-dim); }
 
 /* Gallery, Index layout: number left, title right, always shown under each print */
 :root .prints.is-index { --wall-gap: max(8px, calc(12 * var(--s))); }
@@ -952,3 +952,6 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .mode-pick.on-work .pick-layout { display: block; }
 .mode-pick-work label { text-transform: none; letter-spacing: .01em; font-size: max(10px, calc(var(--nav-size) * .8)); }
 .mode-pick-legal { margin-top: 3px; }
+
+/* About: the text column half as wide, so it runs longer down the page (Juan, 2026-11-26) */
+@media (min-width: 701px) { .page.stacked { max-width: max(320px, calc(410 * var(--s))); } }
