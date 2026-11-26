@@ -270,8 +270,7 @@ body {
   --gap: max(28px, calc(48 * var(--s)));
   --frame-w: calc(min(
     calc(100vw - var(--gutter) - var(--edge) - max(160px, calc(240 * var(--s))) - var(--side-w) - var(--gap)),
-    calc((100vh - var(--header-h) - var(--edge) * .35 - var(--gutter) * 2.2 - var(--title-size) * 1.8) * 16 / 9)) * .92
-    + var(--count-h) * 16 / 9);
+    calc((100vh - var(--header-h) - var(--edge) * .35 - var(--gutter) * 2.2) * 16 / 9)) * .92);
   /* + --count-h: the image grows by one counter line and the counter drops by
      the same amount (Juan, 2026-11-25), keeping the gap between them.
      .92: images scaled down from their top left corner (Juan, 2026-11-25) so the
@@ -333,7 +332,13 @@ body {
   letter-spacing: calc(.2em * var(--track));
   color: var(--ink-dim);
 }
-.project-text { width: var(--side-w); padding-top: calc(var(--title-size) * 1.2 + 1.2em); }
+.project-text { width: var(--side-w); }
+/* the label beside the image: title, year/medium, count, prev / all / next */
+.project .project-text h1 { margin: 0 0 .7em; line-height: 1.25; }
+.project-text .meta { margin: 0 0 .5em; }
+.project-text .slide-count { margin: 0; }
+.project-text .project-nav { margin-top: 1.6em; gap: 1.3em; }
+.project-desc { margin-top: 2.4em; }
 /* Rule: project text never runs below the bottom edge of the image */
 @media (min-width: 701px) {
   .project-text p.past-image { display: none; }   /* site.js hides any paragraph that would end below the image */
@@ -750,7 +755,7 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
    (wheel, drag or arrow keys), first project to last, edge to edge; it glides
    in slowly on arrival. Previous: full-screen grid (PR #24). */
 .work-page {
-  --tile-gap: max(16px, calc(44 * var(--s)));   /* was 10: a little more air (Juan, 2026-11-26) */
+  --tile-gap: max(8px, calc(17.6 * var(--s)));   /* 44 less 60% (Juan, 2026-11-26) */
   --strip-pad: calc(var(--gutter) + 180 * var(--s) + 20px);
   --tile-h: calc(100vh - 2 * var(--strip-pad));
   position: fixed; inset: 0; z-index: 1;
@@ -765,17 +770,19 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   scrollbar-width: none;
 }
 .work-page .grid::-webkit-scrollbar { display: none; }
-.work-page .card { flex: 0 0 auto; width: calc(var(--tile-h) * var(--ar, 1) * var(--k, 1)); transform: translateY(calc(var(--tile-h) * var(--dy, 0))); }
+/* hung higher or lower with top (not transform): transformed tiles in the
+   scrolling strip left grey trails behind in Chrome (Juan, 2026-11-26) */
+.work-page .card { flex: 0 0 auto; width: calc(var(--tile-h) * var(--ar, 1) * var(--k, 1)); top: calc(var(--tile-h) * var(--dy, 0)); }
 .work-page .card img { aspect-ratio: var(--ar, 1); }
 /* room above and below for tiles hung higher or lower, and for the magnified one */
-.work-page .grid { padding: calc(var(--tile-h) * .25) 0; }
+.work-page .grid { padding: calc(var(--tile-h) * .3) 0; }
 .work-page .grid { align-items: center; }
 .work-page .grid { cursor: grab; user-select: none; -webkit-user-select: none; }
 .work-page .grid.is-dragging { cursor: grabbing; }
 .work-page .grid.is-dragging .card { pointer-events: none; }
 @media (hover: none), (max-width: 760px) {
   .work-page { position: static; display: block; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) 0 90px !important; }
-  .work-page .card { width: 72vw; transform: none; }
+  .work-page .card { width: 72vw; top: 0; }
   .work-page .card img { aspect-ratio: 1; }
   .work-page .grid { padding: 0; }
 }
@@ -863,6 +870,15 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 
 /* Test (Juan, 2026-11-26): project pages without the description text, the
    images centred in the window. View box: Text / No text. */
-:root[data-ptext="off"] .project-text { display: none; }
-:root[data-ptext="off"] .project-main { margin-left: calc((100vw - var(--frame-w)) / 2 - var(--edge)); }
-@media (max-width: 760px) { :root[data-ptext="off"] .project-main { margin-left: 0; } }
+:root[data-ptext="off"] .project-desc { display: none; }
+/* without text: image and label centred together, label at the image's foot */
+@media (min-width: 701px) {
+  :root[data-ptext="off"] .project-layout { justify-content: center; margin-left: calc(var(--edge) * -1); width: 100vw; }
+  :root[data-ptext="off"] .project-text { align-self: flex-end; }
+}
+/* contained images hug the label beside them, so the label sits next to the
+   picture, not next to empty frame (Juan, 2026-11-26) */
+@media (min-width: 701px) {
+  .project-main .slide.contain { object-position: right top; }
+  :root[data-ptext="off"] .project-main .slide.contain { object-position: right bottom; }
+}

@@ -15,6 +15,8 @@ YEAR = "2026"
 # Each project's images live in images/work/<slug>/ as 01.webp, 02.webp, ...
 # shown in that order on its page; the first one is the grid thumbnail.
 PROJECTS = [
+    # Order: Talbot/Parnell, Julius/Julius II and American Promise/Conflicted Icon
+    # never side by side, the strip's wrap included (Juan, 2026-11-26)
     {"slug": "soma", "title": "SOMA",
      "meta": "2024 · Pigment print",
      "text": [
@@ -35,6 +37,18 @@ PROJECTS = [
       "Quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur. At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui.",
       "Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam."
      ]},
+    {"slug": "american-promise", "title": "American Promise",
+     "meta": "2016 · Photomontage and elevation drawings",
+     "text": [
+      "Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla, in ac dui quis mi consectetuer lacinia. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante.",
+      "Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing, phasellus ullamcorper ipsum rutrum nunc. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur."
+     ]},
+    {"slug": "march-of-the-silhouettes", "title": "March of the Silhouettes",
+     "meta": "2014 · Charcoal and ink on paper",
+     "text": [
+      "Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam.",
+      "Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Figurae in ordine ambulant, nec umquam consistunt. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula."
+     ]},
     {"slug": "talbot-road-residence", "title": "Talbot Road Residence",
      "meta": "2018 · Ink and digital collage",
      "text": [
@@ -48,11 +62,12 @@ PROJECTS = [
       "Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante, etiam sit amet orci eget eros faucibus tincidunt. Duis leo, sed fringilla mauris sit amet nibh. Forma sequitur lumen, et lumen formam reddit. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor, sed diam eget risus varius blandit.",
       "Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui."
      ]},
-    {"slug": "american-promise", "title": "American Promise",
-     "meta": "2016 · Photomontage and elevation drawings",
+    {"slug": "wedges", "title": "Wedges",
+     "meta": "2013 · Study models, photography",
      "text": [
-      "Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla, in ac dui quis mi consectetuer lacinia. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante.",
-      "Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing, phasellus ullamcorper ipsum rutrum nunc. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur."
+      "Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus, aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur.",
+      "Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi, nam eget dui. Etiam rhoncus, maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero. Fusce dapibus tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.",
+      "Sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus, donec id elit non mi porta."
      ]},
     {"slug": "the-conflicted-icon", "title": "The Conflicted Icon",
      "meta": "2015 · Digital rendering, line drawing",
@@ -60,19 +75,6 @@ PROJECTS = [
       "Curabitur at lacus ac velit ornare lobortis. Curabitur a felis in nunc fringilla tristique. Morbi mattis ullamcorper velit, phasellus gravida semper nisi. Nullam vel sem, pellentesque libero tortor, tincidunt et tincidunt eget. Fusce dapibus tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.",
       "Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In ac felis quis tortor malesuada pretium, umbra turris super urbem cadit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus, donec id elit non mi porta.",
       "Vivamus quis mi. Phasellus a est, phasellus magna in hac habitasse platea dictumst. Curabitur nisi, quisque malesuada placerat nisl. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor, sed diam eget risus varius blandit."
-     ]},
-    {"slug": "march-of-the-silhouettes", "title": "March of the Silhouettes",
-     "meta": "2014 · Charcoal and ink on paper",
-     "text": [
-      "Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam.",
-      "Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Figurae in ordine ambulant, nec umquam consistunt. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula."
-     ]},
-    {"slug": "wedges", "title": "Wedges",
-     "meta": "2013 · Study models, photography",
-     "text": [
-      "Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus, aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur.",
-      "Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi, nam eget dui. Etiam rhoncus, maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero. Fusce dapibus tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.",
-      "Sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus, donec id elit non mi porta."
      ]},
     {"slug": "frankls-purposive-intention", "title": "Frankl\u2019s Purposive Intention",
      "meta": "2012 · Axonometric drawings, model",
@@ -345,6 +347,10 @@ def asset_version():
     return h.hexdigest()[:8]
 
 
+# Work strip: these tiles hang as upright rectangles (Juan, 2026-11-26)
+TALL_TILES = {"american-promise", "the-conflicted-icon"}
+
+
 def main():
     global ASSET_V
     ASSET_V = asset_version()
@@ -352,7 +358,7 @@ def main():
     write("index.html", page("Home", "home", HOME_BODY, "home"))
 
     cards = "\n".join(
-        f'      <a class="card" href="/work/{p["slug"]}/">\n'
+        f'      <a class="card" href="/work/{p["slug"]}/"{" data-tall=\"1\"" if p["slug"] in TALL_TILES else ""}>\n'
         f'        <img src="/images/work/{p["slug"]}/tile.webp" alt="{html.escape(p["title"])}" loading="lazy" decoding="async">\n'
         f'        <span class="card-title">{html.escape(p["title"])}</span>\n'
         f'      </a>' for p in PROJECTS)
@@ -372,29 +378,31 @@ def main():
             for k, f in enumerate(files))
         meta = html.escape(p.get("meta", "Year \u00b7 Medium"))
         text = "\n".join(f"      <p>{html.escape(t)}</p>" for t in p.get("text", ["Description coming soon."]))
+        # One compact label beside the image: title, year/medium, image count,
+        # prev / all / next, then the description (Juan, 2026-11-26)
         body = f"""  <main class="page page-wide project">
     <div class="project-layout">
       <div class="project-main">
-        <div class="project-head">
-          <h1>{html.escape(p["title"])}</h1>
-          <nav class="project-nav" aria-label="Projects">
-            <a href="/work/{prev_p["slug"]}/" title="{html.escape(prev_p["title"])}">&lsaquo; Prev</a>
-            <a href="/work/">All</a>
-            <a href="/work/{next_p["slug"]}/" title="{html.escape(next_p["title"])}">Next &rsaquo;</a>
-          </nav>
-        </div>
         <div class="slideshow" data-count="{len(files)}">
           <div class="frame">
 {slides}
             <button class="slide-btn prev" type="button" aria-label="Previous image">&lsaquo;</button>
             <button class="slide-btn next" type="button" aria-label="Next image">&rsaquo;</button>
           </div>
-          <div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
         </div>
       </div>
       <div class="project-text">
+        <h1>{html.escape(p["title"])}</h1>
         <p class="meta">{meta}</p>
+        <div class="slide-count"><span class="slide-i">1</span> / {len(files)}</div>
+        <nav class="project-nav" aria-label="Projects">
+          <a href="/work/{prev_p["slug"]}/" title="{html.escape(prev_p["title"])}">&lsaquo; Prev</a>
+          <a href="/work/">All</a>
+          <a href="/work/{next_p["slug"]}/" title="{html.escape(next_p["title"])}">Next &rsaquo;</a>
+        </nav>
+        <div class="project-desc">
 {text}
+        </div>
       </div>
     </div>
   </main>

@@ -47,9 +47,10 @@
     var d = document.documentElement.dataset;
     d.theme = 'light';
     d.mode = 'dark';   // the site's default mode (Juan, 2026-11-25)
+    d.ptext = 'off';   // project pages without text by default (Juan, 2026-11-26)
     if (off) return;
     ['mode', 'frame', 'ptext'].forEach(function (k) {
-      var v = localStorage.getItem('jdm-' + k);
+      var v = localStorage.getItem('jdm-' + (k === 'ptext' ? 'text' : k));
       if (v) d[k] = v;
     });
   } catch (e) { document.documentElement.dataset.theme = 'light'; }
