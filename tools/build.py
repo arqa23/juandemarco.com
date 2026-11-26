@@ -432,9 +432,7 @@ def main():
     # a few of the line drawings hang turned a quarter (Juan, 2026-11-25)
     allp = [(sl, nm, k, "rot/" + f, h, w) if rnd.random() < 0.27 else (sl, nm, k, f, w, h)
             for sl, nm, k, f, w, h in allp]
-    # and the SOMA prints, once each, somewhere along the wall
-    for p in [p for p in allp_all if p[0] == "soma"]:
-        allp.insert(rnd.randrange(len(allp) + 1), p)
+    # SOMA prints were on the wall in PR #48; off for now (Juan, 2026-11-26)
     # Gallery wall: shuffled prints of random sizes on a 12-column grid with one
     # gutter size both ways; site.js sets each print's height in 4px rows (masonry).
     items = []
