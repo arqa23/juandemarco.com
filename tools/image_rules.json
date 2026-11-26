@@ -7,10 +7,10 @@
   "mode": "document"
  },
  "julius/03": {
-  "clear": "lr"
+  "crop": "lr"
  },
  "julius/04": {
-  "clear": "lr"
+  "crop": "lr"
  },
  "julius/12": {
   "skip": true
@@ -25,13 +25,13 @@
   "mode": "document"
  },
  "the-conflicted-icon/03": {
-  "clear": "lr"
+  "crop": "lr"
  },
  "the-conflicted-icon/04": {
-  "clear": "lr"
+  "crop": "lr"
  },
  "the-conflicted-icon/05": {
-  "clear": "lr"
+  "crop": "lr"
  },
  "the-conflicted-icon/09": {
   "mode": "document"
@@ -52,7 +52,7 @@
   "mode": "document"
  },
  "frankls-purposive-intention/08": {
-  "clear": "lr"
+  "crop": "lr"
  },
  "julius/10": {
   "skip": true
@@ -91,12 +91,6 @@
   "mode": "document"
  },
  "march-of-the-silhouettes/07": {
-  "mode": "document"
- },
- "parnell-residence/03": {
-  "mode": "document"
- },
- "parnell-residence/04": {
   "mode": "document"
  },
  "talbot-road-residence/02": {
