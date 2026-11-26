@@ -98,15 +98,14 @@ def project_images(slug):
     return sorted(f.name for f in (ROOT / "images" / "work" / slug).glob("[0-9]*.webp"))
 
 
-# About text (Juan, 2026-11-26): placeholder built from juandemarco.us; the
-# previous text is kept in project-files juandemarco-site/VERSIONS.md ("About v1").
+# About text (Juan's draft, lightly edited, 2026-11-26); earlier drafts are
+# kept in project-files juandemarco-site/VERSIONS.md ("About v1", "About v2").
 ABOUT = [
-    "Juan De Marco is an artist and a licensed architect. He makes things: "
-    "architecture, objects and drawings.",
-    "His work is guided by history: the architectural canon, the cultures and people "
-    "that buildings serve, and the ways architects of earlier eras met the problems of "
-    "their own time with invention and conviction. His drawings and objects are a way "
-    "of studying those precedents closely and carrying their lessons forward.",
+    "Juan De Marco is a licensed architect and artist who makes architecture, "
+    "objects and drawings.",
+    "His work is guided by history, by cultures, and by the people who inhabit the "
+    "world we live in, with a deep appreciation of, and curiosity about, the ways "
+    "artists and designers have engaged with the built environment in the past.",
     "He holds a Master of Architecture from Princeton University and a Bachelor of "
     "Architecture from the Illinois Institute of Technology, and has worked at the "
     "offices of Snøhetta, Reiser + Umemoto and FXCollaborative on a range of cultural "
@@ -124,7 +123,7 @@ TEXT_POSITION = "top"
 #               Strip 1B sliders, for designing together
 SETTINGS_MODE = "working"
 GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
-WORK_LAYOUTS = [("squares", "Squares"), ("grid", "Grid V1"), ("grid2", "Grid V2"), ("1a", "Strip 1A"), ("1b", "Strip 1B")]
+WORK_LAYOUTS = [("squares", "Squares"), ("squares2", "Squares 2 rows"), ("grid", "Grid V1"), ("grid2", "Cluster"), ("1a", "Strip 1A"), ("1b", "Strip 1B")]
 
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
@@ -533,7 +532,7 @@ def main():
                 f'    <div class="stack-content">\n{content}    </div>\n    </div>\n  </main>\n')
 
     contact = f"""      <h2 class="about-contact">Contact</h2>
-      <p>For commissions, collaborations and studio inquiries:</p>
+      <p class="about-ask">For commissions, collaborations and studio inquiries:</p>
       <p class="email"><a id="email" href="/about/">{EMAIL_USER} [at] {EMAIL_DOMAIN}</a></p>
       <script>
       // Assemble the address in the browser so simple spam bots can't read it from the page.

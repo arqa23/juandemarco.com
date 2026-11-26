@@ -23,6 +23,7 @@ Options
                 longest side, default 0.06), keeping the drawing's true
                 proportions; it sits whole on the page colour
   margin 0.06   sheet margin for document mode
+  crop   "lr" / "tb" / "all"  cut the solid white bands on those sides off
   clear  "lr" / "tb" / "all"  make the solid white bands on those sides
                 see-through, so the page colour shows instead (Light, Dark,
                 White, Black). Size and zoom stay exactly as before.
@@ -105,6 +106,27 @@ def clear_bands(im, sides):
     return out
 
 
+def crop_bands(im, sides):
+    """Cut solid white bands off the chosen edges (no fill shows in the frame)."""
+    a = np.asarray(im.convert("RGB"))
+    white = a.min(2) >= 246
+
+    def run(frac):
+        n = 0
+        while n < len(frac) and frac[n] > 0.995:
+            n += 1
+        return n
+    l = t = 0
+    r, b = im.size
+    if sides in ("lr", "all"):
+        c = white.mean(0)
+        l, r = run(c), im.width - run(c[::-1])
+    if sides in ("tb", "all"):
+        rw = white.mean(1)
+        t, b = run(rw), im.height - run(rw[::-1])
+    return im.crop((l, t, r, b))
+
+
 def main():
     display = {}
     made = set()
@@ -122,6 +144,8 @@ def main():
         changed = bool(box) or rule.get("mode") == "document"
         if rule.get("scale"):
             im, changed = scale_down(im, rule["scale"], rule.get("fill")), True
+        if rule.get("crop"):
+            im, changed = crop_bands(im, rule["crop"]), True
         if rule.get("clear"):
             im, changed = clear_bands(im, rule["clear"]), True
         fit = rule.get("fit", "auto")

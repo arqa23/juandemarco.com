@@ -854,7 +854,7 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .page p.about-legal.about-legal.about-legal { margin-top: 2.6em; font-size: calc(var(--nav-size) * .85); letter-spacing: .12em; color: var(--ink-dim); }
 
 /* Gallery, Index layout: number left, title right, always shown under each print */
-:root .prints.is-index { --wall-gap: max(8px, calc(12 * var(--s))); }
+:root .prints.is-index { --wall-gap: max(16px, calc(24 * var(--s))); }   /* doubled (Juan, 2026-11-26) */
 .prints.is-index .print .print-cap {
   position: relative; inset: auto; display: block; margin: .75em 0 0; padding: 0 0 0 3.2em;
   background: none; opacity: 1; text-align: right; overflow: hidden; text-overflow: ellipsis;
@@ -913,19 +913,19 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   :root[data-work="grid"] .work-page .card img { aspect-ratio: 1; }
 
   /* Squares (Tyler Hobbs-style): placed by site.js */
-  :root[data-work="squares"] .work-page .grid { display: block; overflow: visible; padding: 0; cursor: default; }
-  :root[data-work="squares"] .work-page .card { position: fixed; width: var(--sq, 180px); top: 0; overflow: visible; visibility: hidden; }
-  :root[data-work="squares"] .work-page.is-squares .card { visibility: visible; }
-  :root[data-work="squares"] .work-page .card img { aspect-ratio: 1; }
-  :root[data-work="squares"] .work-page .card:hover img { transform: none; opacity: .88; }
-  :root[data-work="squares"] .work-page .card-title {
+  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .grid { display: block; overflow: visible; padding: 0; cursor: default; }
+  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card { position: fixed; width: var(--sq, 180px); top: 0; overflow: visible; visibility: hidden; }
+  :root:is([data-work="squares"],[data-work="squares2"]) .work-page.is-squares .card { visibility: visible; }
+  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card img { aspect-ratio: 1; }
+  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card:hover img { transform: none; opacity: .88; }
+  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card-title {
     position: static; display: block; opacity: 1; background: none; padding: 0; margin-top: .7em;
-    text-align: left; white-space: nowrap; overflow: visible; color: var(--ink-dim);
+    text-align: left; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45; color: var(--ink-dim);
     font-family: var(--caption-font, var(--font)); font-weight: var(--caption-w, 400);
     font-size: calc(var(--nav-size) * var(--caption-scale, .7)) !important;
     letter-spacing: var(--caption-track, .2em); text-transform: var(--caption-case, uppercase);
   }
-  :root[data-work="squares"] .work-page .card:hover .card-title { color: var(--ink); }
+  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card:hover .card-title { color: var(--ink); }
 }
 
 /* Project pages in the print-room format: the project label to the right */
@@ -933,8 +933,8 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .room-text .room-pnav a { color: var(--ink); }
 /* phones: Squares and Grid V1 become two columns of squares, titles under them */
 @media (hover: none), (max-width: 760px) {
-  :root[data-work="squares"] .work-page .grid, :root[data-work="grid"] .work-page .grid, :root[data-work="grid2"] .work-page .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; overflow: visible; padding: 0 var(--gutter); }
-  :root[data-work="squares"] .work-page .card, :root[data-work="grid"] .work-page .card, :root[data-work="grid2"] .work-page .card { width: auto; }
+  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .grid, :root[data-work="grid"] .work-page .grid, :root[data-work="grid2"] .work-page .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; overflow: visible; padding: 0 var(--gutter); }
+  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card, :root[data-work="grid"] .work-page .card, :root[data-work="grid2"] .work-page .card { width: auto; }
 }
 
 /* View box, simple (Juan, 2026-11-26, from his screen grab): a small solid
@@ -1002,3 +1002,14 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .mode-pick .pick-hangs, .mode-pick .pick-art { display: none; }
 .mode-pick.on-gal .pick-hangs { display: flex; }
 .mode-pick.on-room .pick-art { display: block; }
+
+/* About: the email sits close under its line, so the gap above the copyright reads larger (Juan, 2026-11-26) */
+.page p.about-ask.about-ask.about-ask { margin-bottom: .3em; }
+.page p.about-ask.about-ask.about-ask + p.email { margin-top: 0; }
+
+/* Gallery mini map: tiny print rectangles and an empty box for the screen */
+.wall-map { position: fixed; z-index: 5; display: flex; justify-content: center; align-items: flex-start; cursor: pointer; }
+.wall-map-in { position: relative; }
+.wall-map-in i { position: absolute; background: var(--ink); opacity: .32; }
+.wall-map-view { position: absolute; border: 1px solid var(--ink); opacity: .75; pointer-events: none; }
+.room .wall-map { display: none; }

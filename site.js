@@ -196,7 +196,7 @@
         var m = (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark' ? 'light' : 'dark';
         root.dataset.mode = m;
         delete root.dataset.wall; previewWall = null;
-        try { localStorage.setItem('jdm-mode', m); localStorage.removeItem('jdm-wall'); } catch (err) {}
+        try { sessionStorage.setItem('jdm-mode', m); localStorage.removeItem('jdm-mode'); localStorage.removeItem('jdm-wall'); } catch (err) {}
         applyPhotos(); applyWall(); markSettings(); markPick();
       });
     }
@@ -441,6 +441,14 @@
     function cluster() {
       numberPrints();
       var MAX = narrow ? 2 : 3, avail = W - g * (MAX - 1), cx = W / 2, cy = 0, placed = [];
+      // the hang starts at the very top of the page, level with the name, and
+      // flows around it (an invisible block keeps the name clear)
+      var logo = document.querySelector('.site-header .logo'), scr = wall.closest('.scroller');
+      if (logo && scr && !narrow) {
+        var lr = logo.getBoundingClientRect(), wr = wall.getBoundingClientRect();
+        var gw = lr.right - wr.left + g * 2, gh = lr.bottom - lr.top + g * 2;
+        if (gw > 0) placed.push({ x: 0, y: 0, w: gw, h: gh, ghost: 1 });
+      }
       var mean = 0; items.forEach(function (it) { mean += Math.pow(it.r, 0.75); }); mean = mean / items.length * 1.025;
       var dims = items.map(function (it) {
         var w = Math.min(avail * 0.4, avail / MAX * Math.pow(Math.pow(it.r, 0.75) / mean, 0.5) * (0.78 + rand() * 0.34));
@@ -463,7 +471,7 @@
       var clamp = function (v, lo, hi) { return Math.max(lo, Math.min(hi, v)); };
       dims.forEach(function (d) {
         var w = d.w, h = d.h, best = null, bs = Infinity, cands = [];
-        if (!placed.length) cands.push([cx - w / 2, 0]);
+        cands.push([cx - w / 2, 0]);
         placed.forEach(function (P) {
           var ys = [P.y, P.y + P.h - h, 0];
           var xs = [P.x, P.x + P.w - w, clamp(cx - w / 2, P.x - w + g, P.x + P.w - g), 0, W - w];
@@ -478,9 +486,34 @@
         if (!best) best = [0, placed.reduce(function (m, P) { return Math.max(m, P.y + P.h + g); }, 0)];
         placed.push({ x: best[0], y: best[1], w: w, h: h, ih: d.ih, it: d.it });
       });
-      var top = Math.min.apply(null, placed.map(function (P) { return P.y; }));
+      // then everything is pulled together: each print in turn moves up as far
+      // as it can, then sideways toward the middle, until nothing moves, so no
+      // holes are left behind (Juan, 2026-11-26)
+      var freeBut = function (P, x, y) {
+        if (x < -0.5 || x + P.w > W + 0.5 || y < -0.5) return false;
+        for (var k = 0; k < placed.length; k++) {
+          var Q = placed[k]; if (Q === P) continue;
+          if (x < Q.x + Q.w + g - 0.5 && x + P.w > Q.x - g + 0.5 && y < Q.y + Q.h + g - 0.5 && y + P.h > Q.y - g + 0.5) return false;
+        }
+        return true;
+      };
+      for (var pass = 0; pass < 8; pass++) {
+        var moved = false;
+        placed.sort(function (p, q) { return p.y - q.y; }).forEach(function (P) {
+          if (P.ghost) return;
+          var ys = [0]; placed.forEach(function (Q) { if (Q !== P) ys.push(Q.y + Q.h + g); });
+          ys.sort(function (a, b) { return a - b; });
+          for (var k = 0; k < ys.length && ys[k] < P.y - 0.5; k++) if (freeBut(P, P.x, ys[k])) { P.y = ys[k]; moved = true; break; }
+          var xs = [cx - P.w / 2]; placed.forEach(function (Q) { if (Q !== P) xs.push(Q.x + Q.w + g, Q.x - g - P.w); });
+          var d0 = Math.abs(P.x + P.w / 2 - cx), bx = null, bd = d0 - 1;
+          xs.forEach(function (x) { var dd = Math.abs(x + P.w / 2 - cx); if (dd < bd && freeBut(P, x, P.y)) { bd = dd; bx = x; } });
+          if (bx !== null) { P.x = bx; moved = true; }
+        });
+        if (!moved) break;
+      }
+      placed = placed.filter(function (P) { return !P.ghost; });
       var bot = Math.max.apply(null, placed.map(function (P) { return P.y + P.h; }));
-      return { placed: placed, top: top, h: bot - top };
+      return { placed: placed, top: 0, h: bot };
     }
     // Index (default; after sort-office.com's index): rows of three that fill
     // the wall edge to edge, tight gaps across, each print at its own shape
@@ -779,6 +812,7 @@
     // scroll only until that edge lines up with the bottom of "Contact".
     wall.style.height = best.h + 'px';
     wall.classList.add('is-hung');   // shown only once every print has its place
+    setTimeout(drawMap, 0);
     // The stop sits two menu lines above the bottom line, where "Contact" was
     // when the menu had six lines. The top of the hang mirrors that distance.
     var page = wall.closest('.page'), labels = document.querySelectorAll('.nav .nav-label');
@@ -793,7 +827,10 @@
     if (!narrow) {
       var sc = wall.closest('.scroller') || document.scrollingElement;
       var topNow = wall.getBoundingClientRect().top + sc.scrollTop;
-      wall.style.marginTop = (gapBelow - topNow) + 'px';
+      // Cluster: the hang starts level with the top of the name (Juan, 2026-11-26)
+      var lg = document.querySelector('.site-header .logo');
+      var want = hang === 'cluster' && lg ? lg.getBoundingClientRect().top : gapBelow;
+      wall.style.marginTop = (want - topNow) + 'px';
     }
   }
 
@@ -888,7 +925,7 @@
 
   /* ---------- Work filmstrip: wheel and arrow keys move it sideways ---------- */
   // the filmstrip behaviour (wheel, drift, drag) runs only in the Filmstrip layouts
-  function workView() { return root.dataset.work || 'squares'; }
+  function workView() { return root.dataset.work || '1a'; }
   function strip() { var w = workView(); return w === '1a' || w === '1b' ? document.querySelector('.work-page .grid') : null; }
   // Work strip test sliders: gap in design px, up / down in % of tile height
   var WORK_DEFAULTS = { gap: 18, up: 20, down: 20 };
@@ -1009,14 +1046,15 @@
      the left or right and fades up at the same speed, each at its own moment. */
   function initSquares() {
     var pg = document.querySelector('.work-page');
-    if (!pg || workView() !== 'squares' || pg.dataset.sq) return;
+    var two = workView() === 'squares2';   // two rows of larger squares (Juan, 2026-11-26)
+    if (!pg || (workView() !== 'squares' && !two) || pg.dataset.sq) return;
     if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
     pg.dataset.sq = '1';
     var cards = [].slice.call(pg.querySelectorAll('.card'));
     // three rows (Juan, 2026-11-26); which squares share a row and how the
     // spare room in each row is split are drawn once per visit, so a resize
     // (or full screen) keeps the same arrangement, just re-measured
-    var counts = [4, 3, 3].sort(function () { return Math.random() - .5; });
+    var counts = (two ? [5, 5] : [4, 3, 3]).sort(function () { return Math.random() - .5; });
     while (counts.reduce(function (x, y) { return x + y; }) < cards.length) counts[counts.indexOf(Math.min.apply(null, counts))]++;
     var weights = counts.map(function (k) { var w = []; for (var j = 0; j <= k; j++) w.push(Math.random() + 0.15); return w; });
     pg._sq = { cards: cards, counts: counts, weights: weights };
@@ -1044,21 +1082,30 @@
     var top = (logo ? logo.getBoundingClientRect().bottom : 90) + Math.max(36, 64 * s);
     var bottom = innerHeight * 0.73;
     var left = edge, right = innerWidth - gutter;
-    var gap = Math.max(18, 36 * s), cap = Math.max(16, 26 * s), rowGap = Math.max(10, 18 * s);
+    var gap = Math.max(18, 36 * s), rowGap = Math.max(10, 18 * s);
+    // captions may take two lines (a long title wraps under the square)
+    var t0 = Q.cards[0] && Q.cards[0].querySelector('.card-title');
+    var lh = t0 ? parseFloat(getComputedStyle(t0).lineHeight) || parseFloat(getComputedStyle(t0).fontSize) * 1.4 : 14;
+    var cap = Math.max(16, 26 * s) + lh;
     var rows = Q.counts.length, rowH = (bottom - top) / rows, kmax = Math.max.apply(null, Q.counts);
-    var S = Math.min(1.3 * Math.max(120, 174 * s), rowH - cap - rowGap, (right - left - (kmax - 1) * gap * 1.6) / kmax);
+    var S = Math.min(rows === 2 ? Infinity : 1.3 * Math.max(120, 174 * s), rowH - cap - rowGap, (right - left - (kmax - 1) * gap * 1.6) / kmax);
     pg.style.setProperty('--sq', S + 'px');
-    var n = 0;
+    var n = 0, pos = [];
     Q.counts.forEach(function (k, r) {
       var row = Q.cards.slice(n, n + k), w = Q.weights[r], tot = w.reduce(function (x, y) { return x + y; });
       n += k;
       var free = right - left - k * S - (k - 1) * gap, x0 = left + free * w[0] / tot;
       row.forEach(function (c, j) {
-        c.style.left = x0 + 'px';
-        c.style.top = top + r * rowH + 'px';
+        pos.push([c, x0, top + r * rowH]);
         x0 += S + gap + free * w[j + 1] / tot;
       });
     });
+    // the box around all the squares (and their titles) sits in the middle of
+    // the window, across and down (Juan, 2026-11-26)
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    pos.forEach(function (p) { minX = Math.min(minX, p[1]); maxX = Math.max(maxX, p[1] + S); minY = Math.min(minY, p[2]); maxY = Math.max(maxY, p[2] + S + cap); });
+    var dx = innerWidth / 2 - (minX + maxX) / 2, dy = innerHeight / 2 - (minY + maxY) / 2;
+    pos.forEach(function (p) { p[0].style.left = (p[1] + dx) + 'px'; p[0].style.top = (p[2] + dy) + 'px'; });
   }
   addEventListener('resize', function () { clearTimeout(layoutSquares._t); layoutSquares._t = setTimeout(layoutSquares, 60); });
   /* Grid V2 (Juan, 2026-11-26): the tiles pack together around one centre of
@@ -1175,6 +1222,59 @@
      the wheel moves it smoothly (a little drift after each turn of the wheel). */
   var wallTarget = null, wallRaf = null, wallSc = null, wallSet = null;
   function wallStop() { if (wallRaf) cancelAnimationFrame(wallRaf); wallRaf = null; wallTarget = null; }
+  /* ---------- Gallery mini map (Juan, 2026-11-26) ----------
+     A small diagram left of the menu: a tiny rectangle for every print on the
+     wall and an empty box for the part of the wall on screen. Click or drag on
+     it to go there. */
+  function drawMap() {
+    var wall = document.querySelector('.prints'), sc = document.querySelector('.scroller');
+    var map = document.querySelector('.wall-map');
+    if (!wall || !sc || !wall.classList.contains('is-hung') || !matchMedia('(hover: hover) and (min-width: 761px)').matches) { if (map) map.remove(); return; }
+    if (!map) {
+      map = document.createElement('div'); map.className = 'wall-map'; map.setAttribute('aria-hidden', 'true');
+      map.innerHTML = '<div class="wall-map-in"></div><div class="wall-map-view"></div>';
+      document.body.appendChild(map);
+      var go = function (e) {
+        var r = map.querySelector('.wall-map-in').getBoundingClientRect(), k = map._k || 1;
+        sc.scrollTop = map._top + (e.clientY - r.top) / k - sc.clientHeight / 2;
+      };
+      var down = false;
+      map.addEventListener('mousedown', function (e) { down = true; stopGlide && stopGlide(); go(e); e.preventDefault(); });
+      addEventListener('mousemove', function (e) { if (down) go(e); });
+      addEventListener('mouseup', function () { down = false; });
+    }
+    if (!sc._mapped) { sc._mapped = 1; sc.addEventListener('scroll', viewMap, { passive: true }); }
+    // the box sits left of the menu, its foot on the menu's last line
+    var labels = document.querySelectorAll('.nav .nav-label'), last = labels[labels.length - 1];
+    // between the right edge of the wall and the menu
+    var s = innerWidth / 1920, mh = Math.max(200, 300 * s);
+    var navL = last ? Math.min.apply(null, [].map.call(labels, function (l) { return l.getBoundingClientRect().left; })) : innerWidth - 120;
+    var ml = wall.getBoundingClientRect().right + Math.max(20, 40 * s), mw = Math.min(115 * s, navL - Math.max(16, 24 * s) - ml);
+    if (mw < 40) { map.remove(); return; }
+    map.style.width = mw + 'px'; map.style.height = mh + 'px';
+    map.style.left = ml + 'px';
+    map.style.top = ((last ? last.getBoundingClientRect().bottom : innerHeight - 40) - mh) + 'px';
+    var W = wall.offsetWidth, H = wall.offsetHeight, k = Math.min(mw / W, mh / H);
+    var inner = map.querySelector('.wall-map-in');
+    inner.style.width = W * k + 'px'; inner.style.height = H * k + 'px';
+    inner.innerHTML = [].map.call(wall.querySelectorAll('.print img'), function (img) {
+      var a = img.closest('.print');
+      return '<i style="left:' + (a.offsetLeft * k).toFixed(1) + 'px;top:' + (a.offsetTop * k).toFixed(1) + 'px;width:' + (img.offsetWidth * k).toFixed(1) + 'px;height:' + (img.offsetHeight * k).toFixed(1) + 'px"></i>';
+    }).join('');
+    map._k = k;
+    map._top = wall.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+    viewMap();
+  }
+  function viewMap() {
+    var map = document.querySelector('.wall-map'), sc = document.querySelector('.scroller');
+    if (!map || !sc) return;
+    var inner = map.querySelector('.wall-map-in'), v = map.querySelector('.wall-map-view'), k = map._k;
+    var y = (sc.scrollTop - map._top) * k, h = sc.clientHeight * k, ih = inner.offsetHeight;
+    var top = Math.max(0, y), bot = Math.min(ih, y + h);
+    v.style.left = inner.offsetLeft - 2 + 'px'; v.style.width = inner.offsetWidth + 4 + 'px';
+    v.style.top = top - 2 + 'px'; v.style.height = Math.max(4, bot - top) + 4 + 'px';
+  }
+  addEventListener('resize', function () { clearTimeout(drawMap._t); drawMap._t = setTimeout(drawMap, 120); });
   function wallScroller() {
     if (!document.querySelector('.prints') || innerWidth <= 700) return null;
     var sc = document.querySelector('.scroller');
