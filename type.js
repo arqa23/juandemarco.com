@@ -50,11 +50,14 @@
     d.ptext = 'off';
     // Work page layout (Juan, 2026-11-26): squares | grid | 1b | 1a
     d.work = 'squares';   // project pages without text by default (Juan, 2026-11-26)
+    d.art = '2';          // project / print pages: ArtView2 (fixed width per series); '1' = ArtView1
     if (off) return;
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
-    ['mode', 'frame', 'work'].forEach(function (k) {
+    ['mode', 'frame', 'work', 'art', 'hang'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
       if (k === 'work' && !/^(squares|grid|grid2|1a|1b)$/.test(v || '')) v = null;   // old slider data used this key
+      if (k === 'art' && !/^[12]$/.test(v || '')) v = null;
+      if (k === 'hang' && !/^(index|cluster)$/.test(v || '')) v = null;
       if (v) d[k] = v;
     });
   } catch (e) { document.documentElement.dataset.theme = 'light'; }

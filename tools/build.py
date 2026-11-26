@@ -123,6 +123,7 @@ TEXT_POSITION = "top"
 #   "working" = the same, plus every Work layout listed to click, and the
 #               Strip 1B sliders, for designing together
 SETTINGS_MODE = "working"
+GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
 WORK_LAYOUTS = [("squares", "Squares"), ("grid", "Grid V1"), ("grid2", "Grid V2"), ("1a", "Strip 1A"), ("1b", "Strip 1B")]
 
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
@@ -181,6 +182,10 @@ def _page(title, section, body, body_class="", head_extra=""):
         '    <div class="pick-layouts">\n      <span class="pick-head">Work layout</span>\n'
         + "".join(f'      <button type="button" class="pick-row pick-opt" data-wv="{k}">{v}</button>\n' for k, v in WORK_LAYOUTS)
         + '    </div>\n'
+        '    <div class="pick-layouts pick-hangs">\n      <span class="pick-head">Gallery layout</span>\n'
+        + "".join(f'      <button type="button" class="pick-row pick-opt" data-hv="{k}">{v}</button>\n' for k, v in GALLERY_LAYOUTS)
+        + '    </div>\n'
+        '    <button type="button" class="pick-row pick-art" data-tog="art">Art view: <span></span></button>\n'
         '    <button type="button" class="pick-row pick-shapes" data-shapes>Tile shapes: <span></span></button>\n'
         '    <div class="mode-pick-work">\n'
         '      <label>Space <input type="range" data-wk="gap" min="0" max="120" step="1"><output></output></label>\n'
@@ -421,8 +426,8 @@ def main():
         <h1>{title}</h1>
         <p class="meta">{meta}</p>
         <nav class="project-nav room-pnav" aria-label="Projects">
-          <a href="/work/{prev_p["slug"]}/" title="{html.escape(prev_p["title"])}">&lsaquo; Prev</a>
-          <a href="/work/{next_p["slug"]}/" title="{html.escape(next_p["title"])}">Next &rsaquo;</a>
+          <a href="/work/{prev_p["slug"]}/" title="{html.escape(prev_p["title"])}">&lsaquo; Previous project</a>
+          <a href="/work/{next_p["slug"]}/" title="{html.escape(next_p["title"])}">Next project &rsaquo;</a>
         </nav>
       </div>
     </div>
