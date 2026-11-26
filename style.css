@@ -867,7 +867,6 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 :root[data-frame="off"] .print img[data-bare] { box-shadow: none; background: none; }
 :root[data-frame="off"][data-mode="dark"] .print img[data-ink] { filter: invert(1); }   /* line drawings only, not the colour prints */
 .mode-pick-work { display: none; flex-direction: column; gap: 4px; }
-.mode-pick.on-work .mode-pick-work { display: flex; }
 .mode-pick-work label {
   display: grid; grid-template-columns: 4.2em 1fr 2.2em; align-items: center; gap: 6px;
   font-family: var(--label-font, var(--font)); font-size: max(7px, calc(var(--nav-size) * .5));
@@ -937,3 +936,19 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   :root[data-work="squares"] .work-page .grid, :root[data-work="grid"] .work-page .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; overflow: visible; padding: 0 var(--gutter); }
   :root[data-work="squares"] .work-page .card, :root[data-work="grid"] .work-page .card { width: auto; }
 }
+
+/* View box, simple (Juan, 2026-11-26, from his screen grab): a small solid
+   box, one line per setting as "Name: value", click a line to switch it */
+.mode-pick { gap: 9px; padding: 14px 18px 12px; border-radius: 5px;
+  background: color-mix(in srgb, var(--ink) 9%, var(--bg)); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.mode-pick .pick-row {
+  display: block; text-align: left; white-space: nowrap; opacity: .92;
+  font-family: var(--text-font, var(--font)); font-weight: 400; text-transform: none; letter-spacing: .01em;
+  font-size: max(11px, calc(var(--nav-size) * .95));
+}
+.mode-pick .pick-row:hover { opacity: 1; }
+.mode-pick .pick-row span { margin-left: .25em; }
+.mode-pick .pick-layout { display: none; }
+.mode-pick.on-work .pick-layout { display: block; }
+.mode-pick-work label { text-transform: none; letter-spacing: .01em; font-size: max(10px, calc(var(--nav-size) * .8)); }
+.mode-pick-legal { margin-top: 3px; }
