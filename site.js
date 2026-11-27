@@ -132,10 +132,7 @@
         mode: (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark' ? 'On' : 'Off',
         frame: (root.dataset.frame || 'on') === 'on' ? 'On' : 'Off',
         fs: document.fullscreenElement ? 'On' : 'Off',
-        art: 'ArtView' + (root.dataset.art || '2'),
-        mapfill: mapLook().fill === 'line' ? 'Line' : 'Fill',
       };
-      var mc = pick.querySelector('.map-col'); if (mc) mc.value = mapLook().col || '#888888';
       pick.querySelectorAll('button[data-hv]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.hang || PREF_DEFAULTS.hang) === b.dataset.hv); });
       pick.classList.toggle('on-gal', !!document.querySelector('.prints'));
       pick.classList.toggle('on-room', document.body.classList.contains('room'));
@@ -145,13 +142,6 @@
     };
     if (pick) {
       document.addEventListener('fullscreenchange', markPick);
-      var mcol = pick.querySelector('.map-col');
-      if (mcol) {
-        mcol.addEventListener('input', function () { try { localStorage.setItem('jdm-mapcol', mcol.value); } catch (err) {} drawMap(); });
-        pick.querySelector('.map-col-reset').addEventListener('click', function (e) {
-          e.preventDefault(); try { localStorage.removeItem('jdm-mapcol'); } catch (err) {} drawMap(); markPick();
-        });
-      }
       pick.addEventListener('click', function (e) {
         e.stopPropagation();
         var wv = e.target.closest('button[data-wv]');   // working mode: pick a Work layout
@@ -173,15 +163,6 @@
           root.dataset.frame = (root.dataset.frame || 'on') === 'on' ? 'off' : 'on';
           try { localStorage.setItem('jdm-frame', root.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
-        }
-        if (k === 'mapfill') {   // Gallery mini map: solid or outlined rectangles
-          try { localStorage.setItem('jdm-mapfill', mapLook().fill === 'line' ? 'fill' : 'line'); } catch (err) {}
-          drawMap(); markPick(); return;
-        }
-        if (k === 'art') {   // ArtView1 (as of 2026-11-26) or ArtView2
-          root.dataset.art = (root.dataset.art || '2') === '2' ? '1' : '2';
-          try { localStorage.setItem('jdm-art', root.dataset.art); } catch (err) {}
-          location.reload(); return;
         }
         if (k === 'fs') {
           var de = document.documentElement;
@@ -353,10 +334,10 @@
     // window height, or less if the window is narrow. Wide images fill it
     // (heights vary); images too tall for it shrink to the band's height and
     // sit centred. Only the count and magnifier follow the image's lower edge.
-    // ArtView1 (the earlier view) is kept as a choice: <html data-art="1">.
+    // ArtView1 was retired 2026-11-27 (VERSIONS.md says how to bring it back).
     // (2026-11-26 ArtView2 set one width per series from its tallest image.)
     var STD_R = 16 / 9;
-    function art2() { return !!layout && root.dataset.art !== '1' && matchMedia('(min-width: 761px)').matches; }
+    function art2() { return !!layout && matchMedia('(min-width: 761px)').matches; }
     function sizeArt() {
       if (!layout) return;
       if (!art2()) { layout.style.removeProperty('--aw'); layout._aw = 0; fit(); return; }
@@ -394,18 +375,32 @@
     load(1); load(-1);
     var start = parseInt(location.hash.slice(1), 10);
     if (start > 1 && start <= slides.length) { load(start - 1); go(start - 1); }
-    // Desktop: the cursor over the image shows the way (left half back, right
-    // half on) and a click there turns the image.
+    // Desktop: the cursor shows the way (left half back, right half on) and a
+    // click turns the image. Not only over the image: over the whole space any
+    // image of the project can take (the shared column, the band's full
+    // height), so a narrower or taller next image never drops the arrow
+    // under a cursor that has not moved (Juan, 2026-11-27).
     if (frame && slides.length > 1) {
-      frame.addEventListener('mousemove', function (e) {
-        if (frame.classList.contains('zooming')) { delete frame.dataset.dir; return; }
-        var r = frame.getBoundingClientRect();
-        frame.dataset.dir = e.clientX - r.left < r.width / 2 ? 'prev' : 'next';
+      var area = layout || frame;
+      var dirAt = function (e) {
+        if (frame.classList.contains('zooming')) return null;
+        if (e.target.closest && e.target.closest('.room-text, .room-under, a, button')) return null;
+        var fr = frame.getBoundingClientRect(), cx = fr.left + fr.width / 2;
+        if (layout && art2() && layout._aw) {
+          var lr = layout.getBoundingClientRect(), w = layout._aw / 2;
+          if (e.clientX < cx - w || e.clientX > cx + w || e.clientY < lr.top || e.clientY > lr.bottom) return null;
+        } else if (e.clientX < fr.left || e.clientX > fr.right || e.clientY < fr.top || e.clientY > fr.bottom) return null;
+        return e.clientX < cx ? 'prev' : 'next';
+      };
+      area.addEventListener('mousemove', function (e) {
+        var d = dirAt(e);
+        if (d) area.dataset.dir = d; else delete area.dataset.dir;
+        if (area !== frame) delete frame.dataset.dir;
       });
-      frame.addEventListener('mouseleave', function () { delete frame.dataset.dir; });
-      frame.addEventListener('click', function (e) {
-        if (!frame.dataset.dir || e.target.closest('.slide-btn')) return;
-        go(i + (frame.dataset.dir === 'next' ? 1 : -1));
+      area.addEventListener('mouseleave', function () { delete area.dataset.dir; delete frame.dataset.dir; });
+      area.addEventListener('click', function (e) {
+        var d = dirAt(e);
+        if (d) go(i + (d === 'next' ? 1 : -1));
       });
     }
     show.querySelector('.prev').addEventListener('click', function () { go(i - 1); });
@@ -1097,8 +1092,8 @@
       var ok = function (x, y) { return Q.t.every(function (q) { return !q || Math.abs(q.x - x) > Q.S + Q.gap || Math.abs(q.y - y) > Q.S + Q.cap + Q.gap; }); };
       cards.forEach(function (c, i) {
         var x, y, n = 0;
-        do { x = Math.random() * (innerWidth - Q.S); y = Math.random() * (innerHeight - Q.S - Q.cap); } while (!ok(x, y) && ++n < 400);
-        var sp = (7 + Math.random() * 5) * Q.s, a = Math.random() * 2 * Math.PI;
+        do { x = 3 + Math.random() * (innerWidth - Q.S - 6); y = 3 + Math.random() * (innerHeight - Q.S - 6); } while (!ok(x, y) && ++n < 400);
+        var sp = (11 + Math.random() * 6) * Q.s, a = Math.random() * 2 * Math.PI;   // a little livelier (round 3)
         Q.t[i] = { el: c, x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, rest: still ? 0 : sp, turn: 0 };
       });
     }
@@ -1130,39 +1125,121 @@
     pg.addEventListener('dragstart', function (e) { e.preventDefault(); });
     requestAnimationFrame(sqTick);
   }
-  // In dark mode the name, menu and settings button get a twin in the
-  // light-mode ink, shown only where a square lies under them (clip-path).
+  // Text over the squares (Juan, 2026-11-27, round 3): the name, menu and
+  // settings button take, over each square, whichever of the two inks (light
+  // mode's dark ink, dark mode's light ink) contrasts most with the part of
+  // that square lying under them, in both modes. Each square's image is read
+  // once as a 12 x 12 grid of brightness; where it passes under a piece of
+  // text, the cells under the text are averaged. The text itself is cut away
+  // out over the squares (a twin cut round them shows it; the real text stays
+  // in place, unseen, so it can still be clicked) and a twin in the chosen ink
+  // shows over each square, so no edge of the other colour rims the letters.
+  var SQ_INKS = [[0x24, 0x23, 0x21], [0xED, 0xE8, 0xDE]], SQ_G = 12;
+  function sqLin(c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+  function sqLum(rgb) { return 0.2126 * sqLin(rgb[0]) + 0.7152 * sqLin(rgb[1]) + 0.0722 * sqLin(rgb[2]); }
+  var SQ_INK_L = SQ_INKS.map(sqLum);
+  function sqRead(t) {   // the square's brightness grid, once its image is in
+    if (t.lum || t.lumTry > 3) return t.lum;
+    var img = t.el.querySelector('img');
+    if (!img || !img.complete || !img.naturalWidth) return null;
+    try {
+      var cv = document.createElement('canvas'); cv.width = cv.height = SQ_G;
+      var cx = cv.getContext('2d', { willReadFrequently: true }), w = img.naturalWidth, h = img.naturalHeight, m = Math.min(w, h);
+      cx.drawImage(img, (w - m) / 2, (h - m) / 2, m, m, 0, 0, SQ_G, SQ_G);   // as the square shows it (cover, centred)
+      var d = cx.getImageData(0, 0, SQ_G, SQ_G).data, g = [];
+      for (var k = 0; k < SQ_G * SQ_G; k++) g.push(sqLum([d[k * 4], d[k * 4 + 1], d[k * 4 + 2]]));
+      t.lum = g;
+    } catch (e) { t.lumTry = (t.lumTry || 0) + 1; }
+    return t.lum;
+  }
   function sqInk() {
-    SQ.ink = ['.site-header', '.nav', '.settings-corner'].map(function (sel) {
-      var o = document.querySelector(sel); if (!o) return null;
-      var c = o.cloneNode(true);
-      c.classList.add('sq-ink'); c.setAttribute('aria-hidden', 'true'); c.setAttribute('inert', '');
-      c.removeAttribute('id'); c.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
-      c.style.clipPath = 'inset(100%)';
-      document.body.appendChild(c);
-      return { o: o, c: c };
+    root.classList.add('sq-on');
+    // each piece of text is judged on its own: the name, each menu item, the button
+    SQ.ink = [['.site-header', '.logo'], ['.nav', '.nav-label'], ['.settings-corner']].map(function (p) {
+      var o = document.querySelector(p[0]); if (!o) return null;
+      var pc = p[1] ? [].slice.call(o.querySelectorAll(p[1])) : [];
+      return { o: o, pieces: pc.length ? pc : [o], pool: [], cp: 'inset(100%)', hold: new Map() };
     }).filter(Boolean);
   }
+  function sqTwin(k) {
+    var c = k.o.cloneNode(true);
+    c.classList.add('sq-ink'); c.setAttribute('aria-hidden', 'true'); c.setAttribute('inert', '');
+    c.removeAttribute('id'); c.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+    c.style.clipPath = 'inset(100%)'; c.style.opacity = '';
+    document.body.appendChild(c);
+    return { c: c, cp: 'inset(100%)', ink: -1 };
+  }
+  // average brightness of square b's cells lying under rect p
+  function sqUnder(b, p, S) {
+    var g = sqRead(b[2]); if (!g) return 0.2;
+    var x0 = Math.max(p.left, b[0]), x1 = Math.min(p.right, b[0] + S), y0 = Math.max(p.top, b[1]), y1 = Math.min(p.bottom, b[1] + S);
+    if (x1 <= x0 || y1 <= y0) return null;
+    var c0 = Math.max(0, Math.floor((x0 - b[0]) / S * SQ_G)), c1 = Math.min(SQ_G - 1, Math.floor((x1 - b[0]) / S * SQ_G - 1e-6));
+    var r0 = Math.max(0, Math.floor((y0 - b[1]) / S * SQ_G)), r1 = Math.min(SQ_G - 1, Math.floor((y1 - b[1]) / S * SQ_G - 1e-6));
+    var sum = 0, cnt = 0;
+    for (var rr = r0; rr <= r1; rr++) for (var cc = c0; cc <= c1; cc++) { sum += g[rr * SQ_G + cc]; cnt++; }
+    return cnt ? sum / cnt : 0.2;
+  }
+  function sqRect(x, y, w, h) { return 'M' + x.toFixed(1) + ' ' + y.toFixed(1) + 'h' + w.toFixed(1) + 'v' + h.toFixed(1) + 'h' + (-w).toFixed(1) + 'z'; }
   function sqInkDraw() {
-    var Q = SQ, dark = (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark', S = Q.S;
+    var Q = SQ, S = Q.S;
     var boxes = [];
-    if (dark) Q.t.forEach(function (t) {
+    Q.t.forEach(function (t) {
       var x = sqScreenX(t);
-      boxes.push([x, t.y]);
-      if (!Q.fl && x + S > Q.L) boxes.push([x - Q.L, t.y]);
+      boxes.push([x, t.y, t]);
+      if (!Q.fl && x + S > Q.L) boxes.push([x - Q.L, t.y, t]);
     });
     Q.ink.forEach(function (k) {
-      var r = k.o.getBoundingClientRect(), d = '';
+      var r = k.o.getBoundingClientRect(), holes = '', n = 0;
+      // the pieces' bands: each piece owns the height down to halfway to the next
+      var pr = k.pieces.map(function (el) { return el.getBoundingClientRect(); });
+      var bands = pr.map(function (p, i) {
+        var top = i ? (pr[i - 1].bottom + p.top) / 2 : r.top - 2000, bot = i < pr.length - 1 ? (p.bottom + pr[i + 1].top) / 2 : r.bottom + 2000;
+        return [top, bot];
+      });
       boxes.forEach(function (b) {
         if (b[0] > r.right || b[0] + S < r.left || b[1] > r.bottom || b[1] + S < r.top) return;
-        d += 'M' + (b[0] - r.left).toFixed(1) + ' ' + (b[1] - r.top).toFixed(1) + 'h' + S.toFixed(1) + 'v' + S.toFixed(1) + 'h' + (-S).toFixed(1) + 'z';
+        holes += sqRect(b[0] - r.left, b[1] - r.top, S, S);
+        var paths = ['', ''];
+        pr.forEach(function (p, i) {
+          var y0 = Math.max(b[1], bands[i][0]), y1 = Math.min(b[1] + S, bands[i][1]);
+          if (y1 <= y0) return;
+          var L = sqUnder(b, p, S); if (L == null) L = sqUnder(b, r, S); if (L == null) L = 0.2;
+          var con = SQ_INK_L.map(function (li) { return (Math.max(li, L) + 0.05) / (Math.min(li, L) + 0.05); });
+          var key = b[2].el, prev = k.hold.get(key) || {}, pick = con[1] > con[0] ? 1 : 0;
+          if (prev[i] != null && con[prev[i]] * 1.25 > con[pick]) pick = prev[i];   // no flicker at the turn
+          prev[i] = pick; k.hold.set(key, prev);
+          paths[pick] += sqRect(b[0] - r.left, y0 - r.top, S, y1 - y0);
+        });
+        paths.forEach(function (d, ink) {
+          if (!d) return;
+          var tw = k.pool[n] || (k.pool[n] = sqTwin(k));
+          if (tw.ink !== ink) {
+            var c = SQ_INKS[ink].join(', ');
+            tw.c.style.setProperty('--ink', 'rgb(' + c + ')');
+            tw.c.style.setProperty('--ink-dim', 'rgba(' + c + ', .8)');
+            tw.c.style.setProperty('--legal-ink', 'rgba(' + c + ', .85)');
+            tw.ink = ink;
+          }
+          var cp = 'path("' + d + '")';
+          if (tw.cp !== cp) { tw.c.style.clipPath = cp; tw.cp = cp; }
+          n++;
+        });
       });
-      var cp = d ? 'path("' + d + '")' : 'inset(100%)';
-      if (k.cp !== cp) { k.c.style.clipPath = cp; k.cp = cp; }
+      for (var j = n; j < k.pool.length; j++) if (k.pool[j].cp !== 'inset(100%)') { k.pool[j].c.style.clipPath = 'inset(100%)'; k.pool[j].cp = 'inset(100%)'; }
+      // the text itself stays in place (and clickable) but unseen while a
+      // square is under it; a twin cut round the squares shows it instead
+      var ocp = holes ? 'path(evenodd, "M-4000 -4000H4000V4000H-4000Z' + holes + '")' : 'inset(100%)';
+      if (k.cp !== ocp) {
+        if (!k.base) k.base = sqTwin(k);
+        k.base.c.style.clipPath = ocp; k.cp = ocp;
+        k.o.style.opacity = holes ? '0' : '';
+      }
     });
   }
   function sqDrop() {   // leaving the Work page: take the ink twins away
-    if (SQ && SQ.ink) SQ.ink.forEach(function (k) { k.c.remove(); });
+    if (SQ && SQ.ink) SQ.ink.forEach(function (k) { k.pool.forEach(function (p) { p.c.remove(); }); if (k.base) k.base.c.remove(); k.o.style.opacity = ''; });
+    root.classList.remove('sq-on');
     SQ = null;
   }
   addEventListener('pointermove', function (e) {
@@ -1186,7 +1263,8 @@
     if (G.t) {
       var t = G.t;
       t.el.classList.remove('is-held');
-      t.vx = lim(G.vx) * 0.4; t.vy = lim(G.vy) * 0.35;
+      var k0 = SQ.fl ? 0.5 : 0.4;
+      t.vx = lim(G.vx) * k0; t.vy = lim(G.vy) * (SQ.fl ? 0.5 : 0.35);
       if (!SQ.fl) {   // settles into the nearest row that has room
         var mid = t.y + SQ.S / 2, near = Math.abs(mid - (SQ.laneTop[0] + SQ.S / 2)) <= Math.abs(mid - (SQ.laneTop[1] + SQ.S / 2)) ? 0 : 1;
         var count = SQ.t.filter(function (q) { return q !== t && q.lane === near; }).length;
@@ -1214,6 +1292,10 @@
     var n = Math.ceil(Q.cards.length / 2), L = innerWidth;
     S = Math.min(S, L / n - gap * 1.2);   // a row must fit across the window, with room to move
     var band = 2 * rowH, y0 = (innerHeight - band) / 2;
+    // Float (Juan, 2026-11-27, round 3): no titles under the squares (they
+    // show on hover, as in Grid), squares 20% bigger, 3px apart at the closest
+    // and 3px off the window's edges
+    if (Q.fl) { cap = 0; gap = 3; S *= 1.2; }
     Q.s = s; Q.S = S; Q.gap = gap; Q.rowGap = rowGap; Q.cap = cap; Q.L = L; Q.H = innerHeight;
     Q.room = Math.floor(L / (S + gap));
     Q.laneTop = [y0, y0 + rowH];
@@ -1278,21 +1360,23 @@
         t.turn += (Math.random() - .5) * dt * 1.2; t.turn *= Math.exp(-dt * .5);
         var c = Math.cos(t.turn * dt), si = Math.sin(t.turn * dt), vx = t.vx;
         t.vx = vx * c - t.vy * si; t.vy = vx * si + t.vy * c;
+        // after a throw or a knock it coasts down to its pace over a few
+        // seconds, softly at first (no sudden brake, round 3)
         var sp2 = Math.hypot(t.vx, t.vy), w2;
-        if (sp2 > t.rest) w2 = t.rest + (sp2 - t.rest) * Math.exp(-dt / 0.8);
-        else w2 = sp2 + (t.rest - sp2) * Math.min(1, dt * 0.6);
+        if (sp2 > t.rest) { var ex = sp2 - t.rest; w2 = t.rest + ex * Math.exp(-dt / (1.4 + 1.6 * Math.min(1, ex / (220 * Q.s)))); }
+        else w2 = sp2 + (t.rest - sp2) * Math.min(1, dt * 0.4);
         if (sp2 < 1e-3) { var a = Math.random() * 2 * Math.PI; t.vx = Math.cos(a) * 1e-3; t.vy = Math.sin(a) * 1e-3; sp2 = 1e-3; }
         t.vx *= w2 / sp2; t.vy *= w2 / sp2;
       }
       t.x += t.vx * dt; t.y += t.vy * dt;
       if (Q.fl) {   // hard edges: bounce
-        var mx = W - S, my = H - S - Q.cap;
-        if (t.x < 0) { t.x = 0; t.vx = Math.abs(t.vx); } else if (t.x > mx) { t.x = mx; t.vx = -Math.abs(t.vx); }
-        if (t.y < 0) { t.y = 0; t.vy = Math.abs(t.vy); } else if (t.y > my) { t.y = my; t.vy = -Math.abs(t.vy); }
+        var e0 = 3, mx = W - S - e0, my = H - S - e0;
+        if (t.x < e0) { t.x = e0; t.vx = Math.abs(t.vx) * 0.8; } else if (t.x > mx) { t.x = mx; t.vx = -Math.abs(t.vx) * 0.8; }
+        if (t.y < e0) { t.y = e0; t.vy = Math.abs(t.vy) * 0.8; } else if (t.y > my) { t.y = my; t.vy = -Math.abs(t.vy) * 0.8; }
       }
     });
     // squares bounce off each other, one gap apart (Squares wraps around)
-    var sx = S + Q.gap, sy = S + Q.cap + (Q.fl ? Q.gap * 0.5 : Q.rowGap * 0.8);
+    var sx = S + Q.gap, sy = S + Q.cap + (Q.fl ? Q.gap : Q.rowGap * 0.8);
     for (var i = 0; i < Q.t.length; i++) for (var j = i + 1; j < Q.t.length; j++) {
       var A = Q.t[i], B = Q.t[j];
       var dx = Q.fl ? B.x - A.x : sqMod(B.x - A.x + L / 2, L) - L / 2, dy = B.y - A.y;
@@ -1313,6 +1397,9 @@
       // a held square passes on a little more than its speed; free ones swap, a touch damped
       if (A === held) { na = va; nb = va * 1.2; }
       else if (B === held) { nb = vb; na = vb * 1.2; }
+      else if (Q.fl) {   // Float: a softer knock, less spring (round 3)
+        var mid = (va + vb) / 2; na = mid + (vb - mid) * 0.6; nb = mid + (va - mid) * 0.6;
+      }
       else { na = vb * 0.9; nb = va * 0.9; }
       if (ax) { A.vx = na; B.vx = nb; } else { A.vy = na; B.vy = nb; }
     }
@@ -1369,11 +1456,6 @@
      it to go there. */
   // the map's look, chosen in working settings (Juan, 2026-11-27): rectangles
   // filled or outlined, in the text colour (default) or a colour of his choice
-  function mapLook() {
-    var o = { fill: 'fill', col: '' };
-    try { o.fill = localStorage.getItem('jdm-mapfill') === 'line' ? 'line' : 'fill'; o.col = localStorage.getItem('jdm-mapcol') || ''; } catch (e) {}
-    return o;
-  }
   function drawMap() {
     var wall = document.querySelector('.prints'), sc = document.querySelector('.scroller');
     var map = document.querySelector('.wall-map');
@@ -1414,9 +1496,6 @@
       var a = img.closest('.print');
       return '<i style="left:' + (a.offsetLeft * k).toFixed(1) + 'px;top:' + (a.offsetTop * k).toFixed(1) + 'px;width:' + (img.offsetWidth * k).toFixed(1) + 'px;height:' + (img.offsetHeight * k).toFixed(1) + 'px"></i>';
     }).join('');
-    var look = mapLook();
-    map.classList.toggle('is-line', look.fill === 'line');
-    if (look.col) map.style.setProperty('--map-col', look.col); else map.style.removeProperty('--map-col');
     map._k = k;
     map._top = wall.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
     viewMap();

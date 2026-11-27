@@ -196,9 +196,6 @@ def _page(title, section, body, body_class="", head_extra=""):
         '    <div class="pick-layouts pick-gal">\n      <span class="pick-head">Layout:</span>\n'
         + "".join(f'      <button type="button" class="pick-row pick-opt" data-hv="{k}">{v}</button>\n' for k, v in GALLERY_LAYOUTS)
         + '    </div>\n'
-        '    <button type="button" class="pick-row pick-gal" data-tog="mapfill">Map: <span></span></button>\n'
-        '    <label class="pick-row pick-gal pick-col">Map colour: <input type="color" class="map-col" aria-label="Map colour"><button type="button" class="map-col-reset" title="Back to the text colour">reset</button></label>\n'
-        '    <button type="button" class="pick-row pick-art" data-tog="art">Art view: <span></span></button>\n'
         )
     return f"""<!doctype html>
 <html lang="en">
@@ -553,15 +550,16 @@ def main():
 """
     # About and Contact are one page now: About text, then the contact text below.
     legal = f'      <p class="about-legal">&copy; Juan De Marco | <span class="yr">{YEAR}</span></p>\n'
-    # Test (Juan, 2026-11-27): one of the Gallery sketches, frameless (lines
-    # only, white in dark mode), at random on each visit, right of the text.
-    bare = sorted(f.name for f in (ROOT / "images" / "prints" / "sketches" / "bare").glob("[0-9]*.webp"))
-    sketch = ('  <div class="about-sketch" aria-hidden="true"><img alt="" decoding="async" draggable="false"></div>\n'
+    # About (Juan, 2026-11-27, round 3): Gallery sketch 02 only, frameless,
+    # its drawing (not the sheet) fitted to the box Juan marked right of the
+    # text, in the text's own colour (style.css .about-sketch). It is drawn as
+    # a mask, so it fades in once the image has loaded.
+    sketch = ('  <div class="about-sketch" aria-hidden="true"><i></i></div>\n'
               '  <script>\n    (function () {\n'
-              f'      var list = {json.dumps(["/images/prints/sketches/bare/" + f for f in bare])}, img = document.querySelector(".about-sketch img");\n'
-              '      if (!img || !list.length) return;\n'
-              '      img.onload = function () { img.classList.add("loaded"); };\n'
-              '      img.src = list[Math.floor(Math.random() * list.length)];\n'
+              '      var el = document.querySelector(".about-sketch i"), im = new Image();\n'
+              '      if (!el) return;\n'
+              '      im.onload = function () { el.classList.add("loaded"); };\n'
+              '      im.src = "/images/prints/sketches/bare/02.webp";\n'
               '    })();\n  </script>\n')
     write("about/index.html", page("About", "about", stacked(about_block + contact + legal) + sketch, "inner photo"))
     # Old /contact/ links land on About.
