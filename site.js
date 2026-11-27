@@ -964,25 +964,29 @@
   // (one large + one small, or three small) keep their make-up; their order,
   // and which side each project sits on, are drawn at random.
   function shuffleWork() {
+    // Work (Editorial): a new hang on every visit (Juan, 2026-11-27). The four
+    // major projects (large) and the minor ones (small) are each shuffled, then
+    // hung as: major + minor, major + minor, three minors, major + minor,
+    // major + minor. Two large ones at a time, then a break of three small
+    // ones (no endless zig-zag); a large one always takes the other side from
+    // the large one above it, never straight on top of it.
     var feat = document.querySelector('.edw-feat');
     if (!feat || feat.classList.contains('is-shuffled')) return;
-    var rows = {}, keys = [];
-    feat.querySelectorAll('.edw-item[data-g]').forEach(function (a) {
-      var g = a.dataset.g; if (!rows[g]) { rows[g] = []; keys.push(g); } rows[g].push(a);
-    });
     function mix(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-    // a large project never sits straight above another (Juan, 2026-11-27):
-    // row by row, the large one takes the other side from the last large one
-    var side = Math.random() < .5 ? 0 : 1;
-    mix(keys).forEach(function (g) {
-      var r = mix(rows[g]), lead = r.filter(function (a) { return a.classList.contains('edw-lead'); })[0];
-      if (lead) {
-        r = r.filter(function (a) { return a !== lead; });
-        if (side === 0) r.unshift(lead); else r.push(lead);
-        side = 1 - side;
-      }
-      r.forEach(function (a) { feat.appendChild(a); });
-    });
+    var all = [].slice.call(feat.querySelectorAll('.edw-item'));
+    var big = mix(all.filter(function (a) { return a.classList.contains('edw-lead'); }));
+    var sm = mix(all.filter(function (a) { return !a.classList.contains('edw-lead'); }));
+    var side = Math.random() < .5 ? 0 : 1, out = [];
+    function pair() {
+      var M = big.shift(), m = sm.shift();
+      out.push(side === 0 ? M : m, side === 0 ? m : M);
+      side = 1 - side;
+    }
+    pair(); pair();
+    out.push.apply(out, sm.splice(0, 3));
+    while (big.length) pair();
+    out.push.apply(out, sm);   // any left over (none with 4 + 7)
+    out.filter(Boolean).forEach(function (a) { feat.appendChild(a); });
     feat.classList.add('is-shuffled');
   }
   function init() {
