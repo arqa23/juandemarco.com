@@ -48,7 +48,7 @@
     d.theme = 'light';
     d.mode = 'dark';   // the site's default mode (Juan, 2026-11-25)
     d.ptext = 'off';
-    // Work page layout (Juan, 2026-11-27): squares | grid | strip
+    // Work page layout (Juan, 2026-11-27): squares | float | grid | strip
     d.work = 'strip';   // project pages without text by default (Juan, 2026-11-26)
     d.art = '2';          // project / print pages: ArtView2 (fixed width per series); '1' = ArtView1
     if (off) return;
@@ -59,7 +59,7 @@
     ['frame', 'work', 'art', 'hang'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
       // old names (2026-11-26): Squares 2 rows, Strip 1A; retired layouts fall back
-      if (k === 'work') v = { squares2: 'squares', '1a': 'strip', squares: 'squares', grid: 'grid', strip: 'strip' }[v] || null;
+      if (k === 'work') v = { squares2: 'squares', '1a': 'strip', squares: 'squares', float: 'float', grid: 'grid', strip: 'strip' }[v] || null;
       if (k === 'art' && !/^[12]$/.test(v || '')) v = null;
       if (k === 'hang' && !/^(index|cluster)$/.test(v || '')) v = null;
       if (v) d[k] = v;

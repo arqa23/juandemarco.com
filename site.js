@@ -133,7 +133,9 @@
         frame: (root.dataset.frame || 'on') === 'on' ? 'On' : 'Off',
         fs: document.fullscreenElement ? 'On' : 'Off',
         art: 'ArtView' + (root.dataset.art || '2'),
+        mapfill: mapLook().fill === 'line' ? 'Line' : 'Fill',
       };
+      var mc = pick.querySelector('.map-col'); if (mc) mc.value = mapLook().col || '#888888';
       pick.querySelectorAll('button[data-hv]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.hang || PREF_DEFAULTS.hang) === b.dataset.hv); });
       pick.classList.toggle('on-gal', !!document.querySelector('.prints'));
       pick.classList.toggle('on-room', document.body.classList.contains('room'));
@@ -143,6 +145,13 @@
     };
     if (pick) {
       document.addEventListener('fullscreenchange', markPick);
+      var mcol = pick.querySelector('.map-col');
+      if (mcol) {
+        mcol.addEventListener('input', function () { try { localStorage.setItem('jdm-mapcol', mcol.value); } catch (err) {} drawMap(); });
+        pick.querySelector('.map-col-reset').addEventListener('click', function (e) {
+          e.preventDefault(); try { localStorage.removeItem('jdm-mapcol'); } catch (err) {} drawMap(); markPick();
+        });
+      }
       pick.addEventListener('click', function (e) {
         e.stopPropagation();
         var wv = e.target.closest('button[data-wv]');   // working mode: pick a Work layout
@@ -164,6 +173,10 @@
           root.dataset.frame = (root.dataset.frame || 'on') === 'on' ? 'off' : 'on';
           try { localStorage.setItem('jdm-frame', root.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
+        }
+        if (k === 'mapfill') {   // Gallery mini map: solid or outlined rectangles
+          try { localStorage.setItem('jdm-mapfill', mapLook().fill === 'line' ? 'fill' : 'line'); } catch (err) {}
+          drawMap(); markPick(); return;
         }
         if (k === 'art') {   // ArtView1 (as of 2026-11-26) or ArtView2
           root.dataset.art = (root.dataset.art || '2') === '2' ? '1' : '2';
@@ -278,17 +291,30 @@
   /* ---------- Project slideshow ---------- */
   var slideStep = null;
   // Magnifier for print rooms: a round lens follows the cursor over the print.
+  var zoomOff = function () { return false; };
   function initZoom(show, current) {
     var btn = show.querySelector('.room-zoom'), frame = show.querySelector('.frame');
     if (!btn || !frame) return;
     var lens = document.createElement('div');
     lens.className = 'zoom-lens';
     frame.appendChild(lens);
-    btn.addEventListener('click', function () {
-      var on = btn.getAttribute('aria-pressed') !== 'true';
+    var set = function (on) {
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       frame.classList.toggle('zooming', on);
-    });
+    };
+    btn.addEventListener('click', function () { set(btn.getAttribute('aria-pressed') !== 'true'); });
+    // a click on the image puts the magnifier away (Juan, 2026-11-27), and the
+    // arrow cursor is back at once, ready for the next click to turn the image
+    frame.addEventListener('click', function (e) {
+      if (!frame.classList.contains('zooming')) return;
+      e.stopImmediatePropagation(); e.preventDefault();
+      set(false);
+      if (show.querySelectorAll('.slide').length > 1) {
+        var r = frame.getBoundingClientRect();
+        frame.dataset.dir = e.clientX - r.left < r.width / 2 ? 'prev' : 'next';
+      }
+    }, true);
+    zoomOff = function () { if (frame.isConnected && frame.classList.contains('zooming')) { set(false); return true; } return false; };
     frame.addEventListener('mousemove', function (e) {
       if (!frame.classList.contains('zooming')) return;
       var img = current(), r = frame.getBoundingClientRect();
@@ -1030,54 +1056,114 @@
     if (drag && drag.g === g) drag.left += d;
     if (drift.el === g) { drift.pos += d; if (drift.ease) { drift.ease.from += d; drift.ease.to += d; } }
   }
-  /* Squares (Juan, 2026-11-27): two rows of squares on an endless strip that
-     wraps around the window. Every square drifts very slowly on its own, like
-     a slow game of pong: it bounces off the top and bottom of its row and off
-     its neighbours, while the whole strip flows slowly to the left and cycles
-     for ever. Grab a square to move it (it shoves the others, and a throw
-     sets them going); grab the space between squares to pan the strip. After
-     any push things calm down again, back to a slow drift that never stops.
-     Rows, order and positions are drawn anew on every visit. */
+  /* Squares (Juan, 2026-11-27, round 2): two straight rows of squares that
+     wrap around the window like a map on a globe: whatever leaves one side
+     comes in on the other at once (a square crossing an edge shows on both).
+     The rows flow slowly to the left; each square drifts gently along its row
+     and bounces off its neighbours. Grab a square to move it (it nudges the
+     others), throw it and it eases back into the nearest row, even from above
+     or below the band; grab the space between to pan, or use the wheel.
+     Float (same day): the same squares with no rows and no flow, meandering
+     anywhere on the screen and bouncing off its hard edges; the wheel does
+     nothing there. In both, squares pass behind the name, menu and settings
+     button, and in dark mode the part of those lying over a square turns to
+     the light-mode ink so it stays readable. */
   var SQ = null;
   function initSquares() {
-    var pg = document.querySelector('.work-page');
-    if (!pg || workView() !== 'squares' || pg.dataset.sq) return;
+    var pg = document.querySelector('.work-page'), v = workView();
+    if (SQ && !SQ.pg.isConnected) sqDrop();
+    if (!pg || (v !== 'squares' && v !== 'float') || pg.dataset.sq) return;
     if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
     pg.dataset.sq = '1';
     var grid = pg.querySelector('.grid'), cards = shuffleCards(grid);
     var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    SQ = { pg: pg, cards: cards, off: 0, offV: 0, flowK: 1, still: still, t: [], grab: null, moved: false, last: 0 };
+    SQ = { pg: pg, cards: cards, fl: v === 'float', off: 0, offV: 0, flowK: 1, still: still, t: [], grab: null, moved: false, last: 0 };
     sqMeasure();
-    // two rows, squares spread evenly along each with a little jitter
-    var lanes = [[], []];
-    cards.forEach(function (c, i) { lanes[i % 2].push(i); });
-    lanes.forEach(function (ids, l) {
-      var k = ids.length, step = SQ.L / k, free = Math.max(0, step - SQ.S - SQ.gap), ph = Math.random() * step;
-      ids.forEach(function (i, j) {
-        var sp = (5 + Math.random() * 4) * SQ.s, ang = (Math.random() < .5 ? 0 : Math.PI) + (Math.random() - .5) * 1.1;
-        SQ.t[i] = { el: cards[i], lane: l, x: ph + j * step + (Math.random() - .5) * free * .8, fy: Math.random(),
-          vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, rest: still ? 0 : sp };
+    var Q = SQ;
+    if (!Q.fl) {
+      // two rows, squares spread evenly along each with a little jitter
+      var lanes = [[], []];
+      cards.forEach(function (c, i) { lanes[i % 2].push(i); });
+      lanes.forEach(function (ids, l) {
+        var k = ids.length, step = Q.L / k, free = Math.max(0, step - Q.S - Q.gap), ph = Math.random() * step;
+        ids.forEach(function (i, j) {
+          var sp = (5 + Math.random() * 4) * Q.s;
+          Q.t[i] = { el: cards[i], lane: l, x: ph + j * step + (Math.random() - .5) * free * .8, y: Q.laneTop[l],
+            vx: (Math.random() < .5 ? -1 : 1) * sp, vy: 0, rest: still ? 0 : sp };
+        });
       });
+    } else {
+      // anywhere on the screen, not touching
+      var ok = function (x, y) { return Q.t.every(function (q) { return !q || Math.abs(q.x - x) > Q.S + Q.gap || Math.abs(q.y - y) > Q.S + Q.cap + Q.gap; }); };
+      cards.forEach(function (c, i) {
+        var x, y, n = 0;
+        do { x = Math.random() * (innerWidth - Q.S); y = Math.random() * (innerHeight - Q.S - Q.cap); } while (!ok(x, y) && ++n < 400);
+        var sp = (7 + Math.random() * 5) * Q.s, a = Math.random() * 2 * Math.PI;
+        Q.t[i] = { el: c, x: x, y: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, rest: still ? 0 : sp, turn: 0 };
+      });
+    }
+    Q.t.forEach(function (t) {
+      t.el._sq = t;
+      if (!Q.fl) {   // its twin, shown at the other side while it crosses an edge
+        t.gh = t.el.cloneNode(true); t.gh.classList.add('sq-ghost'); t.gh.setAttribute('aria-hidden', 'true'); t.gh.tabIndex = -1;
+        t.gh._sq = t; t.gh.style.visibility = 'hidden'; grid.appendChild(t.gh);
+      }
     });
-    SQ.t.forEach(function (t) { t.y = SQ.laneTop[t.lane] + t.fy * SQ.play; });
+    sqInk();
     sqRender();
     pg.classList.add('is-squares');
     if (!still) cards.forEach(function (c) {
-      c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 80 + Math.random() * 1300, easing: 'ease-out', fill: 'backwards' });
+      var a = { duration: 900, delay: 80 + Math.random() * 1300, easing: 'ease-out', fill: 'backwards' };
+      c.animate([{ opacity: 0 }, { opacity: 1 }], a);
+      if (c._sq.gh) c._sq.gh.animate([{ opacity: 0 }, { opacity: 1 }], a);
     });
-    // grab a square to move it, or the space between to pan
+    // grab a square to move it, or (Squares) the space between to pan
     pg.addEventListener('pointerdown', function (e) {
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
-      var c = e.target.closest('.card'), t = null;
-      SQ.t.forEach(function (q) { if (q.el === c) t = q; });
-      SQ.grab = { t: t, x0: e.clientX, y0: e.clientY, px: e.clientX, py: e.clientY, pt: performance.now(), vx: 0, vy: 0,
-        dx: t ? sqScreenX(t) - e.clientX : 0, dy: t ? t.y - e.clientY : 0 };
+      var c = e.target.closest('.card'), t = c ? c._sq || null : null;
+      if (!t && SQ.fl) return;
+      SQ.grab = { t: t, x0: e.clientX, y0: e.clientY, px: e.clientX, py: e.clientY, pt: performance.now(), vx: 0, vy: 0 };
       SQ.moved = false;
       e.preventDefault();
     });
     pg.addEventListener('click', function (e) { if (SQ && SQ.moved) { e.preventDefault(); e.stopPropagation(); SQ.moved = false; } }, true);
     pg.addEventListener('dragstart', function (e) { e.preventDefault(); });
     requestAnimationFrame(sqTick);
+  }
+  // In dark mode the name, menu and settings button get a twin in the
+  // light-mode ink, shown only where a square lies under them (clip-path).
+  function sqInk() {
+    SQ.ink = ['.site-header', '.nav', '.settings-corner'].map(function (sel) {
+      var o = document.querySelector(sel); if (!o) return null;
+      var c = o.cloneNode(true);
+      c.classList.add('sq-ink'); c.setAttribute('aria-hidden', 'true'); c.setAttribute('inert', '');
+      c.removeAttribute('id'); c.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+      c.style.clipPath = 'inset(100%)';
+      document.body.appendChild(c);
+      return { o: o, c: c };
+    }).filter(Boolean);
+  }
+  function sqInkDraw() {
+    var Q = SQ, dark = (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark', S = Q.S;
+    var boxes = [];
+    if (dark) Q.t.forEach(function (t) {
+      var x = sqScreenX(t);
+      boxes.push([x, t.y]);
+      if (!Q.fl && x + S > Q.L) boxes.push([x - Q.L, t.y]);
+    });
+    Q.ink.forEach(function (k) {
+      var r = k.o.getBoundingClientRect(), d = '';
+      boxes.forEach(function (b) {
+        if (b[0] > r.right || b[0] + S < r.left || b[1] > r.bottom || b[1] + S < r.top) return;
+        d += 'M' + (b[0] - r.left).toFixed(1) + ' ' + (b[1] - r.top).toFixed(1) + 'h' + S.toFixed(1) + 'v' + S.toFixed(1) + 'h' + (-S).toFixed(1) + 'z';
+      });
+      var cp = d ? 'path("' + d + '")' : 'inset(100%)';
+      if (k.cp !== cp) { k.c.style.clipPath = cp; k.cp = cp; }
+    });
+  }
+  function sqDrop() {   // leaving the Work page: take the ink twins away
+    if (SQ && SQ.ink) SQ.ink.forEach(function (k) { k.c.remove(); });
+    SQ = null;
   }
   addEventListener('pointermove', function (e) {
     var G = SQ && SQ.grab; if (!G) return;
@@ -1094,20 +1180,27 @@
     var G = SQ && SQ.grab; if (!G) return;
     SQ.grab = null; SQ.pg.classList.remove('is-dragging');
     if (!SQ.moved) return;
-    var cap = 700 * SQ.s, lim = function (v) { return Math.max(-cap, Math.min(cap, v)); };
-    if (G.t) {   // a throw: the square leaves at the speed it was moving and settles into the nearest row
-      G.t.el.classList.remove('is-held');
-      G.t.vx = lim(G.vx) * 0.6; G.t.vy = lim(G.vy) * 0.25;
-      var mid = G.t.y + SQ.S / 2;
-      G.t.lane = Math.abs(mid - (SQ.laneTop[0] + SQ.S / 2)) <= Math.abs(mid - (SQ.laneTop[1] + SQ.S / 2)) ? 0 : 1;
-    } else SQ.offV = -lim(G.vx) * 0.6;   // a pan keeps going a little and eases off
+    // gentler than before (Juan, 2026-11-27): a throw leaves at about a third
+    // of the hand's speed, capped, and calms down within a second or so
+    var cap = 380 * SQ.s, lim = function (v) { return Math.max(-cap, Math.min(cap, v)); };
+    if (G.t) {
+      var t = G.t;
+      t.el.classList.remove('is-held');
+      t.vx = lim(G.vx) * 0.4; t.vy = lim(G.vy) * 0.35;
+      if (!SQ.fl) {   // settles into the nearest row that has room
+        var mid = t.y + SQ.S / 2, near = Math.abs(mid - (SQ.laneTop[0] + SQ.S / 2)) <= Math.abs(mid - (SQ.laneTop[1] + SQ.S / 2)) ? 0 : 1;
+        var count = SQ.t.filter(function (q) { return q !== t && q.lane === near; }).length;
+        if (count < SQ.room) t.lane = near;
+      }
+    } else SQ.offV = -lim(G.vx) * 0.5;   // a pan keeps going a little and eases off
   });
   addEventListener('wheel', function (e) {
-    if (!SQ || !SQ.pg.isConnected || e.ctrlKey || (e.target.closest && e.target.closest('.settings, .mode-pick'))) return;
-    SQ.offV += (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * (e.deltaMode === 1 ? 40 : 1) * 2.2;
+    if (!SQ || SQ.fl || !SQ.pg.isConnected || e.ctrlKey || (e.target.closest && e.target.closest('.settings, .mode-pick'))) return;
+    var cap = 1400 * SQ.s;
+    SQ.offV = Math.max(-cap, Math.min(cap, SQ.offV + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * (e.deltaMode === 1 ? 40 : 1) * 2.2));
   }, { passive: true });
   function sqMeasure() {
-    var Q = SQ, s = innerWidth / 1920, oldL = Q.L;
+    var Q = SQ, s = innerWidth / 1920, oldL = Q.L, oldH = Q.H;
     var logo = document.querySelector('.site-header .logo');
     var top = (logo ? logo.getBoundingClientRect().bottom : 90) + Math.max(36, 64 * s);
     var bottom = innerHeight * 0.78;
@@ -1115,79 +1208,112 @@
     var t0 = Q.cards[0] && Q.cards[0].querySelector('.card-title');
     var lh = t0 ? parseFloat(getComputedStyle(t0).lineHeight) || parseFloat(getComputedStyle(t0).fontSize) * 1.4 : 14;
     var cap = Math.max(16, 26 * s) + lh, rowH = (bottom - top) / 2;
-    // squares a little smaller than the 2-row layout, so each has room to bob up and down in its row
-    var S = Math.max(90, (rowH - cap - rowGap) * 0.86), play = Math.max(0, rowH - S - cap - rowGap);
-    var n = Math.ceil(Q.cards.length / 2);
-    var L = Math.max(innerWidth + S + gap * 2, n * (S + gap * 2.4));
+    // 15% bigger than round 1 (Juan): the rows now fill the band they used to
+    // bob in, so the band's top and bottom edges stay where they were
+    var S = Math.max(90, (rowH - cap - rowGap) * 0.86 * 1.15);
+    var n = Math.ceil(Q.cards.length / 2), L = innerWidth;
+    S = Math.min(S, L / n - gap * 1.2);   // a row must fit across the window, with room to move
     var band = 2 * rowH, y0 = (innerHeight - band) / 2;
-    Q.s = s; Q.S = S; Q.gap = gap; Q.cap = cap; Q.play = play; Q.L = L; Q.pad = S + gap;
+    Q.s = s; Q.S = S; Q.gap = gap; Q.rowGap = rowGap; Q.cap = cap; Q.L = L; Q.H = innerHeight;
+    Q.room = Math.floor(L / (S + gap));
     Q.laneTop = [y0, y0 + rowH];
     Q.pg.style.setProperty('--sq', S + 'px');
-    if (oldL && Q.t.length) Q.t.forEach(function (t) { t.x *= L / oldL; t.y = Q.laneTop[t.lane] + Math.max(0, Math.min(1, t.fy)) * play; });
+    if (oldL && Q.t.length) Q.t.forEach(function (t) {
+      t.x *= L / oldL;
+      if (Q.fl) t.y *= Q.H / oldH; else t.y = Q.laneTop[t.lane];
+    });
   }
   addEventListener('resize', function () {
     if (!SQ || !SQ.pg.isConnected) return;
     clearTimeout(sqMeasure._t);
-    sqMeasure._t = setTimeout(function () { SQ.t.forEach(function (t) { t.fy = SQ.play ? (t.y - SQ.laneTop[t.lane]) / SQ.play : 0; }); sqMeasure(); sqRender(); }, 60);
+    sqMeasure._t = setTimeout(function () { sqMeasure(); sqRender(); }, 60);
   });
   function sqMod(v, L) { return ((v % L) + L) % L; }
-  function sqScreenX(t) { return sqMod(t.x - SQ.off, SQ.L) - SQ.pad; }
+  function sqScreenX(t) { return SQ.fl ? t.x : sqMod(t.x - SQ.off, SQ.L); }
   function sqRender() {
-    SQ.t.forEach(function (t) {
-      t.el.style.transform = 'translate3d(' + sqScreenX(t).toFixed(2) + 'px,' + t.y.toFixed(2) + 'px,0)';
+    var Q = SQ;
+    Q.t.forEach(function (t) {
+      var x = sqScreenX(t), y = t.y.toFixed(2);
+      t.el.style.transform = 'translate3d(' + x.toFixed(2) + 'px,' + y + 'px,0)';
+      if (t.gh) {
+        var across = x + Q.S > Q.L;
+        if (across) t.gh.style.transform = 'translate3d(' + (x - Q.L).toFixed(2) + 'px,' + y + 'px,0)';
+        if (across !== !!t.ghOn) { t.gh.style.visibility = across ? 'visible' : 'hidden'; t.ghOn = across; }
+      }
     });
+    sqInkDraw();
   }
   function sqTick(now) {
     var Q = SQ;
-    if (!Q || !Q.pg.isConnected || workView() !== 'squares') { if (Q && !Q.pg.isConnected) SQ = null; return; }
+    if (!Q) return;
+    if (!Q.pg.isConnected || (workView() !== 'squares' && workView() !== 'float')) { sqDrop(); return; }
     var dt = Q.last ? Math.min(0.05, (now - Q.last) / 1000) : 0.016; Q.last = now;
-    var held = Q.grab && Q.moved ? Q.grab.t : null, S = Q.S, L = Q.L;
+    var held = Q.grab && Q.moved ? Q.grab.t : null, S = Q.S, L = Q.L, W = innerWidth, H = innerHeight;
     // the cursor resting on a square stills it (and the flow), so it can be clicked
     var hover = null;
     if (mouse.on && !Q.grab) Q.t.forEach(function (t) {
-      var x = sqScreenX(t);
-      if (mouse.x >= x && mouse.x <= x + S && mouse.y >= t.y && mouse.y <= t.y + S + Q.cap) hover = t;
+      var x = sqScreenX(t), inY = mouse.y >= t.y && mouse.y <= t.y + S + Q.cap;
+      if (inY && ((mouse.x >= x && mouse.x <= x + S) || (!Q.fl && mouse.x >= x - L && mouse.x <= x - L + S))) hover = t;
     });
-    Q.flowK += ((hover || Q.grab ? 0 : 1) - Q.flowK) * Math.min(1, dt * 2.5);
-    var flow = Q.still ? 0 : 6 * Q.s;
-    Q.off += (flow * Q.flowK + Q.offV) * dt;
-    Q.offV *= Math.exp(-dt / 0.9);
+    if (!Q.fl) {
+      Q.flowK += ((hover || Q.grab ? 0 : 1) - Q.flowK) * Math.min(1, dt * 2.5);
+      Q.off += ((Q.still ? 0 : 6 * Q.s) * Q.flowK + Q.offV) * dt;
+      Q.offV *= Math.exp(-dt / 0.7);
+    }
+    var hv = 260 * Q.s;   // how hard a held square can shove
     Q.t.forEach(function (t) {
       if (t === held) return;
       if (t === hover) { t.vx *= Math.exp(-dt * 5); t.vy *= Math.exp(-dt * 5); }
-      else {
-        // calm back down to its own slow pace, never to a stop
-        var sp = Math.hypot(t.vx, t.vy), want;
-        if (sp > t.rest) want = t.rest + (sp - t.rest) * Math.exp(-dt / 1.6);
+      else if (!Q.fl) {
+        // along the row: calm back to its own slow pace, never to a stop
+        var sp = Math.abs(t.vx), dir = t.vx < 0 ? -1 : 1, want;
+        if (sp > t.rest) want = t.rest + (sp - t.rest) * Math.exp(-dt / 0.8);
         else want = sp + (t.rest - sp) * Math.min(1, dt * 0.6);
-        if (sp < 1e-3) { var a = Math.random() * 2 * Math.PI; t.vx = Math.cos(a) * 1e-3; t.vy = Math.sin(a) * 1e-3; sp = 1e-3; }
-        t.vx *= want / sp; t.vy *= want / sp;
-        if (Math.abs(t.vy) > 0.55 * want) { t.vy = Math.sign(t.vy) * 0.55 * want; t.vx = (Math.sign(t.vx) || 1) * Math.sqrt(Math.max(0, want * want - t.vy * t.vy)); }
+        t.vx = dir * want;
+        // across: a soft spring back into its row (straight rows, no bobbing)
+        var dy = t.y - Q.laneTop[t.lane];
+        t.vy += (-4 * dy - 3.6 * t.vy) * dt;
+      } else {
+        // Float: meander, turning a little now and then, at its own slow pace
+        t.turn += (Math.random() - .5) * dt * 1.2; t.turn *= Math.exp(-dt * .5);
+        var c = Math.cos(t.turn * dt), si = Math.sin(t.turn * dt), vx = t.vx;
+        t.vx = vx * c - t.vy * si; t.vy = vx * si + t.vy * c;
+        var sp2 = Math.hypot(t.vx, t.vy), w2;
+        if (sp2 > t.rest) w2 = t.rest + (sp2 - t.rest) * Math.exp(-dt / 0.8);
+        else w2 = sp2 + (t.rest - sp2) * Math.min(1, dt * 0.6);
+        if (sp2 < 1e-3) { var a = Math.random() * 2 * Math.PI; t.vx = Math.cos(a) * 1e-3; t.vy = Math.sin(a) * 1e-3; sp2 = 1e-3; }
+        t.vx *= w2 / sp2; t.vy *= w2 / sp2;
       }
       t.x += t.vx * dt; t.y += t.vy * dt;
-      // bounce off the top and bottom of its row (eased back in after a drop)
-      var lo = Q.laneTop[t.lane], hi = lo + Q.play;
-      if (t.y < lo - 2 || t.y > hi + 2) t.y += ((t.y < lo ? lo : hi) - t.y) * Math.min(1, dt * 3);
-      else if (t.y < lo) { t.y = lo; t.vy = Math.abs(t.vy); }
-      else if (t.y > hi) { t.y = hi; t.vy = -Math.abs(t.vy); }
+      if (Q.fl) {   // hard edges: bounce
+        var mx = W - S, my = H - S - Q.cap;
+        if (t.x < 0) { t.x = 0; t.vx = Math.abs(t.vx); } else if (t.x > mx) { t.x = mx; t.vx = -Math.abs(t.vx); }
+        if (t.y < 0) { t.y = 0; t.vy = Math.abs(t.vy); } else if (t.y > my) { t.y = my; t.vy = -Math.abs(t.vy); }
+      }
     });
-    // squares bounce off each other, one gap apart (the strip wraps around)
-    var sx = S + Q.gap, sy = S + Q.cap + Q.gap * 0.5;
+    // squares bounce off each other, one gap apart (Squares wraps around)
+    var sx = S + Q.gap, sy = S + Q.cap + (Q.fl ? Q.gap * 0.5 : Q.rowGap * 0.8);
     for (var i = 0; i < Q.t.length; i++) for (var j = i + 1; j < Q.t.length; j++) {
       var A = Q.t[i], B = Q.t[j];
-      var dx = sqMod(B.x - A.x + L / 2, L) - L / 2, dy = B.y - A.y;
+      var dx = Q.fl ? B.x - A.x : sqMod(B.x - A.x + L / 2, L) - L / 2, dy = B.y - A.y;
       var ox = sx - Math.abs(dx), oy = sy - Math.abs(dy);
       if (ox <= 0 || oy <= 0) continue;
-      var ax = ox < oy, nx = ax ? (dx < 0 ? -1 : 1) : 0, ny = ax ? 0 : (dy < 0 ? -1 : 1), o = ax ? ox : oy;
+      // Squares: a free square coming back into its row slides the others
+      // sideways to make room (eased), instead of stacking up on them
+      var side = !Q.fl && A !== held && B !== held;
+      var ax = side || ox < oy, nx = ax ? (dx < 0 ? -1 : 1) : 0, ny = ax ? 0 : (dy < 0 ? -1 : 1), o = ax ? ox : oy;
+      if (side) o *= Math.min(1, dt * 6);
       var wa = A === held ? 0 : B === held ? 1 : 0.5, wb = 1 - wa;
       if (A === held) wb = 1;
       A.x -= nx * o * wa; A.y -= ny * o * wa; B.x += nx * o * wb; B.y += ny * o * wb;
-      var va = A === held ? (ax ? Q.grab.vx : Q.grab.vy) : (ax ? A.vx : A.vy), vb = B === held ? (ax ? Q.grab.vx : Q.grab.vy) : (ax ? B.vx : B.vy);
+      var gv = function (v) { return Math.max(-hv, Math.min(hv, v)); };
+      var va = A === held ? gv(ax ? Q.grab.vx : Q.grab.vy) : (ax ? A.vx : A.vy), vb = B === held ? gv(ax ? Q.grab.vx : Q.grab.vy) : (ax ? B.vx : B.vy);
       if ((vb - va) * (ax ? nx : ny) >= 0) continue;   // already moving apart
       var na, nb;
-      if (A === held) { na = va; nb = 2 * va - vb; }
-      else if (B === held) { nb = vb; na = 2 * vb - va; }
-      else { na = vb; nb = va; }
+      // a held square passes on a little more than its speed; free ones swap, a touch damped
+      if (A === held) { na = va; nb = va * 1.2; }
+      else if (B === held) { nb = vb; na = vb * 1.2; }
+      else { na = vb * 0.9; nb = va * 0.9; }
       if (ax) { A.vx = na; B.vx = nb; } else { A.vy = na; B.vy = nb; }
     }
     sqRender();
@@ -1241,6 +1367,13 @@
      A small diagram left of the menu: a tiny rectangle for every print on the
      wall and an empty box for the part of the wall on screen. Click or drag on
      it to go there. */
+  // the map's look, chosen in working settings (Juan, 2026-11-27): rectangles
+  // filled or outlined, in the text colour (default) or a colour of his choice
+  function mapLook() {
+    var o = { fill: 'fill', col: '' };
+    try { o.fill = localStorage.getItem('jdm-mapfill') === 'line' ? 'line' : 'fill'; o.col = localStorage.getItem('jdm-mapcol') || ''; } catch (e) {}
+    return o;
+  }
   function drawMap() {
     var wall = document.querySelector('.prints'), sc = document.querySelector('.scroller');
     var map = document.querySelector('.wall-map');
@@ -1281,6 +1414,9 @@
       var a = img.closest('.print');
       return '<i style="left:' + (a.offsetLeft * k).toFixed(1) + 'px;top:' + (a.offsetTop * k).toFixed(1) + 'px;width:' + (img.offsetWidth * k).toFixed(1) + 'px;height:' + (img.offsetHeight * k).toFixed(1) + 'px"></i>';
     }).join('');
+    var look = mapLook();
+    map.classList.toggle('is-line', look.fill === 'line');
+    if (look.col) map.style.setProperty('--map-col', look.col); else map.style.removeProperty('--map-col');
     map._k = k;
     map._top = wall.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
     viewMap();
@@ -1291,8 +1427,10 @@
     var inner = map.querySelector('.wall-map-in'), v = map.querySelector('.wall-map-view'), k = map._k;
     var y = (sc.scrollTop - map._top) * k, h = sc.clientHeight * k, ih = inner.offsetHeight;
     var top = Math.max(0, y), bot = Math.min(ih, y + h);
-    v.style.left = inner.offsetLeft - 2 + 'px'; v.style.width = inner.offsetWidth + 4 + 'px';
-    v.style.top = top - 2 + 'px'; v.style.height = Math.max(4, bot - top) + 4 + 'px';
+    // more room either side of the prints (Juan, 2026-11-27)
+    var px = Math.max(6, 10 * innerWidth / 1920), py = 3;
+    v.style.left = inner.offsetLeft - px + 'px'; v.style.width = inner.offsetWidth + 2 * px + 'px';
+    v.style.top = top - py + 'px'; v.style.height = Math.max(4, bot - top) + 2 * py + 'px';
   }
   addEventListener('resize', function () { clearTimeout(drawMap._t); drawMap._t = setTimeout(drawMap, 120); });
   function wallScroller() {
@@ -1470,7 +1608,7 @@
     if (!slideStep || (e.target.closest && e.target.closest('input, textarea, select'))) return;
     if (e.key === 'ArrowRight') slideStep(1);
     if (e.key === 'ArrowLeft') slideStep(-1);
-    if (e.key === 'Escape' && document.body.classList.contains('room')) { var x = document.querySelector('.room-close'); if (x) x.click(); }
+    if (e.key === 'Escape' && document.body.classList.contains('room') && !zoomOff()) { var x = document.querySelector('.room-close'); if (x) x.click(); }
   });
 
   init();

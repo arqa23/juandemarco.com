@@ -130,9 +130,10 @@ GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
 # Retired 2026-11-27 (kept in VERSIONS.md, commit c3a070c): Squares (3 rows),
 # Cluster (grid2), Strip 1B. Squares = the old "Squares 2 rows", Grid = Grid V1,
 # Strip = Strip 1A.
-WORK_LAYOUTS = [("squares", "Squares"), ("grid", "Grid"), ("strip", "Strip")]
+# Float (2026-11-27) = Squares without rows: free roaming, hard window edges, no wheel.
+WORK_LAYOUTS = [("squares", "Squares"), ("float", "Float"), ("grid", "Grid"), ("strip", "Strip")]
 
-EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
+EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.us"   # .com mail not set up yet (Juan, 2026-11-27)
 
 NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Gallery", "/prints/"),
        ("about", "About", "/about/")]
@@ -184,13 +185,19 @@ def _page(title, section, body, body_class="", head_extra=""):
         # copyright never move when a scroll bar appears.
         cover = HOME_BODY if "photo" in body_class else ""
         body = f'{cover}  <div class="scroller">\n{body}  </div>\n'
+    # The view box shows only what belongs to the page you are on (Juan,
+    # 2026-11-27): Framed on the Gallery only; in working mode a "Layout:" list
+    # on Work and on the Gallery, the mini map look on the Gallery, Art view in
+    # the rooms. No box on Home.
     working_rows = "" if SETTINGS_MODE == "public" else (
-        '    <div class="pick-layouts">\n      <span class="pick-head">Work layout</span>\n'
+        '    <div class="pick-layouts pick-work">\n      <span class="pick-head">Layout:</span>\n'
         + "".join(f'      <button type="button" class="pick-row pick-opt" data-wv="{k}">{v}</button>\n' for k, v in WORK_LAYOUTS)
         + '    </div>\n'
-        '    <div class="pick-layouts pick-hangs">\n      <span class="pick-head">Gallery layout</span>\n'
+        '    <div class="pick-layouts pick-gal">\n      <span class="pick-head">Layout:</span>\n'
         + "".join(f'      <button type="button" class="pick-row pick-opt" data-hv="{k}">{v}</button>\n' for k, v in GALLERY_LAYOUTS)
         + '    </div>\n'
+        '    <button type="button" class="pick-row pick-gal" data-tog="mapfill">Map: <span></span></button>\n'
+        '    <label class="pick-row pick-gal pick-col">Map colour: <input type="color" class="map-col" aria-label="Map colour"><button type="button" class="map-col-reset" title="Back to the text colour">reset</button></label>\n'
         '    <button type="button" class="pick-row pick-art" data-tog="art">Art view: <span></span></button>\n'
         )
     return f"""<!doctype html>
@@ -219,8 +226,8 @@ def _page(title, section, body, body_class="", head_extra=""):
   <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="View mode" title="View mode"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   <div class="mode-pick" id="mode-pick" role="group" aria-label="View mode" hidden>
     <button type="button" class="pick-row" data-tog="mode">Dark mode: <span></span></button>
-    <button type="button" class="pick-row" data-tog="frame">Framed: <span></span></button>
     <button type="button" class="pick-row" data-tog="fs">Full screen: <span></span></button>
+    <button type="button" class="pick-row pick-gal" data-tog="frame">Framed: <span></span></button>
 {working_rows}  </div>
 
   <div class="settings" id="settings" hidden>
