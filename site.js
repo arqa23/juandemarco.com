@@ -131,6 +131,7 @@
       var val = {
         mode: (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark' ? 'On' : 'Off',
         frame: (root.dataset.frame || 'on') === 'on' ? 'On' : 'Off',
+        aframe: root.dataset.aframe === 'on' ? 'On' : 'Off',
         fs: document.fullscreenElement ? 'On' : 'Off',
       };
       pick.querySelectorAll('button[data-hv]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.hang || PREF_DEFAULTS.hang) === b.dataset.hv); });
@@ -184,6 +185,11 @@
           root.dataset.frame = (root.dataset.frame || 'on') === 'on' ? 'off' : 'on';
           try { localStorage.setItem('jdm-frame', root.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
+        }
+        if (k === 'aframe') {   // About: the drawing on its paper, or the drawing alone
+          if (root.dataset.aframe === 'on') delete root.dataset.aframe; else root.dataset.aframe = 'on';
+          try { localStorage.setItem('jdm-aframe', root.dataset.aframe || 'off'); } catch (err) {}
+          markPick(); return;
         }
         if (k === 'fs') {
           var de = document.documentElement;

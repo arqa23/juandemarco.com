@@ -41,8 +41,10 @@
   function save(T) { try { localStorage.setItem('jdm-type', JSON.stringify(T)); } catch (e) {} }
   // Views per page. '' = the page's original layout ("Current").
   var VIEWS = {
-    work:    { def: 'edit',  ok: ['edit', 'edit2'] },   // Editorial is Work's default (Juan, 2026-11-27)
-    about:   { def: 'edit2', ok: ['edit', 'edit2'] },   // Editorial v2 is About's default (Juan, 2026-11-27)
+    // Work = Editorial, About = Editorial v2, for good (Juan, 2026-11-27); their
+    // other views are saved (VERSIONS.md): put them back in "ok" to choose again
+    work:    { def: 'edit',  ok: [] },
+    about:   { def: 'edit2', ok: [] },
     gallery: { def: '',      ok: ['exh', 'wall'] }      // Current (Index / Cluster) stays the Gallery default
   };
   window.jdmPageOf = function (path) {
@@ -75,6 +77,7 @@
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
     // dark mode on every new visit (Juan, 2026-11-26): a switch to light lasts
     // only for this visit (sessionStorage)
+    if (localStorage.getItem('jdm-aframe') === 'on') d.aframe = 'on';   // About drawing on its paper
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
     // public settings (build.py SETTINGS_MODE): frames always on, no Framed option
     var keys = document.documentElement.getAttribute('data-public') ? ['work', 'hang'] : ['frame', 'work', 'hang'];

@@ -155,7 +155,7 @@ ABOUT = [
     "Juan De Marco is a licensed architect and artist who makes architecture, "
     "objects and drawings.",
     "His work is guided by history, by cultures, and by the people who inhabit the "
-    "world we live in, with a deep appreciation of, and curiosity about, the ways "
+    "world we live in, with a deep appreciation and curiosity about the ways "
     "artists and designers have engaged with the built environment in the past.",
     "He holds a Master of Architecture from Princeton University and a Bachelor of "
     "Architecture from the Illinois Institute of Technology, and has worked at the "
@@ -177,9 +177,12 @@ SETTINGS_MODE = "public"
 GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
 # Page views in the settings box (Juan, 2026-11-27). "current" = the page's
 # original layout; defaults live in type.js (VIEWS).
+# Work = Editorial and About = Editorial v2 for good (Juan, 2026-11-27); their
+# other views are saved (VERSIONS.md) and their code stays, add them back here
+# (and in type.js VIEWS) to choose again:
+#   "work": [("current", "Squares / Float"), ("edit", "Editorial"), ("edit2", "Editorial v2")],
+#   "about": [("current", "Current"), ("edit", "Editorial"), ("edit2", "Editorial v2")],
 VIEWS = {
-    "work": [("current", "Squares / Float"), ("edit", "Editorial"), ("edit2", "Editorial v2")],
-    "about": [("current", "Current"), ("edit", "Editorial"), ("edit2", "Editorial v2")],
     "prints": [("current", "Current"), ("exh", "Exhibition"), ("wall", "Wall")],
 }
 # Stream saved but switched off (Juan, 2026-11-27, VERSIONS.md); its code stays,
@@ -264,6 +267,9 @@ def _page(title, section, body, body_class="", head_extra=""):
     # 2026-11-27); type.js holds the defaults (Work: Editorial, About:
     # Editorial v2, Gallery: Current). Home has one view and no settings button.
     views = VIEWS.get(section) if "has-ed" in body_class else None
+    # About: the drawing framed (on its paper) or not (Juan, 2026-11-27)
+    if section == "about":
+        frame_row += '    <button type="button" class="pick-row" data-tog="aframe">Framed: <span></span></button>\n'
     design_rows = "" if not views else (
         '    <div class="pick-layouts pick-design" role="radiogroup" aria-label="View">\n'
         '      <span class="pick-head">View:</span>\n'
@@ -477,6 +483,35 @@ def ed_work():
 # Sketches 4-6 are the same sheet turned: 3:2 landscape, 12 x 8 in.
 GALLERY_WORKS = [("sketches", k, "2:3", "portrait", 8, 12, "in") for k in (1, 2, 3)] + \
                 [("sketches", k, "3:2", "landscape", 12, 8, "in") for k in (4, 5, 6)]
+# TEST HANG (Juan, 2026-11-27): until there are more series, the six sketches
+# hang five times each (30), each turned upright or on its side at random (the
+# turned copies in rot/), shuffled so neither a sketch nor an orientation runs
+# on. Fixed seed, so the order holds between visits; change it to reshuffle.
+GALLERY_TEST_SEED = 7
+
+
+def gallery_test_hang():
+    import random
+    rnd = random.Random(GALLERY_TEST_SEED)
+    out = []
+    while len(out) < 30:
+        cand = [(w, rnd.random() < .5) for w in GALLERY_WORKS for _ in range(5)]
+        out = []
+        for _ in range(2000):
+            if not cand:
+                break
+            c = cand[rnd.randrange(len(cand))]
+            (slug, k, fam, ori, w, h, u), turned = c
+            o = ("landscape" if ori == "portrait" else "portrait") if turned else ori
+            if out and out[-1][0][1] == k:
+                continue
+            if len(out) >= 2 and out[-1][1] == out[-2][1] == o:
+                continue
+            cand.remove(c)
+            if turned:
+                w, h, fam = h, w, ("3:2" if fam == "2:3" else "2:3")
+            out.append(((slug, k, fam, o, w, h, u), o, turned))
+    return out
 
 
 def gallery_views():
@@ -485,10 +520,11 @@ def gallery_views():
     names = {slug: name for slug, name, *_ in PRINT_SERIES}
     years = {"sketches": "2026"}
     cells, wall = [], []
-    sumw = sum(w for *_, w, h, u in GALLERY_WORKS)
-    maxh = max(h for *_, w, h, u in GALLERY_WORKS)
-    for slug, k, fam, orient, w, h, unit in GALLERY_WORKS:
-        f = f"/images/prints/{slug}/{k:02d}.webp"
+    hang = gallery_test_hang()
+    sumw = sum(it[0][4] for it in hang)
+    maxh = max(it[0][5] for it in hang)
+    for (slug, k, fam, orient, w, h, unit), _, turned in gallery_test_hang():
+        f = f"/images/prints/{slug}/{'rot/' if turned else ''}{k:02d}.webp"
         pw, ph = Image.open(ROOT / f.lstrip("/")).size
         title = f"{names[slug]}, No. {k}"
         meta = " \u00b7 ".join(x for x in [years.get(slug), f"{fam} {orient}", f"{w} \u00d7 {h} {unit}" if w else None] if x)
@@ -503,7 +539,7 @@ def gallery_views():
                     f'<span class="gw-m">{html.escape(meta)}</span></span></a></li>')
     return ('  <main class="gx gx-page">\n    <h1 class="gx-h">Gallery</h1>\n    <ol class="gx-grid">\n'
             + "\n".join(cells) + '\n    </ol>\n  </main>\n'
-            f'  <main class="gw gw-page" style="--sumw:{sumw};--maxh:{maxh};--n:{len(GALLERY_WORKS)}">\n'
+            f'  <main class="gw gw-page" style="--sumw:{sumw};--maxh:{maxh};--n:{len(hang)}">\n'
             '    <h1 class="visually-hidden">Gallery</h1>\n    <ol class="gw-row">\n'
             + "\n".join(wall) + '\n    </ol>\n  </main>\n')
 
@@ -534,7 +570,7 @@ def e2_about(contact, legal):
     current page; the text beside it with the same hierarchy as Editorial."""
     contact = contact.replace(' id="email"', ' class="ed-email"').split("      <script>")[0]
     return ('  <main class="ed2 e2-about">\n    <h1 class="visually-hidden">About</h1>\n'
-            '    <div class="e2a-fig" aria-hidden="true"><i></i></div>\n'
+            '    <div class="e2a-fig" aria-hidden="true"><i></i><img class="e2a-sheet" src="/images/prints/sketches/02.webp" width="1000" height="1500" alt="" loading="lazy" decoding="async" draggable="false"></div>\n'
             '    <div class="e2a-text">\n'
             f'      <p class="eda-lead">{html.escape(ABOUT[0])}</p>\n'
             f'      <p class="eda-body">{html.escape(ABOUT[1])}</p>\n'
@@ -584,7 +620,7 @@ def main():
         f'      </a>' for p in PROJECTS)
     write("work/index.html", page("Work", "work",
         f'  <main class="page page-wide work-page">\n    <h1 class="work-h">Work</h1>\n    <div class="grid">\n{cards}\n    </div>\n  </main>\n'
-        + ed_work() + e2_work(), "inner has-ed"))
+        + ed_work() + e2_work(), "inner has-ed pg-work"))
 
     for i, p in enumerate(PROJECTS):
         prev_p, next_p = PROJECTS[i - 1], PROJECTS[(i + 1) % len(PROJECTS)]
@@ -724,7 +760,7 @@ def main():
         '  <main class="page page-wide prints-page">\n    <h1 class="visually-hidden">Gallery</h1>\n'
         '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n' + gallery_views() +
         '  <button class="to-top" type="button" aria-label="Back to top" title="Back to top">'
-        '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5 9.5 10 4.5l5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>\n', "inner has-ed"))
+        '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5 9.5 10 4.5l5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>\n', "inner has-ed pg-gal"))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
     about_block = f"      <h1>About</h1>\n{about}\n"
