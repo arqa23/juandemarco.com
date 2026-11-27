@@ -960,7 +960,22 @@
   }
   addEventListener('resize', function () { var p = document.querySelector('.press'); if (p && p.dataset.set) initPress(); });
 
+  // Work (Editorial): a new hang on every visit (Juan, 2026-11-27). The rows
+  // (one large + one small, or three small) keep their make-up; their order,
+  // and which side each project sits on, are drawn at random.
+  function shuffleWork() {
+    var feat = document.querySelector('.edw-feat');
+    if (!feat || feat.classList.contains('is-shuffled')) return;
+    var rows = {}, keys = [];
+    feat.querySelectorAll('.edw-item[data-g]').forEach(function (a) {
+      var g = a.dataset.g; if (!rows[g]) { rows[g] = []; keys.push(g); } rows[g].push(a);
+    });
+    function mix(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+    mix(keys).forEach(function (g) { mix(rows[g]).forEach(function (a) { feat.appendChild(a); }); });
+    feat.classList.add('is-shuffled');
+  }
   function init() {
+    shuffleWork();
     setTimeout(aboutFit, 0);
     initToTop();
     turnLegal();

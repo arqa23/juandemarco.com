@@ -134,7 +134,7 @@ ED_FEATURED = [
     [("parnell-residence", "small", "01.webp"), ("julius-ii", "lead", "01.webp")],
     [("american-promise", "lead", "01.webp"), ("family-of-curves", "small", "01.webp")],
     [("frankls-purposive-intention", "small", "01.webp"), ("talbot-road-residence", "lead", "01.webp")],
-    [("julius", "small", "03.webp"), ("wedges", "small", "03.webp"), ("the-conflicted-icon", "small", "04.webp")],
+    [("julius", "small", "03.webp"), ("wedges", "small", "01.webp"), ("the-conflicted-icon", "small", "01.webp")],
 ]
 ED_BELOW = []   # the smaller grid under a line (round 2), now empty
 # About: the drawing beside the text, on its own paper (Gallery sketch 02)
@@ -478,11 +478,11 @@ def ed_work():
     from PIL import Image
     by = {p["slug"]: p for p in PROJECTS}
 
-    def item(slug, role, img):
+    def item(slug, role, img, g=None):
         p = by[slug]
         w, h = Image.open(ROOT / "images" / "work" / slug / img).size
         sub = f'<span class="edw-s">{html.escape(p["subtitle"])}</span>' if p.get("subtitle") else ""
-        return (f'      <a class="edw-item edw-{role}" href="/work/{slug}/">'
+        return (f'      <a class="edw-item edw-{role}" href="/work/{slug}/"{f' data-g="{g}"' if g is not None else ""}>'
                 f'<span class="edw-img"><img src="/images/work/{slug}/{img}" width="{w}" height="{h}" '
                 f'alt="{html.escape(p["title"])}" loading="lazy" decoding="async" draggable="false"></span>'
                 f'<span class="edw-t">{html.escape(p["title"])}</span>{sub}</a>')
@@ -492,7 +492,9 @@ def ed_work():
     rest = ED_BELOW + [(p["slug"], "01.webp") for p in PROJECTS if p["slug"] not in shown and p["slug"] not in dict(ED_BELOW)]
     assert len(feat) + len(rest) == len(PROJECTS), "every project exactly once"
     return ('  <main class="ed ed-work">\n    <h1 class="visually-hidden">Work</h1>\n'
-            '    <div class="edw-feat">\n' + "\n".join(item(*it) for it in feat) + '\n    </div>\n'
+            # data-g = the row each project belongs to; site.js shuffles the rows and
+            # the places within each row on every visit (Juan, 2026-11-27)
+            '    <div class="edw-feat">\n' + "\n".join(item(*it, g=i) for i, grp in enumerate(ED_FEATURED) for it in grp) + '\n    </div>\n'
             + ('    <div class="edw-more">\n' + "\n".join(item(s, "sm", f) for s, f in rest) + '\n    </div>\n' if rest else '')
             + '  </main>\n')
 
