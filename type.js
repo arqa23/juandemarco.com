@@ -60,7 +60,7 @@
       var v = localStorage.getItem('jdm-' + k);
       // old names (2026-11-26): Squares 2 rows, Strip 1A; retired layouts fall back
       if (k === 'work') v = { squares2: 'squares', '1a': 'strip', squares: 'squares', float: 'float' }[v] || null;   // grid / strip: saved, switched off (2026-11-27)
-      if (k === 'hang' && !/^(index|cluster|stream)$/.test(v || '')) v = null;
+      if (k === 'hang') v = { index: 'index', cluster: 'cluster', stream: 'cluster' }[v] || null;   // stream: saved, switched off (2026-11-27)
       if (v) d[k] = v;
     });
   } catch (e) { document.documentElement.dataset.theme = 'light'; }

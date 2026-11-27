@@ -988,8 +988,9 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   :root:not([data-art="1"]) .room-show .slide { transition: none; }
   :root:not([data-art="1"]) .room-under { position: absolute; top: 100%; left: 50%; right: auto; width: var(--fw, var(--aw, 40vw)); transform: translateX(-50%); }
 }
-/* project links: one per line, so they don't read as next image */
-.room-text .room-pnav { flex-direction: column; align-items: flex-start; gap: .55em; }
+/* project links (Juan, 2026-11-27): short "‹ Prev   Next ›" on one line,
+   smaller, under the description */
+.room-text .room-pnav { flex-direction: row; align-items: baseline; gap: 1.6em; margin-top: 1.5em; font-size: calc(var(--nav-size) * .78); }
 
 /* The view box shows only the options of the page you are on (Juan,
    2026-11-27): Work layouts on Work; Framed, layouts and map on the Gallery;
