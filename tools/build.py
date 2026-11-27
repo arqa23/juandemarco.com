@@ -155,7 +155,7 @@ ABOUT = [
     "Juan De Marco is a licensed architect and artist who makes architecture, "
     "objects and drawings.",
     "His work is guided by history, by cultures, and by the people who inhabit the "
-    "world we live in, with a deep appreciation and curiosity about the ways "
+    "world we live in, with a deep appreciation and curiosity for the ways "
     "artists and designers have engaged with the built environment in the past.",
     "He holds a Master of Architecture from Princeton University and a Bachelor of "
     "Architecture from the Illinois Institute of Technology, and has worked at the "
