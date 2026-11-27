@@ -182,8 +182,11 @@ GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
 # (and in type.js VIEWS) to choose again:
 #   "work": [("current", "Squares / Float"), ("edit", "Editorial"), ("edit2", "Editorial v2")],
 #   "about": [("current", "Current"), ("edit", "Editorial"), ("edit2", "Editorial v2")],
+# Round 5 (Juan, 2026-11-27): About gets Editorial (v1) back beside v2; Gallery
+# Wall saved but off (VERSIONS.md), add ("wall", "Wall") back to bring it back.
 VIEWS = {
-    "prints": [("current", "Current"), ("exh", "Exhibition"), ("wall", "Wall")],
+    "about": [("edit2", "Editorial v2"), ("edit", "Editorial")],
+    "prints": [("current", "Current"), ("exh", "Exhibition")],
 }
 # Stream saved but switched off (Juan, 2026-11-27, VERSIONS.md); its code stays,
 # add ("stream", "Stream") back here to bring it back.

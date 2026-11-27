@@ -1338,14 +1338,10 @@ body.home { background: var(--bg); }
 /* Work: no hard edge at the foot of the window; the page runs to the bottom */
 :root[data-design] body.inner.has-ed.pg-work .scroller, :root[data-design] body.inner.has-ed.pg-gal .scroller { bottom: 0; }   /* no hard edge at the foot */
 :root[data-design] body.pg-work .ed-work { padding-bottom: var(--ed-3); }
-/* About: the text 15% further right */
-:root[data-design="edit2"] .has-ed .e2-about { width: calc(100vw - var(--gutter)); grid-template-columns: max-content minmax(0, 1fr);
-  --fh: calc(100vh - var(--header-h) - var(--ed-band) - var(--ed-2) * 2); }
-/* text starts 62.6% across the window (it sat at ~47.6%; +15%) */
-.e2-about .e2a-text { max-width: 36em; margin-left: max(0px, calc(62.6vw - var(--ed-l) - var(--fh) * 707 / 1087 - var(--ed-3))); }
+/* About v2: back to its PR #74 layout (Juan, round 5); the 15% shift is saved in VERSIONS.md */
 /* About: Framed (settings) shows the drawing on its paper, the sheet fitted
    to the very box the drawing alone fills */
-.e2a-fig { position: relative; }
+.e2a-fig { position: relative; justify-self: start; }   /* the box is just the drawing, so the sheet fits it */
 .e2a-sheet { display: none; }
 :root[data-aframe="on"] .e2a-fig i { visibility: hidden; }
 :root[data-aframe="on"] .e2a-sheet { display: block; position: absolute; inset: 0; margin: auto; width: 100%; height: auto; max-height: 100%;
@@ -1354,3 +1350,39 @@ body.home { background: var(--bg); }
 :root[data-design="wall"] body.inner.has-ed.pg-gal .scroller { top: 0; bottom: 0; }
 .gw-page { scrollbar-width: none; }
 .gw-page::-webkit-scrollbar { display: none; }
+
+/* ---------- Round 5 (Juan, 2026-11-27) ---------- */
+/* Work + Gallery views: things slide all the way up under the name, with the
+   same soft fade as the Current Gallery instead of a hard band */
+@media (min-width: 701px) {
+  :root[data-design] body.inner.has-ed.pg-work .scroller, :root[data-design] body.inner.has-ed.pg-gal .scroller { top: 0; }
+  :root[data-design] body.inner.has-ed.pg-work .site-header::before, :root[data-design] body.inner.has-ed.pg-gal .site-header::before { display: block; }
+  :root[data-design] body.pg-work .ed-work { padding-top: calc(var(--header-h) + var(--ed-2)); }
+  :root[data-design="exh"] .gx-page { padding-top: calc(var(--header-h) + var(--ed-1)); }
+}
+/* Exhibition: centred, with the Current Gallery's side margins; sheets and gaps
+   scaled together to fit; sheets in a row share a centre line */
+.gx-page {
+  --gx-m: calc(max(160px, calc(240 * var(--s))) + var(--gutter) + 10vw);
+  --gx-w: calc(100vw - var(--gx-m) * 2);
+  --gx-gap: calc(var(--gx-w) * .03);   /* 48 of ~1600 design px: the old proportion */
+  --gx-cell: calc((var(--gx-w) - var(--gx-gap) * 2) / 3);
+  --gx-row: min(calc(var(--gx-cell) * 1.5), calc((100vh - var(--header-h) - var(--ed-band)) * .6));
+  width: var(--gx-w); margin-left: var(--gx-m); padding-left: 0; padding-right: 0;
+}
+.gx-grid { gap: var(--gx-gap); }
+.gx-stage { align-items: center; }
+.gx-sheet { height: min(100%, calc(var(--gx-cell) / var(--r))); }
+@media (max-width: 1000px) { .gx-page { --gx-m: var(--gutter); } .gx-cell { --gx-cell: calc((var(--gx-w) - var(--gx-gap)) / 2); } }
+/* the Framed row belongs to About v2 only */
+:root[data-design="edit"] .mode-pick .pick-row[data-tog="aframe"] { display: none; }
+/* About Editorial (v1) is back as a view: it fits the window too, like v2 */
+@media (min-width: 701px) {
+  :root[data-design="edit"] .ed-about { --ts: min(var(--text-size), 1.62vh); }
+  .ed-about .eda-lead { font-size: calc(var(--ts, var(--text-size)) * 1.8); margin-bottom: min(var(--ed-2), 4.4vh); }
+  .ed-about .eda-body { font-size: calc(var(--ts, var(--text-size)) * 1.05); }
+  .ed-about .eda-cred { font-size: calc(var(--ts, var(--text-size)) * .9); margin-top: min(var(--ed-2), 4.4vh); padding-top: min(var(--ed-1), 2.4vh); }
+  .ed-about .eda-contact { margin-top: min(var(--ed-3), 6.5vh); }
+  .ed-about .about-ask, .ed-about .email.email { font-size: var(--ts, var(--text-size)) !important; }
+  .ed-about .eda-legal { margin-top: min(var(--ed-2), 4.4vh); }
+}

@@ -124,6 +124,27 @@ def crop_bands(im, sides):
     if sides in ("tb", "all"):
         rw = white.mean(1)
         t, b = run(rw), im.height - run(rw[::-1])
+    im = im.crop((l, t, r, b))
+    return shave(im, sides)
+
+
+def shave(im, sides, most=4):
+    """Cut the last few pale edge lines (anti-aliased paper) left after a band crop,
+    so no light sliver shows against a dark page."""
+    a = np.asarray(im.convert("L")).astype(float)
+
+    def run(lines):
+        inner = lines[most + 1:most + 4].mean()
+        n = 0
+        while n < most and lines[n].mean() > inner + 12 and (lines[n].mean() > 150 or lines[n].mean() > inner + 30):
+            n += 1
+        return n
+    l = t = 0
+    r, b = im.size
+    if sides in ("lr", "all"):
+        l, r = run(a.T), im.width - run(a.T[::-1])
+    if sides in ("tb", "all") or sides == "lr":
+        t, b = run(a), im.height - run(a[::-1])
     return im.crop((l, t, r, b))
 
 
