@@ -49,7 +49,7 @@
     d.mode = 'dark';   // the site's default mode (Juan, 2026-11-25)
     d.ptext = 'off';
     // Work page layout (Juan, 2026-11-27): squares | float | grid | strip
-    d.work = 'strip';   // project pages without text by default (Juan, 2026-11-26)
+    d.work = 'squares';   // Grid and Strip switched off (Juan, 2026-11-27)
     d.art = '2';          // project / print pages: ArtView2 only (Juan, 2026-11-27); ArtView1 retired, see VERSIONS.md
     if (off) return;
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
@@ -59,8 +59,8 @@
     ['frame', 'work', 'hang'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
       // old names (2026-11-26): Squares 2 rows, Strip 1A; retired layouts fall back
-      if (k === 'work') v = { squares2: 'squares', '1a': 'strip', squares: 'squares', float: 'float', grid: 'grid', strip: 'strip' }[v] || null;
-      if (k === 'hang' && !/^(index|cluster)$/.test(v || '')) v = null;
+      if (k === 'work') v = { squares2: 'squares', '1a': 'strip', squares: 'squares', float: 'float' }[v] || null;   // grid / strip: saved, switched off (2026-11-27)
+      if (k === 'hang' && !/^(index|cluster|stream)$/.test(v || '')) v = null;
       if (v) d[k] = v;
     });
   } catch (e) { document.documentElement.dataset.theme = 'light'; }

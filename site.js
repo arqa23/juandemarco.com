@@ -425,8 +425,14 @@
     var narrow = W < 600, base = W * (narrow ? 0.4 : 0.185), cx = W / 2;
     var hang = document.documentElement.dataset.hang || PREF_DEFAULTS.hang;
     var idx = hang === 'index' || hang === 'cluster';   // both: number + title under each print
+    var stream = hang === 'stream' && !narrow && matchMedia('(hover: hover)').matches;
+    if (hang === 'stream' && !stream) { hang = 'cluster'; idx = true; }
     wall.classList.toggle('is-index', idx);
+    wall.classList.toggle('is-stream', stream);
     if (idx) g = parseFloat(getComputedStyle(wall).columnGap) || 12;
+    // Stream: the Cluster hang with more air, so the prints have room to drift
+    if (stream) g = Math.max(36, 84 * W / 1400);
+    stStop();
     var capH = 0, cap0 = wall.querySelector('.print-cap');
     var overlay = cap0 && getComputedStyle(cap0).position === 'absolute';   // titles on hover take no room
     if (cap0 && !overlay) capH = cap0.offsetHeight + parseFloat(getComputedStyle(cap0).marginTop);
@@ -445,7 +451,7 @@
       var size = SIZES[Math.floor(rand() * SIZES.length)];
       return { a: a, r: r, cw: cap && !overlay ? capWidth(cap) : 0, w0: Math.min(W * (narrow ? 1 : 0.5), base * Math.sqrt(size * r)) };
     });
-    var best = hang === 'cluster' ? cluster() : hang === 'salon' ? salon() : hang === 'flow' ? rows() : hang === 'rows' ? even() : index();
+    var best = hang === 'cluster' || stream ? cluster() : hang === 'salon' ? salon() : hang === 'flow' ? rows() : hang === 'rows' ? even() : index();
     function numberPrints() {
       [].forEach.call(wall.querySelectorAll('.print'), function (a, n) {
         var c = a.querySelector('.print-cap'); if (c) c.dataset.no = '[' + (n + 1 < 10 ? '0' : '') + (n + 1) + ']';
@@ -824,12 +830,14 @@
       return { placed: out, top: 0, h: y - gv };
     }
     best.placed.forEach(function (p) {
-      var st = p.it.a.style; st.width = p.w + 'px'; st.left = p.x + 'px'; st.top = (p.y - best.top) + 'px';
+      var st = p.it.a.style; st.width = p.w + 'px'; st.left = p.x + 'px'; st.top = (p.y - best.top) + 'px'; st.transform = '';
+      p.it.a._st = null;
     });
     // Height ends at the lowest image (captions hang below it). The page can
     // scroll only until that edge lines up with the bottom of "Contact".
     wall.style.height = best.h + 'px';
     wall.classList.add('is-hung');   // shown only once every print has its place
+    if (stream) stStart(wall, best.placed.map(function (p) { return { a: p.it.a, x: p.x, y: p.y - best.top, w: p.w, h: p.ih || p.w / p.it.r }; }), best.h, W);
     setTimeout(drawMap, 0);
     // The stop sits two menu lines above the bottom line, where "Contact" was
     // when the menu had six lines. The top of the hang mirrors that distance.
@@ -847,7 +855,7 @@
       var topNow = wall.getBoundingClientRect().top + sc.scrollTop;
       // Cluster: the hang starts level with the top of the name (Juan, 2026-11-26)
       var lg = document.querySelector('.site-header .logo');
-      var want = hang === 'cluster' && lg ? lg.getBoundingClientRect().top : gapBelow;
+      var want = (hang === 'cluster' || stream) && lg ? lg.getBoundingClientRect().top : gapBelow;
       wall.style.marginTop = (want - topNow) + 'px';
     }
   }
@@ -942,7 +950,7 @@
 
   /* ---------- Work filmstrip: wheel and arrow keys move it sideways ---------- */
   // the filmstrip behaviour (wheel, drift, drag) runs only in the Filmstrip layouts
-  function workView() { return root.dataset.work || 'strip'; }
+  function workView() { return root.dataset.work || 'squares'; }
   function strip() { return workView() === 'strip' ? document.querySelector('.work-page .grid') : null; }
   document.addEventListener('wheel', function (e) {
     var g = strip();
@@ -1079,12 +1087,17 @@
       // two rows, squares spread evenly along each with a little jitter
       var lanes = [[], []];
       cards.forEach(function (c, i) { lanes[i % 2].push(i); });
+      // Round 4 (Juan, 2026-11-27): each square moves on its own as in Float,
+      // mostly along its row. On arrival the top row comes in from a little
+      // above and the bottom row from a little below, at an angle, and they
+      // settle into their rows as if caught by a current.
       lanes.forEach(function (ids, l) {
         var k = ids.length, step = Q.L / k, free = Math.max(0, step - Q.S - Q.gap), ph = Math.random() * step;
         ids.forEach(function (i, j) {
-          var sp = (5 + Math.random() * 4) * Q.s;
-          Q.t[i] = { el: cards[i], lane: l, x: ph + j * step + (Math.random() - .5) * free * .8, y: Q.laneTop[l],
-            vx: (Math.random() < .5 ? -1 : 1) * sp, vy: 0, rest: still ? 0 : sp };
+          var sp = (11 + Math.random() * 6) * Q.s, dir = Math.random() < .5 ? -1 : 1;
+          var lift = still ? 0 : (l ? 1 : -1) * (60 + Math.random() * 110) * Q.s;
+          Q.t[i] = { el: cards[i], lane: l, x: ph + j * step + (Math.random() - .5) * free * .8, y: Q.laneTop[l] + lift,
+            vx: dir * sp * 1.6, vy: 0, rest: still ? 0 : sp, turn: 0, enter: !still };
         });
       });
     } else {
@@ -1107,8 +1120,10 @@
     sqInk();
     sqRender();
     pg.classList.add('is-squares');
+    var t0 = performance.now();
     if (!still) cards.forEach(function (c) {
       var a = { duration: 900, delay: 80 + Math.random() * 1300, easing: 'ease-out', fill: 'backwards' };
+      c._sq.born = t0 + a.delay;   // holds still, unseen, until its fade begins
       c.animate([{ opacity: 0 }, { opacity: 1 }], a);
       if (c._sq.gh) c._sq.gh.animate([{ opacity: 0 }, { opacity: 1 }], a);
     });
@@ -1263,8 +1278,7 @@
     if (G.t) {
       var t = G.t;
       t.el.classList.remove('is-held');
-      var k0 = SQ.fl ? 0.5 : 0.4;
-      t.vx = lim(G.vx) * k0; t.vy = lim(G.vy) * (SQ.fl ? 0.5 : 0.35);
+      t.vx = lim(G.vx) * 0.5; t.vy = lim(G.vy) * 0.5; t.enter = false;
       if (!SQ.fl) {   // settles into the nearest row that has room
         var mid = t.y + SQ.S / 2, near = Math.abs(mid - (SQ.laneTop[0] + SQ.S / 2)) <= Math.abs(mid - (SQ.laneTop[1] + SQ.S / 2)) ? 0 : 1;
         var count = SQ.t.filter(function (q) { return q !== t && q.lane === near; }).length;
@@ -1291,18 +1305,22 @@
     var S = Math.max(90, (rowH - cap - rowGap) * 0.86 * 1.15);
     var n = Math.ceil(Q.cards.length / 2), L = innerWidth;
     S = Math.min(S, L / n - gap * 1.2);   // a row must fit across the window, with room to move
-    var band = 2 * rowH, y0 = (innerHeight - band) / 2;
     // Float (Juan, 2026-11-27, round 3): no titles under the squares (they
     // show on hover, as in Grid), squares 20% bigger, 3px apart at the closest
-    // and 3px off the window's edges
-    if (Q.fl) { cap = 0; gap = 3; S *= 1.2; }
+    // and 3px off the window's edges. Squares (round 4): same size as before,
+    // no titles either, the same 3px; the two rows, from the top of the upper
+    // squares to the foot of the lower ones, centred in the window.
+    if (Q.fl) S *= 1.2;
+    rowGap = Math.max(18, 36 * s);
+    cap = 0; gap = 3;
+    var y0 = (innerHeight - (2 * S + rowGap)) / 2;
     Q.s = s; Q.S = S; Q.gap = gap; Q.rowGap = rowGap; Q.cap = cap; Q.L = L; Q.H = innerHeight;
     Q.room = Math.floor(L / (S + gap));
-    Q.laneTop = [y0, y0 + rowH];
+    Q.laneTop = [y0, y0 + S + rowGap];
     Q.pg.style.setProperty('--sq', S + 'px');
     if (oldL && Q.t.length) Q.t.forEach(function (t) {
       t.x *= L / oldL;
-      if (Q.fl) t.y *= Q.H / oldH; else t.y = Q.laneTop[t.lane];
+      if (Q.fl) t.y *= Q.H / oldH; else { t.y = Q.laneTop[t.lane]; t.enter = false; }
     });
   }
   addEventListener('resize', function () {
@@ -1337,24 +1355,32 @@
       var x = sqScreenX(t), inY = mouse.y >= t.y && mouse.y <= t.y + S + Q.cap;
       if (inY && ((mouse.x >= x && mouse.x <= x + S) || (!Q.fl && mouse.x >= x - L && mouse.x <= x - L + S))) hover = t;
     });
-    if (!Q.fl) {
-      Q.flowK += ((hover || Q.grab ? 0 : 1) - Q.flowK) * Math.min(1, dt * 2.5);
-      Q.off += ((Q.still ? 0 : 6 * Q.s) * Q.flowK + Q.offV) * dt;
+    if (!Q.fl) {   // Squares: no common current any more, only the wheel or a pan
+      Q.off += Q.offV * dt;
       Q.offV *= Math.exp(-dt / 0.7);
     }
-    var hv = 260 * Q.s;   // how hard a held square can shove
+    var hv = 260 * Q.s, wob = Q.rowGap * 0.45;   // how hard a held square can shove; how far off its row a square wanders freely
     Q.t.forEach(function (t) {
       if (t === held) return;
+      if (t.born && now < t.born) return;   // not in yet
       if (t === hover) { t.vx *= Math.exp(-dt * 5); t.vy *= Math.exp(-dt * 5); }
       else if (!Q.fl) {
-        // along the row: calm back to its own slow pace, never to a stop
+        // Squares: along the row as Float moves (coasting down to its own
+        // pace after a throw or a knock, softly), never to a stop
         var sp = Math.abs(t.vx), dir = t.vx < 0 ? -1 : 1, want;
-        if (sp > t.rest) want = t.rest + (sp - t.rest) * Math.exp(-dt / 0.8);
-        else want = sp + (t.rest - sp) * Math.min(1, dt * 0.6);
+        if (sp > t.rest) { var ex0 = sp - t.rest; want = t.rest + ex0 * Math.exp(-dt / (1.4 + 1.6 * Math.min(1, ex0 / (220 * Q.s)))); }
+        else want = sp + (t.rest - sp) * Math.min(1, dt * 0.4);
         t.vx = dir * want;
-        // across: a soft spring back into its row (straight rows, no bobbing)
+        // across: it wanders a little, and is pulled back toward its row
+        // when it strays (or arrives) past the space between the rows
         var dy = t.y - Q.laneTop[t.lane];
-        t.vy += (-4 * dy - 3.6 * t.vy) * dt;
+        if (t.enter) {
+          t.vy += (-1.3 * dy - 2.0 * t.vy) * dt;   // drawn in, a slight overshoot, then settled
+          if (Math.abs(dy) < wob * 0.5 && Math.abs(t.vy) < 6 * Q.s) t.enter = false;
+        } else {
+          var out = dy - Math.max(-wob, Math.min(wob, dy));
+          t.vy += ((Math.random() - .5) * 14 * Q.s - 0.35 * dy - 2.2 * out - (out ? 1.6 : 0.5) * t.vy) * dt;
+        }
       } else {
         // Float: meander, turning a little now and then, at its own slow pace
         t.turn += (Math.random() - .5) * dt * 1.2; t.turn *= Math.exp(-dt * .5);
@@ -1369,24 +1395,22 @@
         t.vx *= w2 / sp2; t.vy *= w2 / sp2;
       }
       t.x += t.vx * dt; t.y += t.vy * dt;
-      if (Q.fl) {   // hard edges: bounce
-        var e0 = 3, mx = W - S - e0, my = H - S - e0;
+      var e0 = 3, my = H - S - e0;   // top and foot of the window: bounce (both layouts)
+      if (t.y < e0) { t.y = e0; t.vy = Math.abs(t.vy) * 0.8; } else if (t.y > my) { t.y = my; t.vy = -Math.abs(t.vy) * 0.8; }
+      if (Q.fl) {   // Float: hard sides too (Squares wraps round instead)
+        var mx = W - S - e0;
         if (t.x < e0) { t.x = e0; t.vx = Math.abs(t.vx) * 0.8; } else if (t.x > mx) { t.x = mx; t.vx = -Math.abs(t.vx) * 0.8; }
-        if (t.y < e0) { t.y = e0; t.vy = Math.abs(t.vy) * 0.8; } else if (t.y > my) { t.y = my; t.vy = -Math.abs(t.vy) * 0.8; }
       }
     });
-    // squares bounce off each other, one gap apart (Squares wraps around)
-    var sx = S + Q.gap, sy = S + Q.cap + (Q.fl ? Q.gap : Q.rowGap * 0.8);
+    // squares knock each other softly, one gap apart (Squares wraps around)
+    var sx = S + Q.gap, sy = S + Q.gap;
     for (var i = 0; i < Q.t.length; i++) for (var j = i + 1; j < Q.t.length; j++) {
       var A = Q.t[i], B = Q.t[j];
-      var dx = Q.fl ? B.x - A.x : sqMod(B.x - A.x + L / 2, L) - L / 2, dy = B.y - A.y;
-      var ox = sx - Math.abs(dx), oy = sy - Math.abs(dy);
+      if ((A.born && now < A.born) || (B.born && now < B.born)) continue;
+      var dx = Q.fl ? B.x - A.x : sqMod(B.x - A.x + L / 2, L) - L / 2, dy2 = B.y - A.y;
+      var ox = sx - Math.abs(dx), oy = sy - Math.abs(dy2);
       if (ox <= 0 || oy <= 0) continue;
-      // Squares: a free square coming back into its row slides the others
-      // sideways to make room (eased), instead of stacking up on them
-      var side = !Q.fl && A !== held && B !== held;
-      var ax = side || ox < oy, nx = ax ? (dx < 0 ? -1 : 1) : 0, ny = ax ? 0 : (dy < 0 ? -1 : 1), o = ax ? ox : oy;
-      if (side) o *= Math.min(1, dt * 6);
+      var ax = ox < oy, nx = ax ? (dx < 0 ? -1 : 1) : 0, ny = ax ? 0 : (dy2 < 0 ? -1 : 1), o = ax ? ox : oy;
       var wa = A === held ? 0 : B === held ? 1 : 0.5, wb = 1 - wa;
       if (A === held) wb = 1;
       A.x -= nx * o * wa; A.y -= ny * o * wa; B.x += nx * o * wb; B.y += ny * o * wb;
@@ -1394,13 +1418,10 @@
       var va = A === held ? gv(ax ? Q.grab.vx : Q.grab.vy) : (ax ? A.vx : A.vy), vb = B === held ? gv(ax ? Q.grab.vx : Q.grab.vy) : (ax ? B.vx : B.vy);
       if ((vb - va) * (ax ? nx : ny) >= 0) continue;   // already moving apart
       var na, nb;
-      // a held square passes on a little more than its speed; free ones swap, a touch damped
+      // a held square passes on a little more than its speed; free ones a soft knock
       if (A === held) { na = va; nb = va * 1.2; }
       else if (B === held) { nb = vb; na = vb * 1.2; }
-      else if (Q.fl) {   // Float: a softer knock, less spring (round 3)
-        var mid = (va + vb) / 2; na = mid + (vb - mid) * 0.6; nb = mid + (va - mid) * 0.6;
-      }
-      else { na = vb * 0.9; nb = va * 0.9; }
+      else { var mid = (va + vb) / 2; na = mid + (vb - mid) * 0.6; nb = mid + (va - mid) * 0.6; }
       if (ax) { A.vx = na; B.vx = nb; } else { A.vy = na; B.vy = nb; }
     }
     sqRender();
@@ -1446,6 +1467,115 @@
     g.addEventListener('dragstart', function (e) { e.preventDefault(); });
   }
 
+  /* ---------- Gallery, Stream (Juan, 2026-11-27) ----------
+     Squares turned upright: the prints start from the Cluster hang, then each
+     drifts on its own, mostly up and down, as the squares do on Work. Sideways
+     each wanders a little and is pulled back toward its place in the wall's
+     middle band; the top and foot of the wall are hard edges (they bounce, no
+     wrapping round). Hover stills a print; grab one to move or throw it. The
+     wheel scrolls the page as usual. */
+  var ST = null;
+  function stStop() { if (ST) { cancelAnimationFrame(ST.raf); ST = null; } }
+  function stStart(wall, list, H, W) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var s = innerWidth / 1920;
+    ST = { wall: wall, H: H, W: W, s: s, gap: Math.max(6, 10 * s), wob: Math.max(24, 60 * s), grab: null, moved: false, last: 0, mapN: 0 };
+    ST.t = list.map(function (p) {
+      var sp = (8 + Math.random() * 5) * s, dir = Math.random() < .5 ? -1 : 1, a = p.a;
+      var t = { el: a, x: p.x, y: p.y, w: p.w, h: p.h, hx: p.x, vx: (Math.random() - .5) * sp * .5, vy: dir * sp, rest: sp, hov: false };
+      a._st = t;
+      a.style.left = '0px'; a.style.top = '0px';
+      if (!a._stBound) {
+        a._stBound = 1;
+        a.addEventListener('pointerenter', function () { if (a._st) a._st.hov = true; });
+        a.addEventListener('pointerleave', function () { if (a._st) a._st.hov = false; });
+        a.addEventListener('pointerdown', function (e) {
+          if (!a._st || !ST || e.pointerType !== 'mouse' || e.button !== 0) return;
+          ST.grab = { t: a._st, x0: e.clientX, y0: e.clientY, px: e.clientX, py: e.clientY, pt: performance.now(), vx: 0, vy: 0 };
+          ST.moved = false; e.preventDefault();
+        });
+        a.addEventListener('click', function (e) { if (ST && ST.moved) { e.preventDefault(); e.stopPropagation(); ST.moved = false; } }, true);
+      }
+      return t;
+    });
+    stRender();
+    ST.raf = requestAnimationFrame(stTick);
+  }
+  addEventListener('pointermove', function (e) {
+    var G = ST && ST.grab; if (!G) return;
+    if (!ST.moved && Math.hypot(e.clientX - G.x0, e.clientY - G.y0) > 5) { ST.moved = true; ST.wall.classList.add('is-dragging'); G.t.el.classList.add('is-held'); }
+    if (!ST.moved) return;
+    var now = performance.now(), dt = Math.max(0.008, (now - G.pt) / 1000), mx = e.clientX - G.px, my = e.clientY - G.py;
+    G.vx += (mx / dt - G.vx) * 0.35; G.vy += (my / dt - G.vy) * 0.35;
+    G.px = e.clientX; G.py = e.clientY; G.pt = now;
+    G.t.x += mx; G.t.y += my;
+  });
+  addEventListener('pointerup', function () {
+    var G = ST && ST.grab; if (!G) return;
+    ST.grab = null; ST.wall.classList.remove('is-dragging'); G.t.el.classList.remove('is-held');
+    if (!ST.moved) return;
+    var cap = 380 * ST.s, lim = function (v) { return Math.max(-cap, Math.min(cap, v)); };
+    G.t.vx = lim(G.vx) * 0.5; G.t.vy = lim(G.vy) * 0.5;
+  });
+  function stRender() {
+    ST.t.forEach(function (t) { t.el.style.transform = 'translate3d(' + t.x.toFixed(2) + 'px,' + t.y.toFixed(2) + 'px,0)'; });
+    // the mini map follows, a few times a second
+    if (++ST.mapN % 6) return;
+    var map = document.querySelector('.wall-map'), k = map && map._k;
+    if (!k) return;
+    var is = map.querySelectorAll('.wall-map-in i');
+    [].forEach.call(ST.wall.querySelectorAll('.print'), function (a, n) {
+      if (!a._st || !is[n]) return;
+      is[n].style.left = Math.round(a._st.x * k) + 'px'; is[n].style.top = Math.round(a._st.y * k) + 'px';
+    });
+  }
+  function stTick(now) {
+    var Q = ST;
+    if (!Q) return;
+    if (!Q.wall.isConnected) { ST = null; return; }
+    var dt = Q.last ? Math.min(0.05, (now - Q.last) / 1000) : 0.016; Q.last = now;
+    var held = Q.grab && Q.moved ? Q.grab.t : null, W = Q.W, H = Q.H, hv = 260 * Q.s;
+    Q.t.forEach(function (t) {
+      if (t === held) return;
+      if (t.hov && !Q.grab) { t.vx *= Math.exp(-dt * 5); t.vy *= Math.exp(-dt * 5); }
+      else {
+        // up or down at its own slow pace, coasting down softly after a throw
+        var sp = Math.abs(t.vy), dir = t.vy < 0 ? -1 : 1, want;
+        if (sp > t.rest) { var ex = sp - t.rest; want = t.rest + ex * Math.exp(-dt / (1.4 + 1.6 * Math.min(1, ex / (220 * Q.s)))); }
+        else want = sp + (t.rest - sp) * Math.min(1, dt * 0.4);
+        t.vy = dir * want;
+        // sideways: a little wandering, pulled back toward its place when it strays
+        var dx = t.x - t.hx, out = dx - Math.max(-Q.wob, Math.min(Q.wob, dx));
+        if (t.sx == null || Math.random() < dt * 0.25) t.sx = (Math.random() - .5) * 1.4 * t.rest;   // now and then a new sideways lean
+        t.vx += ((t.sx - t.vx) * 0.6 - 0.12 * dx - 2.2 * out - (out ? 1.6 : 0) * t.vx) * dt;
+      }
+      t.x += t.vx * dt; t.y += t.vy * dt;
+      // the top and foot of the wall: bounce; the sides keep it on the wall
+      if (t.y < 0) { t.y = 0; t.vy = Math.abs(t.vy) * 0.8; } else if (t.y > H - t.h) { t.y = H - t.h; t.vy = -Math.abs(t.vy) * 0.8; }
+      if (t.x < 0) { t.x = 0; t.vx = Math.abs(t.vx) * 0.8; } else if (t.x > W - t.w) { t.x = W - t.w; t.vx = -Math.abs(t.vx) * 0.8; }
+    });
+    var g = Q.gap;
+    for (var i = 0; i < Q.t.length; i++) for (var j = i + 1; j < Q.t.length; j++) {
+      var A = Q.t[i], B = Q.t[j];
+      var dx = (B.x + B.w / 2) - (A.x + A.w / 2), dy = (B.y + B.h / 2) - (A.y + A.h / 2);
+      var ox = (A.w + B.w) / 2 + g - Math.abs(dx), oy = (A.h + B.h) / 2 + g - Math.abs(dy);
+      if (ox <= 0 || oy <= 0) continue;
+      var ax = ox < oy, nx = ax ? (dx < 0 ? -1 : 1) : 0, ny = ax ? 0 : (dy < 0 ? -1 : 1), o = ax ? ox : oy;
+      var wa = A === held ? 0 : B === held ? 1 : 0.5, wb = A === held ? 1 : 1 - wa;
+      A.x -= nx * o * wa; A.y -= ny * o * wa; B.x += nx * o * wb; B.y += ny * o * wb;
+      var gv = function (v) { return Math.max(-hv, Math.min(hv, v)); };
+      var va = A === held ? gv(ax ? Q.grab.vx : Q.grab.vy) : (ax ? A.vx : A.vy), vb = B === held ? gv(ax ? Q.grab.vx : Q.grab.vy) : (ax ? B.vx : B.vy);
+      if ((vb - va) * (ax ? nx : ny) >= 0) continue;
+      var na, nb;
+      if (A === held) { na = va; nb = va * 1.2; }
+      else if (B === held) { nb = vb; na = vb * 1.2; }
+      else { var mid = (va + vb) / 2; na = mid + (vb - mid) * 0.6; nb = mid + (va - mid) * 0.6; }
+      if (ax) { A.vx = na; B.vx = nb; } else { A.vy = na; B.vy = nb; }
+    }
+    stRender();
+    Q.raf = requestAnimationFrame(stTick);
+  }
+
   /* Gallery: arrives with a slow glide up into place, like the Work strip, and
      the wheel moves it smoothly (a little drift after each turn of the wheel). */
   var wallTarget = null, wallRaf = null, wallSc = null, wallSet = null;
@@ -1487,14 +1617,15 @@
     // where the map sat before
     var ox = (mw - W * k) / 2, oy = H * k;
     k *= 0.7;
-    map.style.width = W * k + 'px'; map.style.height = H * k + 'px';
-    map.style.left = (ml + ox) + 'px';
-    map.style.top = (foot - mh + oy - H * k) + 'px';
+    map.style.width = Math.round(W * k) + 'px'; map.style.height = Math.round(H * k) + 'px';
+    map.style.left = Math.round(ml + ox) + 'px';
+    map.style.top = Math.round(foot - mh + oy - H * k) + 'px';
     var inner = map.querySelector('.wall-map-in');
-    inner.style.width = W * k + 'px'; inner.style.height = H * k + 'px';
+    inner.style.width = Math.round(W * k) + 'px'; inner.style.height = Math.round(H * k) + 'px';
     inner.innerHTML = [].map.call(wall.querySelectorAll('.print img'), function (img) {
       var a = img.closest('.print');
-      return '<i style="left:' + (a.offsetLeft * k).toFixed(1) + 'px;top:' + (a.offsetTop * k).toFixed(1) + 'px;width:' + (img.offsetWidth * k).toFixed(1) + 'px;height:' + (img.offsetHeight * k).toFixed(1) + 'px"></i>';
+      var x = a._st ? a._st.x : a.offsetLeft, y = a._st ? a._st.y : a.offsetTop;
+      return '<i style="left:' + Math.round(x * k) + 'px;top:' + Math.round(y * k) + 'px;width:' + Math.max(1, Math.round(img.offsetWidth * k)) + 'px;height:' + Math.max(1, Math.round(img.offsetHeight * k)) + 'px"></i>';
     }).join('');
     map._k = k;
     map._top = wall.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
@@ -1507,9 +1638,9 @@
     var y = (sc.scrollTop - map._top) * k, h = sc.clientHeight * k, ih = inner.offsetHeight;
     var top = Math.max(0, y), bot = Math.min(ih, y + h);
     // more room either side of the prints (Juan, 2026-11-27)
-    var px = Math.max(6, 10 * innerWidth / 1920), py = 3;
+    var px = Math.round(Math.max(6, 10 * innerWidth / 1920)), py = 3;
     v.style.left = inner.offsetLeft - px + 'px'; v.style.width = inner.offsetWidth + 2 * px + 'px';
-    v.style.top = top - py + 'px'; v.style.height = Math.max(4, bot - top) + 2 * py + 'px';
+    v.style.top = Math.round(top - py) + 'px'; v.style.height = Math.round(Math.max(4, bot - top) + 2 * py) + 'px';
   }
   addEventListener('resize', function () { clearTimeout(drawMap._t); drawMap._t = setTimeout(drawMap, 120); });
   function wallScroller() {
@@ -1591,7 +1722,7 @@
     var g = strip();
     if (g && matchMedia('(hover: hover) and (min-width: 761px)').matches) return { el: g, x: true, items: g.querySelectorAll('.card') };
     var sc = wallScroller();
-    if (sc) return { el: sc, x: false, items: document.querySelectorAll('.prints .print') };
+    if (sc && !document.querySelector('.prints.is-stream')) return { el: sc, x: false, items: document.querySelectorAll('.prints .print') };
     return null;
   }
   function startDrift() {
