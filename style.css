@@ -929,10 +929,13 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
      squares, the title shows over the square on hover. The image itself does
      not change on hover, and the veil reaches a pixel past the square's edge,
      so no light rim or box flashes while it fades in. */
-  :root:is([data-work="squares"], [data-work="float"]) .work-page .card { overflow: hidden; }
+  /* No clip on the card (it cut the veil's overhang back to the image edge, so
+     the image's light edge pixels showed for a moment as the veil faded), and
+     the veil stays on its own layer so the fade is one plain dissolve. */
+  :root:is([data-work="squares"], [data-work="float"]) .work-page .card { overflow: visible; }
   :root:is([data-work="squares"], [data-work="float"]) .work-page .card img,
   :root:is([data-work="squares"], [data-work="float"]) .work-page .card:hover img { transform: none; opacity: 1; transition: none; background: none; }
-  :root:is([data-work="squares"], [data-work="float"]) .work-page .card-title { inset: -1px; white-space: normal; }
+  :root:is([data-work="squares"], [data-work="float"]) .work-page .card-title { inset: -2px; white-space: normal; will-change: opacity; backface-visibility: hidden; }
 }
 
 /* Project pages in the print-room format: the project label to the right */
@@ -1030,7 +1033,7 @@ body.home .settings-btn, body.home .mode-pick { display: none !important; }
    blur; whole-pixel lines (site.js rounds every position), dark-mode grey a
    little lighter (was 50) */
 .wall-map { --map-ink: rgb(64, 64, 64); --map-line: 2px; }
-:root[data-mode="light"] .wall-map { --map-ink: var(--ink); }  /* text / settings ink (Juan, 2026-11-27) */
+:root[data-mode="light"] .wall-map { --map-ink: #D3D0C8; }  /* light mode mirror of dark: a warm grey near the paper (Juan, 2026-11-27) */
 :root[data-frame="off"] .wall-map-in i { background: none; border: 1px solid var(--map-ink); box-sizing: border-box; }
 .wall-map-view { position: absolute; border: var(--map-line) solid var(--map-ink); pointer-events: none; }
 .room .wall-map { display: none; }
