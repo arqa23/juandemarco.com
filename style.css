@@ -1447,3 +1447,5 @@ body.home { background: var(--bg); }
   .e2-about:not(.is-fit) .e2a-fig { animation: none; }
 }
 @keyframes e2-fig-in { from { opacity: 0; } to { opacity: 1; } }
+/* Work: shown once site.js has drawn this visit's hang (no flash of the stored order) */
+.edw-feat:not(.is-shuffled) { visibility: hidden; }
