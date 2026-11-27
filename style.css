@@ -1049,8 +1049,10 @@ body.home .settings-btn, body.home .mode-pick { display: none !important; }
   display: flex; align-items: center; justify-content: center; }
 .about-sketch i { display: block; flex: none; width: min(17.3vw, 55vh * .6504); aspect-ratio: 707 / 1087;
   background: var(--ink-dim);
-  -webkit-mask: url("/images/prints/sketches/bare/02.webp") 41.30% 41.41% / 141.44% 137.99% no-repeat;
-          mask: url("/images/prints/sketches/bare/02.webp") 41.30% 41.41% / 141.44% 137.99% no-repeat;
+  /* ready-shrunk copies of the drawing (tools/about_sketch.py); the page
+     picks the one nearest its shown size, so the fine lines don't break up */
+  -webkit-mask: var(--sk) center / 100% 100% no-repeat;
+          mask: var(--sk) center / 100% 100% no-repeat;
   opacity: 0; transition: opacity .8s ease; }
 .about-sketch i.loaded { opacity: 1; }
 @media (max-width: 1000px), (hover: none) { .about-sketch { display: none; } }
