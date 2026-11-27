@@ -107,5 +107,11 @@
  },
  "the-conflicted-icon/08": {
   "mode": "document"
+ },
+ "family-of-curves/05": {
+  "skip": true
+ },
+ "family-of-curves/06": {
+  "skip": true
  }
 }

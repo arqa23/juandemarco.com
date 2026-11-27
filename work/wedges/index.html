@@ -7,10 +7,10 @@
   <meta name="description" content="Juan De Marco">
   <meta name="robots" content="noai, noimageai">
   <link rel="preload" href="/fonts/jost-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/style.css?v=61a585b5">
-  <script src="/type.js?v=61a585b5"></script>
-  <script src="/images.js?v=61a585b5"></script>
-  <script src="/site.js?v=61a585b5" defer></script>
+  <link rel="stylesheet" href="/style.css?v=f5c7c62a">
+  <script src="/type.js?v=f5c7c62a"></script>
+  <script src="/images.js?v=f5c7c62a"></script>
+  <script src="/site.js?v=f5c7c62a" defer></script>
 </head>
 <body class="inner room">
   <div class="scroller">
@@ -63,19 +63,22 @@
   <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="View mode" title="View mode"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   <div class="mode-pick" id="mode-pick" role="group" aria-label="View mode" hidden>
     <button type="button" class="pick-row" data-tog="mode">Dark mode: <span></span></button>
-    <button type="button" class="pick-row" data-tog="frame">Framed: <span></span></button>
     <button type="button" class="pick-row" data-tog="fs">Full screen: <span></span></button>
-    <div class="pick-layouts">
-      <span class="pick-head">Work layout</span>
+    <button type="button" class="pick-row pick-gal" data-tog="frame">Framed: <span></span></button>
+    <div class="pick-layouts pick-work">
+      <span class="pick-head">Layout:</span>
       <button type="button" class="pick-row pick-opt" data-wv="squares">Squares</button>
+      <button type="button" class="pick-row pick-opt" data-wv="float">Float</button>
       <button type="button" class="pick-row pick-opt" data-wv="grid">Grid</button>
       <button type="button" class="pick-row pick-opt" data-wv="strip">Strip</button>
     </div>
-    <div class="pick-layouts pick-hangs">
-      <span class="pick-head">Gallery layout</span>
+    <div class="pick-layouts pick-gal">
+      <span class="pick-head">Layout:</span>
       <button type="button" class="pick-row pick-opt" data-hv="index">Index</button>
       <button type="button" class="pick-row pick-opt" data-hv="cluster">Cluster</button>
     </div>
+    <button type="button" class="pick-row pick-gal" data-tog="mapfill">Map: <span></span></button>
+    <label class="pick-row pick-gal pick-col">Map colour: <input type="color" class="map-col" aria-label="Map colour"><button type="button" class="map-col-reset" title="Back to the text colour">reset</button></label>
     <button type="button" class="pick-row pick-art" data-tog="art">Art view: <span></span></button>
   </div>
 
