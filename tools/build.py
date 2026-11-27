@@ -126,14 +126,17 @@ PROJECTS = [
 # Round 2 (Juan, 2026-11-27): Julius II, American Promise and Talbot Road
 # large; Wedges, Conflicted Icon and Julius to the smaller projects below;
 # March of the Silhouettes shows its usual first image.
+# Round 3 (Juan): only SOMA, Julius II, American Promise and Talbot Road large;
+# every other project a small tile like the others, no line and no lower grid;
+# March of the Silhouettes shows image 02.
 ED_FEATURED = [
-    [("soma", "lead", "02.webp"), ("march-of-the-silhouettes", "small", "01.webp")],
+    [("soma", "lead", "02.webp"), ("march-of-the-silhouettes", "small", "02.webp")],
     [("parnell-residence", "small", "01.webp"), ("julius-ii", "lead", "01.webp")],
     [("american-promise", "lead", "01.webp"), ("family-of-curves", "small", "01.webp")],
     [("frankls-purposive-intention", "small", "01.webp"), ("talbot-road-residence", "lead", "01.webp")],
+    [("julius", "small", "03.webp"), ("wedges", "small", "03.webp"), ("the-conflicted-icon", "small", "04.webp")],
 ]
-# Smaller projects below the line, in this order
-ED_BELOW = [("julius", "03.webp"), ("wedges", "03.webp"), ("the-conflicted-icon", "04.webp")]
+ED_BELOW = []   # the smaller grid under a line (round 2), now empty
 # About: the drawing beside the text, on its own paper (Gallery sketch 02)
 ED_ABOUT_DRAWING = "/images/prints/sketches/02.webp"
 
@@ -172,6 +175,13 @@ TEXT_POSITION = "top"
 #   "working" = the same, plus the Framed option on the Gallery, for designing together
 SETTINGS_MODE = "public"
 GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
+# Page views in the settings box (Juan, 2026-11-27). "current" = the page's
+# original layout; defaults live in type.js (VIEWS).
+VIEWS = {
+    "work": [("current", "Squares / Float"), ("edit", "Editorial"), ("edit2", "Editorial v2")],
+    "about": [("current", "Current"), ("edit", "Editorial"), ("edit2", "Editorial v2")],
+    "prints": [("current", "Current"), ("exh", "Exhibition"), ("wall", "Wall")],
+}
 # Stream saved but switched off (Juan, 2026-11-27, VERSIONS.md); its code stays,
 # add ("stream", "Stream") back here to bring it back.
 # Stream (2026-11-27) = Squares turned upright: the Cluster hang, every print
@@ -250,21 +260,15 @@ def _page(title, section, body, body_class="", head_extra=""):
         + "".join(f'      <button type="button" class="pick-row pick-opt" data-hv="{k}">{v}</button>\n' for k, v in GALLERY_LAYOUTS)
         + '    </div>\n'
         )
-    # Design preview (Juan, 2026-11-27, brief V2): one shared choice for Home,
-    # Work and About. Current is the default; "Editorial test" is opt-in and
-    # kept in this browser (localStorage jdm-design). Other pages say they
-    # are unchanged. In the test, Work's layout list steps aside (its saved
-    # choice is kept and comes back with Current).
-    design_rows = (
-        '    <span class="pick-note pick-work-off">Layout: back with Current</span>\n'
-        '    <div class="pick-layouts pick-design" role="radiogroup" aria-label="Design preview">\n'
-        '      <span class="pick-head">Design preview:</span>\n'
-        '      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="true" data-dv="current">Current</button>\n'
-        '      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="false" data-dv="edit">Editorial</button>\n'
-        '      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="false" data-dv="edit2">Editorial v2</button>\n'
-        '      <span class="pick-note pick-note-ed">Applies to Home, Work and About.</span>\n'
-        '      <span class="pick-note pick-note-same">This page is unchanged.</span>\n'
-        '    </div>\n')
+    # Each of Work, About and Gallery has its own "View" choice (Juan,
+    # 2026-11-27); type.js holds the defaults (Work: Editorial, About:
+    # Editorial v2, Gallery: Current). Home has one view and no settings button.
+    views = VIEWS.get(section) if "has-ed" in body_class else None
+    design_rows = "" if not views else (
+        '    <div class="pick-layouts pick-design" role="radiogroup" aria-label="View">\n'
+        '      <span class="pick-head">View:</span>\n'
+        + "".join(f'      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="false" data-dv="{k}">{v}</button>\n' for k, v in views)
+        + '    </div>\n')
     return f"""<!doctype html>
 <html lang="en"{' data-public="1"' if SETTINGS_MODE == "public" else ""}>
 <head>
@@ -291,7 +295,7 @@ def _page(title, section, body, body_class="", head_extra=""):
   <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="View mode" title="View mode"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   <div class="mode-pick" id="mode-pick" role="group" aria-label="View mode" hidden>
     <button type="button" class="pick-row" data-tog="mode">Dark mode: <span></span></button>
-{frame_row}{working_rows}{design_rows}  </div>
+{frame_row}{design_rows}{working_rows}  </div>
 
   <div class="settings" id="settings" hidden>
     <p class="settings-note">Test panel. Choices are kept in this browser only.</p>
@@ -460,8 +464,48 @@ def ed_work():
     assert len(feat) + len(rest) == len(PROJECTS), "every project exactly once"
     return ('  <main class="ed ed-work">\n    <h1 class="visually-hidden">Work</h1>\n'
             '    <div class="edw-feat">\n' + "\n".join(item(*it) for it in feat) + '\n    </div>\n'
-            '    <div class="edw-more">\n' + "\n".join(item(s, "sm", f) for s, f in rest) + '\n    </div>\n'
-            '  </main>\n')
+            + ('    <div class="edw-more">\n' + "\n".join(item(s, "sm", f) for s, f in rest) + '\n    </div>\n' if rest else '')
+            + '  </main>\n')
+
+
+# Gallery views (Juan, 2026-11-27). The real artworks so far: the six
+# Gallery sketches, each a complete 2:3 portrait sheet (paper included in
+# the image) at 8 x 12 in (Juan's file names: FOC_*_2x3_8x12). Each work
+# once, in this fixed order. The older print series are mockups and stay off.
+# Fields: series slug, number in its room, sheet family, orientation, sheet
+# width, height, unit. Unknown values stay None (e.g. a work's own title).
+# Sketches 4-6 are the same sheet turned: 3:2 landscape, 12 x 8 in.
+GALLERY_WORKS = [("sketches", k, "2:3", "portrait", 8, 12, "in") for k in (1, 2, 3)] + \
+                [("sketches", k, "3:2", "landscape", 12, 8, "in") for k in (4, 5, 6)]
+
+
+def gallery_views():
+    """Exhibition (design brief V3) and Wall (Claude's own) Gallery views."""
+    from PIL import Image
+    names = {slug: name for slug, name, *_ in PRINT_SERIES}
+    years = {"sketches": "2026"}
+    cells, wall = [], []
+    sumw = sum(w for *_, w, h, u in GALLERY_WORKS)
+    maxh = max(h for *_, w, h, u in GALLERY_WORKS)
+    for slug, k, fam, orient, w, h, unit in GALLERY_WORKS:
+        f = f"/images/prints/{slug}/{k:02d}.webp"
+        pw, ph = Image.open(ROOT / f.lstrip("/")).size
+        title = f"{names[slug]}, No. {k}"
+        meta = " \u00b7 ".join(x for x in [years.get(slug), f"{fam} {orient}", f"{w} \u00d7 {h} {unit}" if w else None] if x)
+        img = (f'<img src="{f}" width="{pw}" height="{ph}" alt="{html.escape(title)}" '
+               f'loading="lazy" decoding="async" draggable="false">')
+        cells.append(f'      <li><a class="gx-cell" href="/prints/{slug}/#{k}"><span class="gx-stage">'
+                     f'<span class="gx-sheet" style="--r:{w / h:.4f}">{img}</span></span>'
+                     f'<span class="gx-t">{html.escape(title)}</span><span class="gx-m">{html.escape(meta)}</span></a></li>')
+        wall.append(f'      <li><a class="gw-item" href="/prints/{slug}/#{k}" style="--w:{w};--h:{h}">'
+                    f'<span class="gw-sheet">{img}</span>'
+                    f'<span class="gw-label"><span class="gw-t">{html.escape(title)}</span>'
+                    f'<span class="gw-m">{html.escape(meta)}</span></span></a></li>')
+    return ('  <main class="gx gx-page">\n    <h1 class="gx-h">Gallery</h1>\n    <ol class="gx-grid">\n'
+            + "\n".join(cells) + '\n    </ol>\n  </main>\n'
+            f'  <main class="gw gw-page" style="--sumw:{sumw};--maxh:{maxh};--n:{len(GALLERY_WORKS)}">\n'
+            '    <h1 class="visually-hidden">Gallery</h1>\n    <ol class="gw-row">\n'
+            + "\n".join(wall) + '\n    </ol>\n  </main>\n')
 
 
 def e2_work():
@@ -527,8 +571,11 @@ def main():
                f'    <p class="edh-cap">{html.escape(soma["title"])}, {soma["meta"].split(" ")[0]}</p>\n'
                '    <a class="edh-go" href="/work/">Explore selected work <span aria-hidden="true">&rarr;</span></a>\n'
                '  </div>\n')
-    e2_home = f'  <p class="ed2 e2-label">{html.escape(soma["title"])}, {soma["meta"].split(" ")[0]}</p>\n'
-    write("index.html", page("Home", "home", HOME_BODY + ed_home + e2_home, "home has-ed"))
+    e2_home = f'  <p class="e2-label">{html.escape(soma["title"])}, {soma["meta"].split(" ")[0]}</p>\n'
+    # Home = the Editorial v2 home (Juan, 2026-11-27): full-screen work in a thin
+    # mat with its wall label. The earlier full-bleed home and the Editorial
+    # (framed) home are saved in VERSIONS.md; ed_home stays here, unused.
+    write("index.html", page("Home", "home", HOME_BODY + e2_home, "home"))
 
     cards = "\n".join(
         f'      <a class="card" href="/work/{p["slug"]}/"{" data-tall=\"1\"" if p["slug"] in TALL_TILES else ""}>\n'
@@ -675,9 +722,9 @@ def main():
         write(f"prints/{slug}/index.html", page(f"{name} \u00b7 Gallery", "prints", room, "inner room"))
     write("prints/index.html", page("Gallery", "prints",
         '  <main class="page page-wide prints-page">\n    <h1 class="visually-hidden">Gallery</h1>\n'
-        '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n'
+        '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n' + gallery_views() +
         '  <button class="to-top" type="button" aria-label="Back to top" title="Back to top">'
-        '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5 9.5 10 4.5l5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>\n', "inner"))
+        '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5 9.5 10 4.5l5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>\n', "inner has-ed"))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
     about_block = f"      <h1>About</h1>\n{about}\n"
