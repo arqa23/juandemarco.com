@@ -132,6 +132,7 @@
         mode: (root.dataset.mode || PREF_DEFAULTS.mode) === 'dark' ? 'On' : 'Off',
         frame: (root.dataset.frame || 'on') === 'on' ? 'On' : 'Off',
         aframe: root.dataset.aframe === 'on' ? 'On' : 'Off',
+        aalign: root.dataset.aalign === 'right' ? 'Right' : 'Left',
         fs: document.fullscreenElement ? 'On' : 'Off',
       };
       pick.querySelectorAll('button[data-hv]').forEach(function (b) { b.classList.toggle('is-on', (root.dataset.hang || PREF_DEFAULTS.hang) === b.dataset.hv); });
@@ -186,6 +187,11 @@
           root.dataset.frame = (root.dataset.frame || 'on') === 'on' ? 'off' : 'on';
           try { localStorage.setItem('jdm-frame', root.dataset.frame); } catch (err) {}
           applyFrame(); markPick(); return;
+        }
+        if (k === 'aalign') {   // About text: flush left or flush right (test)
+          if (root.dataset.aalign === 'right') delete root.dataset.aalign; else root.dataset.aalign = 'right';
+          try { localStorage.setItem('jdm-aalign', root.dataset.aalign || 'left'); } catch (err) {}
+          markPick(); return;
         }
         if (k === 'aframe') {   // About: the drawing on its paper, or the drawing alone
           if (root.dataset.aframe === 'on') delete root.dataset.aframe; else root.dataset.aframe = 'on';
@@ -2010,18 +2016,23 @@
       ab.style.setProperty('--e2fh', Math.max(120, base - t).toFixed(1) + 'px');
     }
   }
+  var ASLIDE = { text: ['--e2-shift', 'jdm-atext', '.e2a-text'], image: ['--e2-ishift', 'jdm-aimg', '.e2a-fig'] };
   function aboutSlide() {
-    var inp = document.querySelector('[data-aslide]'); if (!inp) return;
-    var v = parseFloat(root.style.getPropertyValue('--e2-shift')) || 0;
-    if (document.activeElement !== inp) inp.value = v;
-    var tx = document.querySelector('.e2a-text'), out = inp.parentElement.querySelector('.pick-val');
-    if (out) out.textContent = (v > 0 ? '+' : '') + v + ' (starts ' + (tx ? (tx.getBoundingClientRect().left / innerWidth * 100).toFixed(1) : '?') + '%)';
+    document.querySelectorAll('[data-aslide]').forEach(function (inp) {
+      var o = ASLIDE[inp.dataset.aslide]; if (!o) return;
+      var v = parseFloat(root.style.getPropertyValue(o[0])) || 0;
+      if (document.activeElement !== inp) inp.value = v;
+      var el = document.querySelector(o[2]), out = inp.parentElement.querySelector('.pick-val');
+      if (inp.dataset.aslide === 'image' && el) el = el.querySelector(root.dataset.aframe === 'on' ? '.e2a-sheet' : 'i') || el;
+      if (out) out.textContent = (v > 0 ? '+' : '') + v + ' (starts ' + (el ? (el.getBoundingClientRect().left / innerWidth * 100).toFixed(1) : '?') + '%)';
+    });
   }
   document.addEventListener('input', function (e) {
     if (!e.target.matches || !e.target.matches('[data-aslide]')) return;
+    var o = ASLIDE[e.target.dataset.aslide]; if (!o) return;
     var v = parseFloat(e.target.value) || 0;
-    if (v) root.style.setProperty('--e2-shift', v + 'vw'); else root.style.removeProperty('--e2-shift');
-    try { localStorage.setItem('jdm-atext', String(v)); } catch (err) {}
+    if (v) root.style.setProperty(o[0], v + 'vw'); else root.style.removeProperty(o[0]);
+    try { localStorage.setItem(o[1], String(v)); } catch (err) {}
     aboutSlide();
   });
   window.addEventListener('resize', function () { aboutFit(); aboutSlide(); });
