@@ -961,6 +961,7 @@
   addEventListener('resize', function () { var p = document.querySelector('.press'); if (p && p.dataset.set) initPress(); });
 
   function init() {
+    setTimeout(aboutFit, 0);
     initToTop();
     turnLegal();
     layoutWall();
@@ -2009,12 +2010,14 @@
   function aboutFit() {
     var ab = document.querySelector('.e2-about'), tx = ab && ab.querySelector('.e2a-text'), lg = ab && ab.querySelector('.eda-legal');
     if (!ab || !lg || innerWidth <= 700 || !ab.offsetParent) { if (ab) ab.style.removeProperty('--e2fh'); return; }
+    if (document.fonts && document.fonts.status !== 'loaded') return;   // measure with the real type, or the size jumps
     for (var k = 0; k < 2; k++) {   // twice: the drawing's width can move the text
       var t = tx.getBoundingClientRect().top, r = lg.getBoundingClientRect(), cs = getComputedStyle(lg);
       var fs = parseFloat(cs.fontSize), lh = parseFloat(cs.lineHeight) || fs * 1.2;
       var base = r.bottom - (lh - fs) / 2 - fs * .2;   // the foot of the capitals, not of the line box
       ab.style.setProperty('--e2fh', Math.max(120, base - t).toFixed(1) + 'px');
     }
+    ab.classList.add('is-fit');   // the drawing shows only once it has its size (no jump on load)
   }
   var ASLIDE = { text: ['--e2-shift', 'jdm-atext', '.e2a-text'], image: ['--e2-ishift', 'jdm-aimg', '.e2a-fig'] };
   function aboutSlide() {
@@ -2037,7 +2040,9 @@
   });
   window.addEventListener('resize', function () { aboutFit(); aboutSlide(); });
   document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.settings-corner')) setTimeout(aboutSlide, 0); }, true);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { aboutFit(); aboutSlide(); });
   var aboutWatch = setInterval(function () { if (document.fonts && document.fonts.status !== 'loaded') return; aboutFit(); aboutSlide(); }, 400);
 
   init();
+  aboutFit();
 })();

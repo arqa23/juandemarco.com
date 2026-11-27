@@ -1440,3 +1440,10 @@ body.home { background: var(--bg); }
 
 /* No settings button (Juan, 2026-11-27); build.py SETTINGS_BUTTON brings it back */
 :root[data-nosettings="1"] :is(.settings-btn, .settings-corner, .mode-pick, .settings) { display: none !important; }
+/* About: the drawing waits until it has been fitted (no large-then-small jump on load) */
+@media (min-width: 701px) {
+  .e2-about:not(.is-fit) .e2a-fig { visibility: hidden; }
+  .e2-about .e2a-fig { animation: e2-fig-in .35s ease both; }
+  .e2-about:not(.is-fit) .e2a-fig { animation: none; }
+}
+@keyframes e2-fig-in { from { opacity: 0; } to { opacity: 1; } }
