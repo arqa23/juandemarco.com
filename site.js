@@ -971,7 +971,18 @@
       var g = a.dataset.g; if (!rows[g]) { rows[g] = []; keys.push(g); } rows[g].push(a);
     });
     function mix(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-    mix(keys).forEach(function (g) { mix(rows[g]).forEach(function (a) { feat.appendChild(a); }); });
+    // a large project never sits straight above another (Juan, 2026-11-27):
+    // row by row, the large one takes the other side from the last large one
+    var side = Math.random() < .5 ? 0 : 1;
+    mix(keys).forEach(function (g) {
+      var r = mix(rows[g]), lead = r.filter(function (a) { return a.classList.contains('edw-lead'); })[0];
+      if (lead) {
+        r = r.filter(function (a) { return a !== lead; });
+        if (side === 0) r.unshift(lead); else r.push(lead);
+        side = 1 - side;
+      }
+      r.forEach(function (a) { feat.appendChild(a); });
+    });
     feat.classList.add('is-shuffled');
   }
   function init() {
