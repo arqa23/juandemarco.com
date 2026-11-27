@@ -18,6 +18,7 @@ PROJECTS = [
     # Order: Talbot/Parnell, Julius/Julius II and American Promise/Conflicted Icon
     # never side by side, the strip's wrap included (Juan, 2026-11-26)
     {"slug": "soma", "title": "SOMA",
+     "desc": "Text to be updated.",
      "meta": "2026 · Pigment print",
      "text": [
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus, posuere velit aliquet. Donec ullamcorper nulla non metus auctor fringilla, vitae elementum lacus vehicula. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui.",
@@ -25,12 +26,14 @@ PROJECTS = [
       "Vestibulum id ligula porta felis euismod semper. Curabitur blandit tempus porttitor, sed posuere consectetur est at lobortis. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante."
      ]},
     {"slug": "julius-ii", "title": "Julius II",
+     "desc": "",
      "meta": "2026 · Digital rendering",
      "text": [
       "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur.",
       "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet. Fusce dapibus tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus, donec id elit non mi porta."
      ]},
     {"slug": "parnell-residence", "title": "Parnell Residence",
+     "desc": "A two-story residence composed of two intersecting bars, connected by a double-height living room. As in the Talbot Road Residence, the rooms are staggered to balance interior privacy with expansive views of the surrounding landscape.",
      "meta": "2021 · Graphite on paper, model",
      "text": [
       "Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor, sed diam eget risus varius blandit.",
@@ -38,24 +41,28 @@ PROJECTS = [
       "Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam."
      ]},
     {"slug": "american-promise", "title": "American Promise",
+     "desc": "A proposal for the Peace Corps National Monument Competition in Washington, D.C. In keeping with the spirit of service of the Peace Corps, the monument is designed to draw attention away from itself and toward the National Mall.",
      "meta": "2013 · Photomontage and elevation drawings",
      "text": [
       "Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla, in ac dui quis mi consectetuer lacinia. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante.",
       "Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing, phasellus ullamcorper ipsum rutrum nunc. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur."
      ]},
     {"slug": "march-of-the-silhouettes", "title": "March of the Silhouettes",
+     "desc": "A series of abstract drawings inspired by Egyptian hieroglyphs and the movement of figures in procession.",
      "meta": "2012 · Charcoal and ink on paper",
      "text": [
       "Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam.",
       "Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Figurae in ordine ambulant, nec umquam consistunt. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula."
      ]},
     {"slug": "talbot-road-residence", "title": "Talbot Road Residence",
+     "desc": "A single-story residence with a series of staggered rooms, designed to balance interior privacy with expansive views of the surrounding landscape.",
      "meta": "2020 · Ink and digital collage",
      "text": [
       "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula.",
       "Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur. Fusce dapibus tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus."
      ]},
     {"slug": "julius", "title": "Julius",
+     "desc": "An architectural silhouette that wanders the countryside. Its patterned surfaces alter the perception of its form as it is viewed from different angles.",
      "meta": "2014 · Digital rendering",
      "text": [
       "Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum, aenean imperdiet. Etiam ultricies nisi vel augue, curabitur ullamcorper ultricies nisi. Nam eget dui, etiam rhoncus maecenas tempus tellus eget condimentum. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus, donec id elit non mi porta.",
@@ -63,6 +70,7 @@ PROJECTS = [
       "Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui."
      ]},
     {"slug": "wedges", "title": "Wedges",
+     "desc": "",
      "meta": "2022 · Study models, photography",
      "text": [
       "Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus, aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur.",
@@ -70,6 +78,7 @@ PROJECTS = [
       "Sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus, donec id elit non mi porta."
      ]},
     {"slug": "the-conflicted-icon", "title": "The Conflicted Icon",
+     "desc": "A reinterpretation of the traditional skyscraper, in which the architectural crown is relocated from the top of the tower to its base. The project shifts the emphasis from the skyline to the point where the tower meets the ground.",
      "meta": "2014 · Digital rendering, line drawing",
      "text": [
       "Curabitur at lacus ac velit ornare lobortis. Curabitur a felis in nunc fringilla tristique. Morbi mattis ullamcorper velit, phasellus gravida semper nisi. Nullam vel sem, pellentesque libero tortor, tincidunt et tincidunt eget. Fusce dapibus tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.",
@@ -77,6 +86,7 @@ PROJECTS = [
       "Vivamus quis mi. Phasellus a est, phasellus magna in hac habitasse platea dictumst. Curabitur nisi, quisque malesuada placerat nisl. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor, sed diam eget risus varius blandit."
      ]},
     {"slug": "frankls-purposive-intention", "title": "Frankl\u2019s Purposive Intention",
+     "desc": "An experimental art gallery inspired by Paul Frankl\u2019s writings on purposive intention and the relationship between architectural spaces and the objects within them. Patterns of varying direction and density allow the architecture itself to become an active participant in the exhibition.",
      "meta": "2011 · Axonometric drawings, model",
      "text": [
       "Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor, sed diam eget risus varius blandit.",
@@ -84,7 +94,8 @@ PROJECTS = [
       "Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam."
      ]},
     # Added 2026-11-27 (Juan); images from the old juandemarco.us page
-    {"slug": "family-of-curves", "title": "Family of Curves",
+    {"slug": "family-of-curves", "title": "Family of Curves No. 1",
+     "desc": "A collection of related curves grown from a single line. Through different rates of expansion and distortion, each curve develops its own distinctive character.",
      "meta": "2006 · Line drawings",
      "text": ["Description coming soon."]},
 ]
@@ -126,7 +137,9 @@ TEXT_POSITION = "top"
 #   "working" = the same, plus every Work layout listed to click, and the
 #               Strip 1B sliders, for designing together
 SETTINGS_MODE = "working"
-GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster"), ("stream", "Stream")]
+GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
+# Stream saved but switched off (Juan, 2026-11-27, VERSIONS.md); its code stays,
+# add ("stream", "Stream") back here to bring it back.
 # Stream (2026-11-27) = Squares turned upright: the Cluster hang, every print
 # drifting on its own, held to the wall's middle, bouncing off its top and foot.
 # Retired 2026-11-27 (kept in VERSIONS.md, commit c3a070c): Squares (3 rows),
@@ -416,6 +429,8 @@ def main():
             f'data-r="{dims[k][0] / dims[k][1]:.4f}" alt="{html.escape(p["title"])}, image {k + 1} of {len(files)}" decoding="async" draggable="false">'
             for k, f in enumerate(files))
         title = html.escape(p["title"])
+        # one short description, in the print rooms' series-line style (Juan, 2026-11-27)
+        desc = f'        <p class="room-desc">{html.escape(p["desc"])}</p>\n' if p.get("desc") else ""
         body = f"""  <main class="room-page project-room">
     <div class="room-top">
       <span class="room-where"><a href="/work/">Work</a> / {title}</span>
@@ -434,9 +449,9 @@ def main():
       <div class="room-text">
         <h1>{title}</h1>
         <p class="meta">{meta}</p>
-        <nav class="project-nav room-pnav" aria-label="Projects">
-          <a href="/work/{prev_p["slug"]}/" title="{html.escape(prev_p["title"])}">&lsaquo; Previous project</a>
-          <a href="/work/{next_p["slug"]}/" title="{html.escape(next_p["title"])}">Next project &rsaquo;</a>
+{desc}        <nav class="project-nav room-pnav" aria-label="Projects">
+          <a href="/work/{prev_p["slug"]}/" title="{html.escape(prev_p["title"])}">&lsaquo; Prev</a>
+          <a href="/work/{next_p["slug"]}/" title="{html.escape(next_p["title"])}">Next &rsaquo;</a>
         </nav>
       </div>
     </div>

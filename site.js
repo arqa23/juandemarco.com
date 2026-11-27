@@ -425,8 +425,9 @@
     var narrow = W < 600, base = W * (narrow ? 0.4 : 0.185), cx = W / 2;
     var hang = document.documentElement.dataset.hang || PREF_DEFAULTS.hang;
     var idx = hang === 'index' || hang === 'cluster';   // both: number + title under each print
-    var stream = hang === 'stream' && !narrow && matchMedia('(hover: hover)').matches;
-    if (hang === 'stream' && !stream) { hang = 'cluster'; idx = true; }
+    // Stream is saved but off (Juan, 2026-11-27): a stored choice falls back to Cluster
+    var stream = false;
+    if (hang === 'stream') { hang = 'cluster'; idx = true; }
     wall.classList.toggle('is-index', idx);
     wall.classList.toggle('is-stream', stream);
     if (idx) g = parseFloat(getComputedStyle(wall).columnGap) || 12;
@@ -1665,6 +1666,7 @@
     wallRaf = requestAnimationFrame(tick);
   }
   document.addEventListener('wheel', function (e) {
+    if (STILL_WALL) return;   // plain browser scrolling on the Gallery (Juan, 2026-11-27)
     var sc = wallScroller();
     if (!sc || e.ctrlKey || (e.target.closest && e.target.closest('.settings'))) return;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -1680,7 +1682,11 @@
   document.addEventListener('scroll', function (e) {
     if (wallRaf && e.target === wallSc && Math.abs(wallSc.scrollTop - wallSet) > 2) wallStop();
   }, true);
+  // Gallery holds still (Juan, 2026-11-27): no arrival glide, no eased wheel,
+  // no drift. Set to false to bring that motion back.
+  var STILL_WALL = true;
   function initWallGlide() {
+    if (STILL_WALL) return;
     var sc = wallScroller();
     if (!sc || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var from = Math.min(sc.scrollHeight - sc.clientHeight, innerHeight * 0.16), t0 = null, dur = 2600;
@@ -1721,8 +1727,7 @@
   function driftTarget() {
     var g = strip();
     if (g && matchMedia('(hover: hover) and (min-width: 761px)').matches) return { el: g, x: true, items: g.querySelectorAll('.card') };
-    var sc = wallScroller();
-    if (sc && !document.querySelector('.prints.is-stream')) return { el: sc, x: false, items: document.querySelectorAll('.prints .print') };
+    // no ambient drift on the Gallery wall (Juan, 2026-11-27: no movement for now)
     return null;
   }
   function startDrift() {
