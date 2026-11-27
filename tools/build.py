@@ -116,6 +116,22 @@ PROJECTS = [
 # How each image is trimmed, fitted and cropped: tools/image_rules.json, applied by tools/images.py.
 
 
+# Editorial test (design brief V2, Juan 2026-11-27): an opt-in alternate Home,
+# Work and About, switched in the settings box ("Design preview"). Current
+# stays the default. Everything the test uses is set here, in one place.
+# Work: three groups of two on a 3-column grid, "lead" spans two columns;
+# "img" is which of the project's images stands as its cover. PROVISIONAL
+# choice made by Claude (architecture, drawings, objects), not Juan's ranking.
+# Every other project follows below in a quieter grid, in PROJECTS order.
+ED_FEATURED = [
+    [("soma", "lead", "02.webp"), ("march-of-the-silhouettes", "small", "07.webp")],
+    [("wedges", "small", "03.webp"), ("parnell-residence", "lead", "01.webp")],
+    [("julius", "lead", "03.webp"), ("the-conflicted-icon", "small", "04.webp")],
+]
+# About: the drawing beside the text, on its own paper (Gallery sketch 02)
+ED_ABOUT_DRAWING = "/images/prints/sketches/02.webp"
+
+
 # Written by tools/images.py: how each image sits in the frame (fit, focus).
 DISPLAY = json.loads((ROOT / "images" / "work" / "display.json").read_text())
 
@@ -228,6 +244,20 @@ def _page(title, section, body, body_class="", head_extra=""):
         + "".join(f'      <button type="button" class="pick-row pick-opt" data-hv="{k}">{v}</button>\n' for k, v in GALLERY_LAYOUTS)
         + '    </div>\n'
         )
+    # Design preview (Juan, 2026-11-27, brief V2): one shared choice for Home,
+    # Work and About. Current is the default; "Editorial test" is opt-in and
+    # kept in this browser (localStorage jdm-design). Other pages say they
+    # are unchanged. In the test, Work's layout list steps aside (its saved
+    # choice is kept and comes back with Current).
+    design_rows = (
+        '    <span class="pick-note pick-work-off">Layout: back with Current</span>\n'
+        '    <div class="pick-layouts pick-design" role="radiogroup" aria-label="Design preview">\n'
+        '      <span class="pick-head">Design preview:</span>\n'
+        '      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="true" data-dv="current">Current</button>\n'
+        '      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="false" data-dv="edit">Editorial test</button>\n'
+        '      <span class="pick-note pick-note-ed">Applies to Home, Work and About.</span>\n'
+        '      <span class="pick-note pick-note-same">This page is unchanged.</span>\n'
+        '    </div>\n')
     return f"""<!doctype html>
 <html lang="en"{' data-public="1"' if SETTINGS_MODE == "public" else ""}>
 <head>
@@ -254,7 +284,7 @@ def _page(title, section, body, body_class="", head_extra=""):
   <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="View mode" title="View mode"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   <div class="mode-pick" id="mode-pick" role="group" aria-label="View mode" hidden>
     <button type="button" class="pick-row" data-tog="mode">Dark mode: <span></span></button>
-{frame_row}{working_rows}  </div>
+{frame_row}{working_rows}{design_rows}  </div>
 
   <div class="settings" id="settings" hidden>
     <p class="settings-note">Test panel. Choices are kept in this browser only.</p>
@@ -403,12 +433,58 @@ def asset_version():
 TALL_TILES = {"american-promise", "the-conflicted-icon"}
 
 
+def ed_work():
+    """Editorial test, Work: featured groups, then the rest, every project once."""
+    from PIL import Image
+    by = {p["slug"]: p for p in PROJECTS}
+
+    def item(slug, role, img):
+        p = by[slug]
+        w, h = Image.open(ROOT / "images" / "work" / slug / img).size
+        sub = f'<span class="edw-s">{html.escape(p["subtitle"])}</span>' if p.get("subtitle") else ""
+        return (f'      <a class="edw-item edw-{role}" href="/work/{slug}/">'
+                f'<span class="edw-img"><img src="/images/work/{slug}/{img}" width="{w}" height="{h}" '
+                f'alt="{html.escape(p["title"])}" loading="lazy" decoding="async" draggable="false"></span>'
+                f'<span class="edw-t">{html.escape(p["title"])}</span>{sub}</a>')
+    feat = [it for g in ED_FEATURED for it in g]
+    shown = {slug for slug, _, _ in feat}
+    assert len(shown) == len(feat) and shown <= set(by), "ED_FEATURED: each project once"
+    rest = [p["slug"] for p in PROJECTS if p["slug"] not in shown]
+    return ('  <main class="ed ed-work">\n    <h1 class="visually-hidden">Work</h1>\n'
+            '    <div class="edw-feat">\n' + "\n".join(item(*it) for it in feat) + '\n    </div>\n'
+            '    <div class="edw-rest">\n' + "\n".join(item(s, "rest", "01.webp") for s in rest) + '\n    </div>\n'
+            '  </main>\n')
+
+
+def ed_about(contact, legal):
+    """Editorial test, About: opening statement large, approach at body size,
+    background quieter below, the drawing on its paper to the right, contact
+    under the text. Same words as the current page."""
+    from PIL import Image
+    w, h = Image.open(ROOT / ED_ABOUT_DRAWING.lstrip("/")).size
+    contact = contact.replace(' id="email"', ' class="ed-email"').replace("<script>", "<!--").replace("</script>", "-->")
+    contact = contact.split("      <!--")[0]
+    # one column on phones, in this order: opening, approach, drawing, background, contact
+    return ('  <main class="ed ed-about">\n    <h1 class="visually-hidden">About</h1>\n'
+            f'    <p class="eda-lead">{html.escape(ABOUT[0])}</p>\n'
+            f'    <p class="eda-body">{html.escape(ABOUT[1])}</p>\n'
+            f'    <figure class="eda-fig"><img src="{ED_ABOUT_DRAWING}" width="{w}" height="{h}" alt="Drawing by Juan De Marco" loading="lazy" decoding="async" draggable="false"></figure>\n'
+            '    <div class="eda-cred">\n' + "".join(f'      <p>{html.escape(t)}</p>\n' for t in ABOUT[2:]) + '    </div>\n'
+            '    <div class="eda-contact">\n' + contact.replace('<h2 class="about-contact">', '<h2 class="eda-h">') + legal.replace('about-legal', 'eda-legal') +
+            '    </div>\n  </main>\n')
+
+
 def main():
     global ASSET_V
     from PIL import Image
     ASSET_V = asset_version()
     thumbs()
-    write("index.html", page("Home", "home", HOME_BODY, "home"))
+    soma = next(p for p in PROJECTS if p["slug"] == "soma")
+    ed_home = ('  <div class="ed ed-home-cap">\n'
+               f'    <p class="edh-cap">{html.escape(soma["title"])}, {soma["meta"].split(" ")[0]}</p>\n'
+               '    <a class="edh-go" href="/work/">Explore selected work <span aria-hidden="true">&rarr;</span></a>\n'
+               '  </div>\n')
+    write("index.html", page("Home", "home", HOME_BODY + ed_home, "home has-ed"))
 
     cards = "\n".join(
         f'      <a class="card" href="/work/{p["slug"]}/"{" data-tall=\"1\"" if p["slug"] in TALL_TILES else ""}>\n'
@@ -416,8 +492,8 @@ def main():
         f'        <span class="card-title">{html.escape(p["title"])}</span>\n'
         f'      </a>' for p in PROJECTS)
     write("work/index.html", page("Work", "work",
-        f'  <main class="page page-wide work-page">\n    <h1 class="work-h">Work</h1>\n    <div class="grid">\n{cards}\n    </div>\n  </main>\n',
-        "inner"))
+        f'  <main class="page page-wide work-page">\n    <h1 class="work-h">Work</h1>\n    <div class="grid">\n{cards}\n    </div>\n  </main>\n'
+        + ed_work(), "inner has-ed"))
 
     for i, p in enumerate(PROJECTS):
         prev_p, next_p = PROJECTS[i - 1], PROJECTS[(i + 1) % len(PROJECTS)]
@@ -605,7 +681,7 @@ def main():
               '      pick();\n'
               '      addEventListener("resize", function () { clearTimeout(pick.t); pick.t = setTimeout(pick, 200); });\n'
               '    })();\n  </script>\n')
-    write("about/index.html", page("About", "about", stacked(about_block + contact + legal) + sketch, "inner photo"))
+    write("about/index.html", page("About", "about", stacked(about_block + contact + legal) + sketch + ed_about(contact, legal), "inner photo has-ed"))
     # Old /contact/ links land on About.
     write("contact/index.html", '<!doctype html>\n<meta charset="utf-8">\n<title>About</title>\n'
           '<meta http-equiv="refresh" content="0; url=/about/">\n<link rel="canonical" href="/about/">\n'
