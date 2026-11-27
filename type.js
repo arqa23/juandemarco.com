@@ -59,12 +59,16 @@
   };
   window.jdmType = { FONTS: FONTS, DEFAULTS: DEFAULTS, load: load, apply: apply, save: save };
   // Settings switched off (data-settings="off" on <html>): defaults only.
-  var off = document.documentElement.getAttribute('data-settings') === 'off';
+  // No settings button any more (Juan, 2026-11-27): every visitor sees the
+  // defaults; choices saved in this browser earlier are ignored
+  var noBtn = document.documentElement.getAttribute('data-nosettings') === '1';
+  var off = noBtn || document.documentElement.getAttribute('data-settings') === 'off';
   apply(off ? DEFAULTS : load());
   try {
     var d = document.documentElement.dataset;
     d.theme = 'light';
-    d.mode = 'dark';   // the site's default mode (Juan, 2026-11-25)
+    d.mode = 'light';  // the site's default mode: light (Juan, 2026-11-27; was dark since 2026-11-25)
+    d.aframe = 'on';   // About: the drawing on its paper by default (Juan, 2026-11-27)
     d.ptext = 'off';
     // Work page layout (Juan, 2026-11-27): squares | float | grid | strip
     d.work = 'squares';   // Grid and Strip switched off (Juan, 2026-11-27)
@@ -77,7 +81,7 @@
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
     // dark mode on every new visit (Juan, 2026-11-26): a switch to light lasts
     // only for this visit (sessionStorage)
-    if (localStorage.getItem('jdm-aframe') === 'on') d.aframe = 'on';   // About drawing on its paper
+    if (localStorage.getItem('jdm-aframe') === 'off') delete d.aframe;   // About drawing on its paper (default on)
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
     // public settings (build.py SETTINGS_MODE): frames always on, no Framed option
     var keys = document.documentElement.getAttribute('data-public') ? ['work', 'hang'] : ['frame', 'work', 'hang'];

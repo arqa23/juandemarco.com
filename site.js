@@ -46,7 +46,7 @@
 
   /* ---------- Settings (temporary test panel) ---------- */
   // Each page-wide choice; the default leaves no attribute on <html>.
-  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'page', mode: 'dark', grad: 'off', hang: 'index', ptitle: 'hover', tiles: 'image' };
+  var PREF_DEFAULTS = { colour: 'guidelines', mat: 'off', photos: 'off', wall: 'page', mode: 'light', grad: 'off', hang: 'index', ptitle: 'hover', tiles: 'image' };
   // Prints wall colours (Settings > Prints wall): beige, charcoal, plus up to four
   // colours Juan picks (kept in this browser as jdm-wallcolours). "random" picks
   // one of all of these each time the Prints page opens. Dark walls switch the
