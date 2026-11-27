@@ -50,17 +50,16 @@
     d.ptext = 'off';
     // Work page layout (Juan, 2026-11-27): squares | float | grid | strip
     d.work = 'strip';   // project pages without text by default (Juan, 2026-11-26)
-    d.art = '2';          // project / print pages: ArtView2 (fixed width per series); '1' = ArtView1
+    d.art = '2';          // project / print pages: ArtView2 only (Juan, 2026-11-27); ArtView1 retired, see VERSIONS.md
     if (off) return;
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
     // dark mode on every new visit (Juan, 2026-11-26): a switch to light lasts
     // only for this visit (sessionStorage)
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
-    ['frame', 'work', 'art', 'hang'].forEach(function (k) {
+    ['frame', 'work', 'hang'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
       // old names (2026-11-26): Squares 2 rows, Strip 1A; retired layouts fall back
       if (k === 'work') v = { squares2: 'squares', '1a': 'strip', squares: 'squares', float: 'float', grid: 'grid', strip: 'strip' }[v] || null;
-      if (k === 'art' && !/^[12]$/.test(v || '')) v = null;
       if (k === 'hang' && !/^(index|cluster)$/.test(v || '')) v = null;
       if (v) d[k] = v;
     });
