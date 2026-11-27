@@ -925,17 +925,14 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   :root:is([data-work="squares"], [data-work="float"]) .work-page .card.is-held { z-index: 2; }
   :root:is([data-work="squares"], [data-work="float"]) .work-page.is-squares .card { visibility: visible; }
   :root:is([data-work="squares"], [data-work="float"]) .work-page .card img { aspect-ratio: 1; }
-  :root:is([data-work="squares"], [data-work="float"]) .work-page .card:hover img { transform: none; opacity: .88; }
-  :root[data-work="squares"] .work-page .card-title {
-    position: static; display: block; opacity: 1; background: none; padding: 0; margin-top: .7em;
-    text-align: left; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45; color: var(--ink-dim);
-    font-family: var(--caption-font, var(--font)); font-weight: var(--caption-w, 400);
-    font-size: calc(var(--nav-size) * var(--caption-scale, .7)) !important;
-    letter-spacing: var(--caption-track, .2em); text-transform: var(--caption-case, uppercase);
-  }
-  :root[data-work="squares"] .work-page .card:hover .card-title { color: var(--ink); }
-  /* Float: titles only on hover, over the square, as in Grid (Juan, 2026-11-27) */
-  :root[data-work="float"] .work-page .card { overflow: hidden; }
+  /* Squares and Float alike (Juan, 2026-11-27, round 4): no titles under the
+     squares, the title shows over the square on hover. The image itself does
+     not change on hover, and the veil reaches a pixel past the square's edge,
+     so no light rim or box flashes while it fades in. */
+  :root:is([data-work="squares"], [data-work="float"]) .work-page .card { overflow: hidden; }
+  :root:is([data-work="squares"], [data-work="float"]) .work-page .card img,
+  :root:is([data-work="squares"], [data-work="float"]) .work-page .card:hover img { transform: none; opacity: 1; transition: none; background: none; }
+  :root:is([data-work="squares"], [data-work="float"]) .work-page .card-title { inset: -1px; white-space: normal; }
 }
 
 /* Project pages in the print-room format: the project label to the right */
@@ -1028,9 +1025,12 @@ body.home .settings-btn, body.home .mode-pick { display: none !important; }
    on, outlined when it is off (lines 40% as thick as the screen box); all of
    it white in light mode, like the frames (with the frames' faint shadow so
    it reads on the paper), rgb(50,50,50) in dark mode so it stays quiet */
-.wall-map { --map-ink: rgb(50, 50, 50); --map-line: 2px; }
-:root[data-mode="light"] .wall-map { --map-ink: #fff; filter: drop-shadow(0 0 .6px rgba(36, 35, 33, .45)) drop-shadow(0 1px 2px rgba(36, 35, 33, .12)); }
-:root[data-frame="off"] .wall-map-in i { background: none; box-shadow: inset 0 0 0 calc(var(--map-line) * .4) var(--map-ink); }
+/* Round 4 (Juan, 2026-11-27): a flat diagram in one colour, no shadow and no
+   blur; whole-pixel lines (site.js rounds every position), dark-mode grey a
+   little lighter (was 50) */
+.wall-map { --map-ink: rgb(64, 64, 64); --map-line: 2px; }
+:root[data-mode="light"] .wall-map { --map-ink: #fff; }
+:root[data-frame="off"] .wall-map-in i { background: none; border: 1px solid var(--map-ink); box-sizing: border-box; }
 .wall-map-view { position: absolute; border: var(--map-line) solid var(--map-ink); pointer-events: none; }
 .room .wall-map { display: none; }
 
@@ -1050,3 +1050,10 @@ body.home .settings-btn, body.home .mode-pick { display: none !important; }
   opacity: 0; transition: opacity .8s ease; }
 .about-sketch i.loaded { opacity: 1; }
 @media (max-width: 1000px), (hover: none) { .about-sketch { display: none; } }
+
+/* Gallery, Stream (Juan, 2026-11-27): the prints drift on their own (site.js);
+   titles on hover over the print, as on Work */
+.prints.is-stream { user-select: none; -webkit-user-select: none; }
+.prints.is-stream .print { will-change: transform; cursor: pointer; }
+.prints.is-stream .print.is-held { z-index: 2; cursor: grabbing; }
+.prints.is-stream.is-dragging .print { pointer-events: none; }
