@@ -174,6 +174,9 @@ TEXT_POSITION = "top"
 #               frames are always on (a saved "unframed" is ignored).
 #   "working" = the same, plus the Framed option on the Gallery, for designing together
 SETTINGS_MODE = "public"
+# Settings button removed from every page (Juan, 2026-11-27): the site shows
+# its defaults only (light mode, About framed). True brings the button back.
+SETTINGS_BUTTON = False
 GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
 # Page views in the settings box (Juan, 2026-11-27). "current" = the page's
 # original layout; defaults live in type.js (VIEWS).
@@ -281,7 +284,7 @@ def _page(title, section, body, body_class="", head_extra=""):
         + "".join(f'      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="false" data-dv="{k}">{v}</button>\n' for k, v in views)
         + '    </div>\n')
     return f"""<!doctype html>
-<html lang="en"{' data-public="1"' if SETTINGS_MODE == "public" else ""}>
+<html lang="en"{' data-public="1"' if SETTINGS_MODE == "public" else ""}{"" if SETTINGS_BUTTON else ' data-nosettings="1"'}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">

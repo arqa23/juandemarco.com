@@ -1437,3 +1437,6 @@ body.home { background: var(--bg); }
     column-gap: 2.97vw; padding-left: 13.7vw; width: 100%;
   }
 }
+
+/* No settings button (Juan, 2026-11-27); build.py SETTINGS_BUTTON brings it back */
+:root[data-nosettings="1"] :is(.settings-btn, .settings-corner, .mode-pick, .settings) { display: none !important; }
