@@ -1292,6 +1292,7 @@
     var cap = 1400 * SQ.s;
     SQ.offV = Math.max(-cap, Math.min(cap, SQ.offV + (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * (e.deltaMode === 1 ? 40 : 1) * 2.2));
   }, { passive: true });
+  var SQ_PREV_SIZE = false;   // true = Squares before round 5 (smaller, rows 36 design px apart)
   function sqMeasure() {
     var Q = SQ, s = innerWidth / 1920, oldL = Q.L, oldH = Q.H;
     var logo = document.querySelector('.site-header .logo');
@@ -1311,9 +1312,13 @@
     // and 3px off the window's edges. Squares (round 4): same size as before,
     // no titles either, the same 3px; the two rows, from the top of the upper
     // squares to the foot of the lower ones, centred in the window.
-    if (Q.fl) S *= 1.2;
-    rowGap = Math.max(18, 36 * s);
+    // Squares (round 5, Juan 2026-11-27): the same size as Float, and the
+    // space between the two rows the same 3px as between squares. Previous
+    // size (Squares at 1/1.2 of Float, rows 36 design px apart): set
+    // SQ_PREV_SIZE = true to go back.
+    if (Q.fl || !SQ_PREV_SIZE) S *= 1.2;
     cap = 0; gap = 3;
+    rowGap = Q.fl || SQ_PREV_SIZE ? Math.max(18, 36 * s) : gap;
     var y0 = (innerHeight - (2 * S + rowGap)) / 2;
     Q.s = s; Q.S = S; Q.gap = gap; Q.rowGap = rowGap; Q.cap = cap; Q.L = L; Q.H = innerHeight;
     Q.room = Math.floor(L / (S + gap));
