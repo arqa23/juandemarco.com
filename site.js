@@ -139,6 +139,14 @@
       pick.querySelectorAll('button[data-wv]').forEach(function (b) { b.classList.toggle('is-on', workView() === b.dataset.wv); });
       pick.querySelectorAll('button[data-tog]').forEach(function (b) { b.querySelector('span').textContent = val[b.dataset.tog]; });
       pick.classList.toggle('on-work', !!document.querySelector('.work-page'));
+      // Design preview: Current / Editorial test, and whether this page has a test version
+      var ed = root.dataset.design === 'edit';
+      pick.querySelectorAll('button[data-dv]').forEach(function (b) {
+        var on = (b.dataset.dv === 'edit') === ed;
+        b.classList.toggle('is-on', on); b.setAttribute('aria-checked', String(on));
+      });
+      pick.classList.toggle('on-ed', document.body.classList.contains('has-ed'));
+      pick.classList.toggle('is-ed', ed);
     };
     if (pick) {
       document.addEventListener('fullscreenchange', markPick);
@@ -148,6 +156,18 @@
         if (wv) {
           try { localStorage.setItem('jdm-work', wv.dataset.wv); } catch (err) {}
           if (document.querySelector('.work-page')) location.reload(); else markPick();
+          return;
+        }
+        var dv = e.target.closest('button[data-dv]');   // Design preview: Current / Editorial test
+        if (dv) {
+          var was = root.dataset.design === 'edit', want = dv.dataset.dv === 'edit';
+          if (want) root.dataset.design = 'edit'; else delete root.dataset.design;
+          try { if (want) localStorage.setItem('jdm-design', 'edit'); else localStorage.removeItem('jdm-design'); } catch (err) {}
+          markPick();
+          if (was === want || !document.body.classList.contains('has-ed')) return;
+          // Work: the moving Squares / Float start (or stop) with a fresh load, as the Layout list does
+          if (document.querySelector('.work-page')) { location.reload(); return; }
+          place(); dispatchEvent(new Event('resize'));   // About's sketch re-measures itself
           return;
         }
         var hv = e.target.closest('button[data-hv]');   // working mode: pick a Gallery layout
@@ -940,6 +960,8 @@
     initPress();
     startDrift();
     document.querySelectorAll('.yr').forEach(function (e) { e.textContent = new Date().getFullYear(); });   // the year updates itself
+    var em = document.getElementById('email');   // Editorial test About: the same address
+    if (em) document.querySelectorAll('.ed-email').forEach(function (a) { a.href = em.href; a.textContent = em.textContent; });
     if (document.fonts) document.fonts.ready.then(function () { place(); layoutWall(); });
   }
 
@@ -1077,6 +1099,7 @@
     var pg = document.querySelector('.work-page'), v = workView();
     if (SQ && !SQ.pg.isConnected) sqDrop();
     if (!pg || (v !== 'squares' && v !== 'float') || pg.dataset.sq) return;
+    if (root.dataset.design === 'edit') return;   // Editorial test: the Work page stands still
     if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
     pg.dataset.sq = '1';
     var grid = pg.querySelector('.grid'), cards = shuffleCards(grid);

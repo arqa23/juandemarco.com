@@ -55,6 +55,9 @@
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
     // dark mode on every new visit (Juan, 2026-11-26): a switch to light lasts
     // only for this visit (sessionStorage)
+    // Design preview (Juan, 2026-11-27): "Editorial test" for Home, Work and
+    // About, opt-in only; set here, before the page paints, so it never flashes
+    if (localStorage.getItem('jdm-design') === 'edit') d.design = 'edit';
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
     // public settings (build.py SETTINGS_MODE): frames always on, no Framed option
     var keys = document.documentElement.getAttribute('data-public') ? ['work', 'hang'] : ['frame', 'work', 'hang'];
