@@ -56,7 +56,9 @@
     // dark mode on every new visit (Juan, 2026-11-26): a switch to light lasts
     // only for this visit (sessionStorage)
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
-    ['frame', 'work', 'hang'].forEach(function (k) {
+    // public settings (build.py SETTINGS_MODE): frames always on, no Framed option
+    var keys = document.documentElement.getAttribute('data-public') ? ['work', 'hang'] : ['frame', 'work', 'hang'];
+    keys.forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
       // old names (2026-11-26): Squares 2 rows, Strip 1A; retired layouts fall back
       if (k === 'work') v = { squares2: 'squares', '1a': 'strip', squares: 'squares', float: 'float' }[v] || null;   // grid / strip: saved, switched off (2026-11-27)

@@ -144,10 +144,11 @@ ABOUT = [
 TEXT_POSITION = "top"
 
 # Settings box mode (Juan, 2026-11-26). ONE LINE TO SWITCH:
-#   "public"  = what visitors see: Dark mode, Framed (and nothing else); Full screen removed 2026-11-27
-#   "working" = the same, plus every Work layout listed to click, and the
-#               Strip 1B sliders, for designing together
-SETTINGS_MODE = "working"
+#   "public"  = what visitors see (Juan, 2026-11-27): Dark mode, plus the
+#               Layout list on Work and on the Gallery. No Framed option:
+#               frames are always on (a saved "unframed" is ignored).
+#   "working" = the same, plus the Framed option on the Gallery, for designing together
+SETTINGS_MODE = "public"
 GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
 # Stream saved but switched off (Juan, 2026-11-27, VERSIONS.md); its code stays,
 # add ("stream", "Stream") back here to bring it back.
@@ -198,7 +199,7 @@ def page(title, section, body, body_class="", head_extra=""):
     if not SETTINGS_ON:
         out = re.sub(r'\n      <button class="settings-btn".*?</button>', '', out)
         out = re.sub(r'\n  <div class="settings" id="settings" hidden>.*?\n  </div>\n', '\n', out, flags=re.S)
-        out = out.replace('<html lang="en">', '<html lang="en" data-settings="off">', 1)
+        out = out.replace('<html lang="en"', '<html lang="en" data-settings="off"', 1)
     return out
 
 
@@ -217,7 +218,9 @@ def _page(title, section, body, body_class="", head_extra=""):
     # 2026-11-27): Framed on the Gallery only; in working mode a "Layout:" list
     # on Work and on the Gallery, the mini map look on the Gallery, Art view in
     # the rooms. No box on Home.
-    working_rows = "" if SETTINGS_MODE == "public" else (
+    frame_row = "" if SETTINGS_MODE == "public" else (
+        '    <button type="button" class="pick-row pick-gal" data-tog="frame">Framed: <span></span></button>\n')
+    working_rows = (
         '    <div class="pick-layouts pick-work">\n      <span class="pick-head">Layout:</span>\n'
         + "".join(f'      <button type="button" class="pick-row pick-opt" data-wv="{k}">{v}</button>\n' for k, v in WORK_LAYOUTS)
         + '    </div>\n'
@@ -226,7 +229,7 @@ def _page(title, section, body, body_class="", head_extra=""):
         + '    </div>\n'
         )
     return f"""<!doctype html>
-<html lang="en">
+<html lang="en"{' data-public="1"' if SETTINGS_MODE == "public" else ""}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -251,8 +254,7 @@ def _page(title, section, body, body_class="", head_extra=""):
   <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="View mode" title="View mode"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   <div class="mode-pick" id="mode-pick" role="group" aria-label="View mode" hidden>
     <button type="button" class="pick-row" data-tog="mode">Dark mode: <span></span></button>
-    <button type="button" class="pick-row pick-gal" data-tog="frame">Framed: <span></span></button>
-{working_rows}  </div>
+{frame_row}{working_rows}  </div>
 
   <div class="settings" id="settings" hidden>
     <p class="settings-note">Test panel. Choices are kept in this browser only.</p>
