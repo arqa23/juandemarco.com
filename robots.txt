@@ -1,7 +1,6 @@
 # juandemarco.com: all artwork is © Juan De Marco. No AI training or image scraping.
+# ChatGPT-User (ChatGPT visiting a page when asked) is allowed so the site can be reviewed; GPTBot (training) stays blocked.
 User-agent: GPTBot
-Disallow: /
-User-agent: ChatGPT-User
 Disallow: /
 User-agent: CCBot
 Disallow: /
