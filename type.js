@@ -48,8 +48,8 @@
     d.theme = 'light';
     d.mode = 'dark';   // the site's default mode (Juan, 2026-11-25)
     d.ptext = 'off';
-    // Work page layout (Juan, 2026-11-26): squares | grid | 1b | 1a
-    d.work = '1a';   // project pages without text by default (Juan, 2026-11-26)
+    // Work page layout (Juan, 2026-11-27): squares | grid | strip
+    d.work = 'strip';   // project pages without text by default (Juan, 2026-11-26)
     d.art = '2';          // project / print pages: ArtView2 (fixed width per series); '1' = ArtView1
     if (off) return;
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
@@ -58,7 +58,8 @@
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
     ['frame', 'work', 'art', 'hang'].forEach(function (k) {
       var v = localStorage.getItem('jdm-' + k);
-      if (k === 'work' && !/^(squares|squares2|grid|grid2|1a|1b)$/.test(v || '')) v = null;   // old slider data used this key
+      // old names (2026-11-26): Squares 2 rows, Strip 1A; retired layouts fall back
+      if (k === 'work') v = { squares2: 'squares', '1a': 'strip', squares: 'squares', grid: 'grid', strip: 'strip' }[v] || null;
       if (k === 'art' && !/^[12]$/.test(v || '')) v = null;
       if (k === 'hang' && !/^(index|cluster)$/.test(v || '')) v = null;
       if (v) d[k] = v;

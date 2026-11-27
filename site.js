@@ -138,23 +138,11 @@
       pick.classList.toggle('on-gal', !!document.querySelector('.prints'));
       pick.classList.toggle('on-room', document.body.classList.contains('room'));
       pick.querySelectorAll('button[data-wv]').forEach(function (b) { b.classList.toggle('is-on', workView() === b.dataset.wv); });
-      pick.classList.toggle('on-g2', workView() === 'grid2');
-      pick.querySelectorAll('button[data-shapes] span').forEach(function (sp) { sp.textContent = tileShapes() === 'mixed' ? 'Mixed' : 'Squares'; });
       pick.querySelectorAll('button[data-tog]').forEach(function (b) { b.querySelector('span').textContent = val[b.dataset.tog]; });
       pick.classList.toggle('on-work', !!document.querySelector('.work-page'));
-      pick.classList.toggle('on-1b', workView() === '1b');
-      pick.querySelectorAll('input[data-wk]').forEach(function (inp) { inp.value = workSet()[inp.dataset.wk]; inp.nextElementSibling.textContent = inp.value; });
     };
     if (pick) {
       document.addEventListener('fullscreenchange', markPick);
-      // Work sliders (test): space between tiles, how far up, how far down
-      pick.addEventListener('input', function (e) {
-        var inp = e.target.closest('input[data-wk]'); if (!inp) return;
-        var w = workSet(); w[inp.dataset.wk] = +inp.value;
-        try { localStorage.setItem('jdm-strip', JSON.stringify(w)); } catch (err) {}
-        inp.nextElementSibling.textContent = inp.value;
-        applyWork();
-      });
       pick.addEventListener('click', function (e) {
         e.stopPropagation();
         var wv = e.target.closest('button[data-wv]');   // working mode: pick a Work layout
@@ -168,10 +156,6 @@
           root.dataset.hang = hv.dataset.hv;
           try { localStorage.setItem('jdm-hang', hv.dataset.hv); } catch (err) {}
           layoutWall(); markPick(); return;
-        }
-        if (e.target.closest('button[data-shapes]')) {
-          try { localStorage.setItem('jdm-shapes', tileShapes() === 'mixed' ? 'square' : 'mixed'); } catch (err) {}
-          location.reload(); return;
         }
         var t = e.target.closest('button[data-tog]');
         if (!t) return;
@@ -328,21 +312,34 @@
       return s;
     }
     var layout = show.closest('.room-layout'), frame = show.querySelector('.frame');
-    function fit() { if (layout && slides[i].dataset.r) layout.style.setProperty('--ratio', slides[i].dataset.r); }
-    // ArtView2 (Juan, 2026-11-26): inside a band from 8% to 91% of the window
-    // height, every image of a series gets the same width, set by its tallest
-    // image, so the text beside it never moves; heights vary. ArtView1 (the
-    // earlier view) is kept as a choice: <html data-art="1">.
+    function fit() {
+      if (!layout || !slides[i].dataset.r) return;
+      layout.style.setProperty('--ratio', slides[i].dataset.r);
+      // ArtView2: each image as wide as the shared column, unless that would
+      // make it taller than the band; then it fits the band's height instead,
+      // centred in the column (the tall ones that break the rule)
+      if (art2() && layout._aw) layout.style.setProperty('--fw', Math.floor(Math.min(layout._aw, layout._mh * +slides[i].dataset.r)) + 'px');
+      else layout.style.removeProperty('--fw');
+    }
+    // ArtView2 (Juan, 2026-11-27): ONE image width for every project and every
+    // Gallery series, so the text to the right sits in the same place on all
+    // of them: the width a 16:9 image takes in the band from 8% to 91% of the
+    // window height, or less if the window is narrow. Wide images fill it
+    // (heights vary); images too tall for it shrink to the band's height and
+    // sit centred. Only the count and magnifier follow the image's lower edge.
+    // ArtView1 (the earlier view) is kept as a choice: <html data-art="1">.
+    // (2026-11-26 ArtView2 set one width per series from its tallest image.)
+    var STD_R = 16 / 9;
     function art2() { return !!layout && root.dataset.art !== '1' && matchMedia('(min-width: 761px)').matches; }
     function sizeArt() {
       if (!layout) return;
-      if (!art2()) { layout.style.removeProperty('--aw'); return; }
-      var minR = Infinity;
-      slides.forEach(function (s) { minR = Math.min(minR, +s.dataset.r || 1); });
+      if (!art2()) { layout.style.removeProperty('--aw'); layout._aw = 0; fit(); return; }
       var cs = getComputedStyle(layout), gap = parseFloat(cs.columnGap) || 40;
       var txt = layout.querySelector('.room-text'), tw = txt ? txt.getBoundingClientRect().width : 0;
       var maxW = layout.clientWidth - 2 * (tw + gap), maxH = layout.clientHeight;
-      layout.style.setProperty('--aw', Math.floor(Math.min(maxW, maxH * minR)) + 'px');
+      layout._aw = Math.floor(Math.min(maxW, maxH * STD_R)); layout._mh = maxH;
+      layout.style.setProperty('--aw', layout._aw + 'px');
+      fit();
     }
     // the image is decoded and sized before it shows, then fades in
     function ready(s) { return s.decode ? s.decode().catch(function () {}) : Promise.resolve(); }
@@ -362,7 +359,7 @@
         requestAnimationFrame(function () { if (my === seq) frame.classList.remove('is-out'); });
       });
     }
-    fit(); sizeArt();
+    sizeArt();
     if (layout) {
       addEventListener('resize', function () { if (document.contains(layout)) sizeArt(); });
       ready(slides[0]).then(function () { layout.classList.add('is-sized'); });
@@ -909,7 +906,6 @@
     initSlideshow();
     initFilmstrip();
     initSquares();
-    initGrid2();
     initWallGlide();
     initPress();
     startDrift();
@@ -925,22 +921,8 @@
 
   /* ---------- Work filmstrip: wheel and arrow keys move it sideways ---------- */
   // the filmstrip behaviour (wheel, drift, drag) runs only in the Filmstrip layouts
-  function workView() { return root.dataset.work || '1a'; }
-  function strip() { var w = workView(); return w === '1a' || w === '1b' ? document.querySelector('.work-page .grid') : null; }
-  // Work strip test sliders: gap in design px, up / down in % of tile height
-  var WORK_DEFAULTS = { gap: 18, up: 20, down: 20 };
-  function workSet() {
-    var w = {}; try { w = JSON.parse(localStorage.getItem('jdm-strip') || '{}') || {}; } catch (e) {}
-    var o = {}; for (var k in WORK_DEFAULTS) o[k] = w[k] != null ? w[k] : WORK_DEFAULTS[k];
-    return o;
-  }
-  function applyWork() {
-    var pg = document.querySelector('.work-page'); if (!pg || workView() !== '1b') return;
-    var w = workSet();
-    pg.style.setProperty('--tile-gap', 'max(' + (w.gap ? 2 : 0) + 'px, calc(' + w.gap + ' * var(--s)))');
-    pg.style.setProperty('--up', w.up / 100);
-    pg.style.setProperty('--down', w.down / 100);
-  }
+  function workView() { return root.dataset.work || 'strip'; }
+  function strip() { return workView() === 'strip' ? document.querySelector('.work-page .grid') : null; }
   document.addEventListener('wheel', function (e) {
     var g = strip();
     if (!g || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
@@ -992,25 +974,34 @@
     if (d) g.dataset.dir = d; else delete g.dataset.dir;
     g._cutBy = by;
   }
-  /* Endless strip (Juan, 2026-11-26, after wschupfer.com/new-york): each tile
-     gets a slightly different shape and sits a little higher or lower, at
-     equal gaps along the strip. The set of projects is hung three times in a
-     row; when the middle of the window passes into the first or last copy,
-     the strip jumps by one set to the matching tile, so it never ends. */
+  /* Work order: shuffled on every visit (Juan, 2026-11-27), keeping the pairs
+     that must never sit side by side apart, the wrap of the endless strip
+     included (Talbot / Parnell, Julius / Julius II, American Promise /
+     Conflicted Icon). */
+  var APART = [['talbot-road-residence', 'parnell-residence'], ['julius', 'julius-ii'], ['american-promise', 'the-conflicted-icon']];
+  function slugOf(c) { var m = (c.getAttribute('href') || '').match(/\/work\/([^\/]+)\//); return m ? m[1] : ''; }
+  function shuffleCards(parent) {
+    var cards = [].slice.call(parent.querySelectorAll(':scope > .card'));
+    if (cards.length < 3) return cards;
+    var clash = function (x, y) { var a = slugOf(x), b = slugOf(y); return APART.some(function (p) { return (p[0] === a && p[1] === b) || (p[1] === a && p[0] === b); }); };
+    var order = cards;
+    for (var tries = 0; tries < 400; tries++) {
+      order = cards.slice();
+      for (var i = order.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = order[i]; order[i] = order[j]; order[j] = t; }
+      var ok = true;
+      for (var k = 0; k < order.length && ok; k++) if (clash(order[k], order[(k + 1) % order.length])) ok = false;
+      if (ok) break;
+    }
+    order.forEach(function (c) { parent.appendChild(c); });
+    return order;
+  }
+  /* Endless strip (as Strip 1B did, now for Strip): the set of projects is
+     hung three times in a row; when the middle of the window passes into the
+     first or last copy, the strip jumps by one set to the matching tile, so it
+     never ends. */
   function endlessStrip(g) {
-    var orig = [].slice.call(g.querySelectorAll('.card')), n = orig.length, prev = 0;
+    var orig = [].slice.call(g.querySelectorAll('.card')), n = orig.length;
     if (n < 2) return;
-    orig.forEach(function (c) {
-      var ar = c.dataset.tall ? 0.68 + Math.random() * 0.1        // upright: 0.68 to 0.78
-                              : 0.84 + Math.random() * 0.36;       // width/height 0.84 to 1.2
-      // up or down by up to 20% of the tile height, mostly the other way from
-      // the last one, by an uneven amount (Juan, 2026-11-26: more variation)
-      var sign = Math.random() < 0.65 ? -Math.sign(prev || 1) : Math.sign(prev || 1);
-      var amt = 0.075 + Math.pow(Math.random(), 0.8) * 0.925;     // share of the Up / Down slider
-      prev = sign;
-      c.style.setProperty('--ar', ar.toFixed(3));
-      c.style.setProperty(sign < 0 ? '--u' : '--d', amt.toFixed(3));
-    });
     for (var r = 0; r < 2; r++) orig.forEach(function (c) {
       var x = c.cloneNode(true);
       x.setAttribute('aria-hidden', 'true'); x.tabIndex = -1;
@@ -1039,152 +1030,176 @@
     if (drag && drag.g === g) drag.left += d;
     if (drift.el === g) { drift.pos += d; if (drift.ease) { drift.ease.from += d; drift.ease.to += d; } }
   }
-  /* Squares (Juan, 2026-11-26, after Tyler Hobbs' index): square tiles with
-     their titles under them, on four invisible horizontal lines between the
-     name and the foot of the window, clear of the menu. Each row's squares are
-     spaced at random (never closer than one gap); every tile drifts in from
-     the left or right and fades up at the same speed, each at its own moment. */
+  /* Squares (Juan, 2026-11-27): two rows of squares on an endless strip that
+     wraps around the window. Every square drifts very slowly on its own, like
+     a slow game of pong: it bounces off the top and bottom of its row and off
+     its neighbours, while the whole strip flows slowly to the left and cycles
+     for ever. Grab a square to move it (it shoves the others, and a throw
+     sets them going); grab the space between squares to pan the strip. After
+     any push things calm down again, back to a slow drift that never stops.
+     Rows, order and positions are drawn anew on every visit. */
+  var SQ = null;
   function initSquares() {
     var pg = document.querySelector('.work-page');
-    var two = workView() === 'squares2';   // two rows of larger squares (Juan, 2026-11-26)
-    if (!pg || (workView() !== 'squares' && !two) || pg.dataset.sq) return;
+    if (!pg || workView() !== 'squares' || pg.dataset.sq) return;
     if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
     pg.dataset.sq = '1';
-    var cards = [].slice.call(pg.querySelectorAll('.card'));
-    // three rows (Juan, 2026-11-26); which squares share a row and how the
-    // spare room in each row is split are drawn once per visit, so a resize
-    // (or full screen) keeps the same arrangement, just re-measured
-    var counts = (two ? [5, 5] : [4, 3, 3]).sort(function () { return Math.random() - .5; });
-    while (counts.reduce(function (x, y) { return x + y; }) < cards.length) counts[counts.indexOf(Math.min.apply(null, counts))]++;
-    var weights = counts.map(function (k) { var w = []; for (var j = 0; j <= k; j++) w.push(Math.random() + 0.15); return w; });
-    pg._sq = { cards: cards, counts: counts, weights: weights };
-    layoutSquares();
-    pg.classList.add('is-squares');
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    // a short slide and a quicker fade, all in within about two seconds
-    cards.forEach(function (c) {
-      var from = (Math.random() < .5 ? -1 : 1) * (16 + Math.random() * 30), delay = 80 + Math.random() * 1300;
-      c.animate([{ transform: 'translateX(' + from + 'px)' }, { transform: 'none' }],
-        { duration: 1100, delay: delay, easing: 'cubic-bezier(.16, .7, .25, 1)', fill: 'backwards' });
-      c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 650, delay: delay, easing: 'ease-out', fill: 'backwards' });
+    var grid = pg.querySelector('.grid'), cards = shuffleCards(grid);
+    var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    SQ = { pg: pg, cards: cards, off: 0, offV: 0, flowK: 1, still: still, t: [], grab: null, moved: false, last: 0 };
+    sqMeasure();
+    // two rows, squares spread evenly along each with a little jitter
+    var lanes = [[], []];
+    cards.forEach(function (c, i) { lanes[i % 2].push(i); });
+    lanes.forEach(function (ids, l) {
+      var k = ids.length, step = SQ.L / k, free = Math.max(0, step - SQ.S - SQ.gap), ph = Math.random() * step;
+      ids.forEach(function (i, j) {
+        var sp = (5 + Math.random() * 4) * SQ.s, ang = (Math.random() < .5 ? 0 : Math.PI) + (Math.random() - .5) * 1.1;
+        SQ.t[i] = { el: cards[i], lane: l, x: ph + j * step + (Math.random() - .5) * free * .8, fy: Math.random(),
+          vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, rest: still ? 0 : sp };
+      });
     });
+    SQ.t.forEach(function (t) { t.y = SQ.laneTop[t.lane] + t.fy * SQ.play; });
+    sqRender();
+    pg.classList.add('is-squares');
+    if (!still) cards.forEach(function (c) {
+      c.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 80 + Math.random() * 1300, easing: 'ease-out', fill: 'backwards' });
+    });
+    // grab a square to move it, or the space between to pan
+    pg.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      var c = e.target.closest('.card'), t = null;
+      SQ.t.forEach(function (q) { if (q.el === c) t = q; });
+      SQ.grab = { t: t, x0: e.clientX, y0: e.clientY, px: e.clientX, py: e.clientY, pt: performance.now(), vx: 0, vy: 0,
+        dx: t ? sqScreenX(t) - e.clientX : 0, dy: t ? t.y - e.clientY : 0 };
+      SQ.moved = false;
+      e.preventDefault();
+    });
+    pg.addEventListener('click', function (e) { if (SQ && SQ.moved) { e.preventDefault(); e.stopPropagation(); SQ.moved = false; } }, true);
+    pg.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    requestAnimationFrame(sqTick);
   }
-  /* The squares live in one band (Juan's red box, 2026-11-26): from a little
-     under the name down to about 73% of the window, edge to edge, above the
-     menu. Squares are 30% larger than before, or as large as three rows allow. */
-  function layoutSquares() {
-    var pg = document.querySelector('.work-page.is-squares, .work-page[data-sq]');
-    if (!pg || !pg._sq) return;
-    var Q = pg._sq, s = innerWidth / 1920;
-    var px = function (v) { var d = document.createElement('div'); d.style.cssText = 'position:absolute;visibility:hidden;width:' + v; document.body.appendChild(d); var w = d.getBoundingClientRect().width; d.remove(); return w; };
-    var edge = px('var(--edge)'), gutter = px('var(--gutter)');
+  addEventListener('pointermove', function (e) {
+    var G = SQ && SQ.grab; if (!G) return;
+    if (!SQ.moved && Math.hypot(e.clientX - G.x0, e.clientY - G.y0) > 5) { SQ.moved = true; SQ.pg.classList.add('is-dragging'); if (G.t) G.t.el.classList.add('is-held'); }
+    if (!SQ.moved) return;
+    var now = performance.now(), dt = Math.max(0.008, (now - G.pt) / 1000);
+    var mx = e.clientX - G.px, my = e.clientY - G.py;
+    G.vx += (mx / dt - G.vx) * 0.35; G.vy += (my / dt - G.vy) * 0.35;
+    G.px = e.clientX; G.py = e.clientY; G.pt = now;
+    if (G.t) { G.t.x += mx; G.t.y += my; }
+    else SQ.off -= mx;
+  });
+  addEventListener('pointerup', function () {
+    var G = SQ && SQ.grab; if (!G) return;
+    SQ.grab = null; SQ.pg.classList.remove('is-dragging');
+    if (!SQ.moved) return;
+    var cap = 700 * SQ.s, lim = function (v) { return Math.max(-cap, Math.min(cap, v)); };
+    if (G.t) {   // a throw: the square leaves at the speed it was moving and settles into the nearest row
+      G.t.el.classList.remove('is-held');
+      G.t.vx = lim(G.vx) * 0.6; G.t.vy = lim(G.vy) * 0.25;
+      var mid = G.t.y + SQ.S / 2;
+      G.t.lane = Math.abs(mid - (SQ.laneTop[0] + SQ.S / 2)) <= Math.abs(mid - (SQ.laneTop[1] + SQ.S / 2)) ? 0 : 1;
+    } else SQ.offV = -lim(G.vx) * 0.6;   // a pan keeps going a little and eases off
+  });
+  addEventListener('wheel', function (e) {
+    if (!SQ || !SQ.pg.isConnected || e.ctrlKey || (e.target.closest && e.target.closest('.settings, .mode-pick'))) return;
+    SQ.offV += (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * (e.deltaMode === 1 ? 40 : 1) * 2.2;
+  }, { passive: true });
+  function sqMeasure() {
+    var Q = SQ, s = innerWidth / 1920, oldL = Q.L;
     var logo = document.querySelector('.site-header .logo');
     var top = (logo ? logo.getBoundingClientRect().bottom : 90) + Math.max(36, 64 * s);
-    var bottom = innerHeight * 0.73;
-    var left = edge, right = innerWidth - gutter;
+    var bottom = innerHeight * 0.78;
     var gap = Math.max(18, 36 * s), rowGap = Math.max(10, 18 * s);
-    // captions may take two lines (a long title wraps under the square)
     var t0 = Q.cards[0] && Q.cards[0].querySelector('.card-title');
     var lh = t0 ? parseFloat(getComputedStyle(t0).lineHeight) || parseFloat(getComputedStyle(t0).fontSize) * 1.4 : 14;
-    var cap = Math.max(16, 26 * s) + lh;
-    var rows = Q.counts.length, rowH = (bottom - top) / rows, kmax = Math.max.apply(null, Q.counts);
-    var S = Math.min(rows === 2 ? Infinity : 1.3 * Math.max(120, 174 * s), rowH - cap - rowGap, (right - left - (kmax - 1) * gap * 1.6) / kmax);
-    pg.style.setProperty('--sq', S + 'px');
-    var n = 0, pos = [];
-    Q.counts.forEach(function (k, r) {
-      var row = Q.cards.slice(n, n + k), w = Q.weights[r], tot = w.reduce(function (x, y) { return x + y; });
-      n += k;
-      var free = right - left - k * S - (k - 1) * gap, x0 = left + free * w[0] / tot;
-      row.forEach(function (c, j) {
-        pos.push([c, x0, top + r * rowH]);
-        x0 += S + gap + free * w[j + 1] / tot;
-      });
+    var cap = Math.max(16, 26 * s) + lh, rowH = (bottom - top) / 2;
+    // squares a little smaller than the 2-row layout, so each has room to bob up and down in its row
+    var S = Math.max(90, (rowH - cap - rowGap) * 0.86), play = Math.max(0, rowH - S - cap - rowGap);
+    var n = Math.ceil(Q.cards.length / 2);
+    var L = Math.max(innerWidth + S + gap * 2, n * (S + gap * 2.4));
+    var band = 2 * rowH, y0 = (innerHeight - band) / 2;
+    Q.s = s; Q.S = S; Q.gap = gap; Q.cap = cap; Q.play = play; Q.L = L; Q.pad = S + gap;
+    Q.laneTop = [y0, y0 + rowH];
+    Q.pg.style.setProperty('--sq', S + 'px');
+    if (oldL && Q.t.length) Q.t.forEach(function (t) { t.x *= L / oldL; t.y = Q.laneTop[t.lane] + Math.max(0, Math.min(1, t.fy)) * play; });
+  }
+  addEventListener('resize', function () {
+    if (!SQ || !SQ.pg.isConnected) return;
+    clearTimeout(sqMeasure._t);
+    sqMeasure._t = setTimeout(function () { SQ.t.forEach(function (t) { t.fy = SQ.play ? (t.y - SQ.laneTop[t.lane]) / SQ.play : 0; }); sqMeasure(); sqRender(); }, 60);
+  });
+  function sqMod(v, L) { return ((v % L) + L) % L; }
+  function sqScreenX(t) { return sqMod(t.x - SQ.off, SQ.L) - SQ.pad; }
+  function sqRender() {
+    SQ.t.forEach(function (t) {
+      t.el.style.transform = 'translate3d(' + sqScreenX(t).toFixed(2) + 'px,' + t.y.toFixed(2) + 'px,0)';
     });
-    // the box around all the squares (and their titles) sits in the middle of
-    // the window, across and down (Juan, 2026-11-26)
-    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    pos.forEach(function (p) { minX = Math.min(minX, p[1]); maxX = Math.max(maxX, p[1] + S); minY = Math.min(minY, p[2]); maxY = Math.max(maxY, p[2] + S + cap); });
-    var dx = innerWidth / 2 - (minX + maxX) / 2, dy = innerHeight / 2 - (minY + maxY) / 2;
-    pos.forEach(function (p) { p[0].style.left = (p[1] + dx) + 'px'; p[0].style.top = (p[2] + dy) + 'px'; });
   }
-  addEventListener('resize', function () { clearTimeout(layoutSquares._t); layoutSquares._t = setTimeout(layoutSquares, 60); });
-  /* Grid V2 (Juan, 2026-11-26): the tiles pack together around one centre of
-     gravity. Biggest first, each tile goes to the free spot nearest the centre
-     of the wall, touching a tile already placed at exactly one gap, never
-     overlapping, inside the two wall margins (as on the Gallery). Sizes (and,
-     with "Tile shapes: Mixed", shapes) are drawn once per visit; a resize
-     re-packs them. */
-  var G2_SIZES = [0.17, 0.2, 0.235, 0.27];
-  function tileShapes() { try { return localStorage.getItem('jdm-shapes') || 'square'; } catch (e) { return 'square'; } }
-  function initGrid2() {
-    var g = document.querySelector('.work-page .grid');
-    if (!g || workView() !== 'grid2' || g._g2) return;
-    if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
-    var cards = [].slice.call(g.querySelectorAll('.card')), mixed = tileShapes() === 'mixed';
-    var LAND = [1, 1, 1.2, 1.33, 1.5];
-    g._g2 = { cards: cards,
-      size: cards.map(function () { return G2_SIZES[Math.floor(Math.random() * G2_SIZES.length)]; }),
-      ar: cards.map(function (c) { return !mixed ? 1 : c.dataset.tall ? 0.68 + Math.random() * 0.1 : LAND[Math.floor(Math.random() * LAND.length)]; }),
-      jit: cards.map(function () { return Math.random(); }) };
-    cards.forEach(function (c, i) { c.style.setProperty('--ar', g._g2.ar[i].toFixed(3)); });
-    layoutGrid2();
-    g.classList.add('is-g2');
-  }
-  function layoutGrid2() {
-    var g = document.querySelector('.work-page .grid'); if (!g || !g._g2) return;
-    var Q = g._g2, W = g.clientWidth, gap = parseFloat(getComputedStyle(g).columnGap) || 12;
-    var cx = W / 2, cy = 0, placed = [];
-    // equal area for a given size, whatever the shape
-    var dims = Q.cards.map(function (c, i) { var a = Q.size[i] * W, r = Math.sqrt(Q.ar[i]); return { w: a * r, h: a / r, i: i }; });
-    var order = dims.slice().sort(function (p, q) { return (q.w * q.h) * (0.85 + Q.jit[q.i] * 0.3) - (p.w * p.h) * (0.85 + Q.jit[p.i] * 0.3); });
-    var free = function (x, y, w, h) {
-      if (x < -0.5 || x + w > W + 0.5) return false;
-      for (var k = 0; k < placed.length; k++) {
-        var P = placed[k];
-        if (x < P.x + P.w + gap - 0.5 && x + w > P.x - gap + 0.5 && y < P.y + P.h + gap - 0.5 && y + h > P.y - gap + 0.5) return false;
+  function sqTick(now) {
+    var Q = SQ;
+    if (!Q || !Q.pg.isConnected || workView() !== 'squares') { if (Q && !Q.pg.isConnected) SQ = null; return; }
+    var dt = Q.last ? Math.min(0.05, (now - Q.last) / 1000) : 0.016; Q.last = now;
+    var held = Q.grab && Q.moved ? Q.grab.t : null, S = Q.S, L = Q.L;
+    // the cursor resting on a square stills it (and the flow), so it can be clicked
+    var hover = null;
+    if (mouse.on && !Q.grab) Q.t.forEach(function (t) {
+      var x = sqScreenX(t);
+      if (mouse.x >= x && mouse.x <= x + S && mouse.y >= t.y && mouse.y <= t.y + S + Q.cap) hover = t;
+    });
+    Q.flowK += ((hover || Q.grab ? 0 : 1) - Q.flowK) * Math.min(1, dt * 2.5);
+    var flow = Q.still ? 0 : 6 * Q.s;
+    Q.off += (flow * Q.flowK + Q.offV) * dt;
+    Q.offV *= Math.exp(-dt / 0.9);
+    Q.t.forEach(function (t) {
+      if (t === held) return;
+      if (t === hover) { t.vx *= Math.exp(-dt * 5); t.vy *= Math.exp(-dt * 5); }
+      else {
+        // calm back down to its own slow pace, never to a stop
+        var sp = Math.hypot(t.vx, t.vy), want;
+        if (sp > t.rest) want = t.rest + (sp - t.rest) * Math.exp(-dt / 1.6);
+        else want = sp + (t.rest - sp) * Math.min(1, dt * 0.6);
+        if (sp < 1e-3) { var a = Math.random() * 2 * Math.PI; t.vx = Math.cos(a) * 1e-3; t.vy = Math.sin(a) * 1e-3; sp = 1e-3; }
+        t.vx *= want / sp; t.vy *= want / sp;
+        if (Math.abs(t.vy) > 0.55 * want) { t.vy = Math.sign(t.vy) * 0.55 * want; t.vx = (Math.sign(t.vx) || 1) * Math.sqrt(Math.max(0, want * want - t.vy * t.vy)); }
       }
-      return true;
-    };
-    var clamp = function (v, lo, hi) { return Math.max(lo, Math.min(hi, v)); };
-    order.forEach(function (d) {
-      var w = d.w, h = d.h, best = null, bs = Infinity;
-      var cands = [];
-      if (!placed.length) cands.push([cx - w / 2, cy - h / 2]);
-      placed.forEach(function (P) {
-        var ys = [P.y, P.y + P.h - h, clamp(cy - h / 2, P.y - h + gap, P.y + P.h - gap)];
-        var xs = [P.x, P.x + P.w - w, clamp(cx - w / 2, P.x - w + gap, P.x + P.w - gap)];
-        ys.forEach(function (y) { cands.push([P.x + P.w + gap, y], [P.x - gap - w, y]); });
-        xs.forEach(function (x) { cands.push([x, P.y + P.h + gap], [x, P.y - gap - h]); });
-      });
-      cands.forEach(function (c) {
-        var x = c[0], y = c[1];
-        if (!free(x, y, w, h)) return;
-        var dx = x + w / 2 - cx, dy = (y + h / 2 - cy) * 1.25;   // a little wider than tall
-        var sc = dx * dx + dy * dy;
-        if (sc < bs) { bs = sc; best = [x, y]; }
-      });
-      if (!best) best = [0, placed.reduce(function (m, P) { return Math.max(m, P.y + P.h + gap); }, 0)];
-      placed.push({ x: best[0], y: best[1], w: w, h: h, i: d.i });
+      t.x += t.vx * dt; t.y += t.vy * dt;
+      // bounce off the top and bottom of its row (eased back in after a drop)
+      var lo = Q.laneTop[t.lane], hi = lo + Q.play;
+      if (t.y < lo - 2 || t.y > hi + 2) t.y += ((t.y < lo ? lo : hi) - t.y) * Math.min(1, dt * 3);
+      else if (t.y < lo) { t.y = lo; t.vy = Math.abs(t.vy); }
+      else if (t.y > hi) { t.y = hi; t.vy = -Math.abs(t.vy); }
     });
-    var top = Math.min.apply(null, placed.map(function (P) { return P.y; }));
-    var bot = Math.max.apply(null, placed.map(function (P) { return P.y + P.h; }));
-    // centred in the window below the name when it fits; otherwise from the top
-    var gr = g.getBoundingClientRect(), room = innerHeight - gr.top - 40, H = bot - top;
-    var off = Math.max(0, (room - H) / 2) - top;
-    placed.forEach(function (P) {
-      var c = Q.cards[P.i];
-      c.style.left = P.x + 'px'; c.style.top = (P.y + off) + 'px'; c.style.width = P.w + 'px';
-    });
-    g.style.height = Math.max(H, room) + 'px';
+    // squares bounce off each other, one gap apart (the strip wraps around)
+    var sx = S + Q.gap, sy = S + Q.cap + Q.gap * 0.5;
+    for (var i = 0; i < Q.t.length; i++) for (var j = i + 1; j < Q.t.length; j++) {
+      var A = Q.t[i], B = Q.t[j];
+      var dx = sqMod(B.x - A.x + L / 2, L) - L / 2, dy = B.y - A.y;
+      var ox = sx - Math.abs(dx), oy = sy - Math.abs(dy);
+      if (ox <= 0 || oy <= 0) continue;
+      var ax = ox < oy, nx = ax ? (dx < 0 ? -1 : 1) : 0, ny = ax ? 0 : (dy < 0 ? -1 : 1), o = ax ? ox : oy;
+      var wa = A === held ? 0 : B === held ? 1 : 0.5, wb = 1 - wa;
+      if (A === held) wb = 1;
+      A.x -= nx * o * wa; A.y -= ny * o * wa; B.x += nx * o * wb; B.y += ny * o * wb;
+      var va = A === held ? (ax ? Q.grab.vx : Q.grab.vy) : (ax ? A.vx : A.vy), vb = B === held ? (ax ? Q.grab.vx : Q.grab.vy) : (ax ? B.vx : B.vy);
+      if ((vb - va) * (ax ? nx : ny) >= 0) continue;   // already moving apart
+      var na, nb;
+      if (A === held) { na = va; nb = 2 * va - vb; }
+      else if (B === held) { nb = vb; na = 2 * vb - va; }
+      else { na = vb; nb = va; }
+      if (ax) { A.vx = na; B.vx = nb; } else { A.vy = na; B.vy = nb; }
+    }
+    sqRender();
+    requestAnimationFrame(sqTick);
   }
-  addEventListener('resize', function () { clearTimeout(layoutGrid2._t); layoutGrid2._t = setTimeout(layoutGrid2, 60); });
   function initFilmstrip() {
     var g = strip();
     if (!g || g.dataset.ready) return;
     g.dataset.ready = '1';
     g._base = 0;
-    applyWork();
-    if (workView() === '1b' && matchMedia('(hover: hover) and (min-width: 761px)').matches) endlessStrip(g);
+    shuffleCards(g);
+    if (matchMedia('(hover: hover) and (min-width: 761px)').matches) endlessStrip(g);
     var card = g.querySelector('.card');
     var from = Math.min(g.scrollWidth - g.clientWidth - g._base, card ? card.offsetWidth * 0.9 : 500);
     g.scrollLeft = g._base;
@@ -1251,10 +1266,15 @@
     var navL = last ? Math.min.apply(null, [].map.call(labels, function (l) { return l.getBoundingClientRect().left; })) : innerWidth - 120;
     var ml = wall.getBoundingClientRect().right + Math.max(20, 40 * s), mw = Math.min(115 * s, navL - Math.max(16, 24 * s) - ml);
     if (mw < 40) { map.remove(); return; }
-    map.style.width = mw + 'px'; map.style.height = mh + 'px';
-    map.style.left = ml + 'px';
-    map.style.top = ((last ? last.getBoundingClientRect().bottom : innerHeight - 40) - mh) + 'px';
+    var foot = last ? last.getBoundingClientRect().bottom : innerHeight - 40;
     var W = wall.offsetWidth, H = wall.offsetHeight, k = Math.min(mw / W, mh / H);
+    // 30% smaller (Juan, 2026-11-27), shrunk toward the lower left corner of
+    // where the map sat before
+    var ox = (mw - W * k) / 2, oy = H * k;
+    k *= 0.7;
+    map.style.width = W * k + 'px'; map.style.height = H * k + 'px';
+    map.style.left = (ml + ox) + 'px';
+    map.style.top = (foot - mh + oy - H * k) + 'px';
     var inner = map.querySelector('.wall-map-in');
     inner.style.width = W * k + 'px'; inner.style.height = H * k + 'px';
     inner.innerHTML = [].map.call(wall.querySelectorAll('.print img'), function (img) {
@@ -1361,36 +1381,6 @@
     if (drift.raf || matchMedia('(prefers-reduced-motion: reduce)').matches || !driftTarget()) return;
     drift.last = 0; drift.raf = requestAnimationFrame(driftTick);
   }
-  function magnify(T, dt) {
-    var cards = T.items, el = T.el;
-    if (!cards.length || (drag && dragMoved) || workView() === '1a') return 0;   // 1A: tiles keep their size
-    var base = innerHeight, rects = [], change = false;
-    cards.forEach(function (c, n) { c._k = c._k || 1; var r = c.getBoundingClientRect(); rects.push(r); if (!n) base = r.height / c._k; });
-    var R = base * 1.1, ks = [];
-    cards.forEach(function (c, n) {
-      var r = rects[n], t = 1;
-      if (mouse.on) {
-        var dx = mouse.x - (r.left + r.width / 2), dy = Math.max(0, Math.abs(mouse.y - (r.top + r.height / 2)) - r.height / 2);
-        var d = Math.sqrt(dx * dx + dy * dy * 2.25);
-        if (d < R) t = 1 + 0.15 * (0.5 + 0.5 * Math.cos(Math.PI * d / R));
-      }
-      var k = c._k + (t - c._k) * Math.min(1, dt * 3);
-      if (Math.abs(k - t) < 0.0005) k = t;
-      if (k !== c._k) change = true;
-      ks.push(k);
-    });
-    if (!change) return 0;
-    // keep what is under the cursor (or the middle of the strip) where it is
-    var er = el.getBoundingClientRect(), ref = mouse.on && mouse.x > er.left && mouse.x < er.right ? mouse.x : er.left + er.width / 2;
-    var a = 0, best = Infinity;
-    rects.forEach(function (r, n) { var d = ref < r.left ? r.left - ref : ref > r.right ? ref - r.right : 0; if (d < best) { best = d; a = n; } });
-    var u = (ref - rects[a].left) / rects[a].width;
-    cards.forEach(function (c, n) { c._k = ks[n]; c.style.setProperty('--k', ks[n].toFixed(4)); });
-    var nr = cards[a].getBoundingClientRect(), delta = nr.left + u * nr.width - ref;
-    if (glide) return 0;
-    var before = el.scrollLeft; el.scrollLeft = before + delta;
-    return el.scrollLeft - before;
-  }
   function driftTick(t) {
     var T = driftTarget();
     if (!T) { drift.raf = null; drift.el = null; return; }
@@ -1405,7 +1395,7 @@
       var dx = Math.max(r.left - mouse.x, 0, mouse.x - r.right), dy = Math.max(r.top - mouse.y, 0, mouse.y - r.bottom);
       prox = Math.max(prox, 1 - Math.min(1, Math.sqrt(dx * dx + dy * dy) / 140));
     });
-    var moved = T.x ? magnify(T, dt) : 0;
+    var moved = 0;
     if (T.x) stripDir(el);
     drift.pos += moved;
     var now = performance.now(), E = drift.ease;
