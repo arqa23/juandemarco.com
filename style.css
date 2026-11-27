@@ -1285,7 +1285,7 @@ body.home { background: var(--bg); }
    ====================================================================== */
 .gx, .gw { display: none; }
 :root[data-design="exh"] .has-ed .gx, :root[data-design="wall"] .has-ed .gw { display: block; }
-:root[data-design] .has-ed .prints-page, :root[data-design] .wall-map, :root[data-design] .has-ed .to-top { display: none !important; }
+:root[data-design] .has-ed .prints-page, :root[data-design] .wall-map { display: none !important; }
 .mode-pick.on-gal.is-ed .pick-gal.pick-layouts { display: none !important; }
 .gx-t, .gw-t, .gx-h {
   font-family: var(--label-font, var(--font)); font-weight: var(--label-w, 400);
@@ -1449,3 +1449,8 @@ body.home { background: var(--bg); }
 @keyframes e2-fig-in { from { opacity: 0; } to { opacity: 1; } }
 /* Work: shown once site.js has drawn this visit's hang (no flash of the stored order) */
 .edw-feat:not(.is-shuffled) { visibility: hidden; }
+
+/* Back to top on Work and Gallery (Juan, 2026-11-27): with no settings button
+   it takes the button's place, centred on the same spot in the lower left */
+:root[data-nosettings="1"] .to-top.to-top { bottom: calc(var(--gutter) - var(--icon) * .125); }
+@media (max-width: 700px) { :root[data-nosettings="1"] .to-top.to-top { bottom: calc(18px - var(--icon) * .125); } }

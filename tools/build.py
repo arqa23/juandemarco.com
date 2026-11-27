@@ -473,6 +473,12 @@ def asset_version():
 TALL_TILES = {"american-promise", "the-conflicted-icon"}
 
 
+# Back to top (Work and Gallery): shows once the page has scrolled half a
+# window; sits where the settings button was, or above it when that is on
+TO_TOP = ('  <button class="to-top" type="button" aria-label="Back to top" title="Back to top">'
+          '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5 9.5 10 4.5l5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>\n')
+
+
 def ed_work():
     """Editorial test, Work: featured groups, then the rest, every project once."""
     from PIL import Image
@@ -648,7 +654,7 @@ def main():
         f'      </a>' for p in PROJECTS)
     write("work/index.html", page("Work", "work",
         f'  <main class="page page-wide work-page">\n    <h1 class="work-h">Work</h1>\n    <div class="grid">\n{cards}\n    </div>\n  </main>\n'
-        + ed_work() + e2_work(), "inner has-ed pg-work"))
+        + ed_work() + e2_work() + TO_TOP, "inner has-ed pg-work"))
 
     for i, p in enumerate(PROJECTS):
         prev_p, next_p = PROJECTS[i - 1], PROJECTS[(i + 1) % len(PROJECTS)]
@@ -786,9 +792,8 @@ def main():
         write(f"prints/{slug}/index.html", page(f"{name} \u00b7 Gallery", "prints", room, "inner room"))
     write("prints/index.html", page("Gallery", "prints",
         '  <main class="page page-wide prints-page">\n    <h1 class="visually-hidden">Gallery</h1>\n'
-        '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n' + gallery_views() +
-        '  <button class="to-top" type="button" aria-label="Back to top" title="Back to top">'
-        '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5V4.5M5 9.5 10 4.5l5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg></button>\n', "inner has-ed pg-gal"))
+        '    <div class="prints">\n' + "\n".join(items) + '\n    </div>\n  </main>\n' + gallery_views()
+        + TO_TOP, "inner has-ed pg-gal"))
 
     about = "\n".join(f"      <p>{html.escape(t)}</p>" for t in ABOUT)
     about_block = f"      <h1>About</h1>\n{about}\n"
