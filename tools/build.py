@@ -18,7 +18,8 @@ PROJECTS = [
     # Order: Talbot/Parnell, Julius/Julius II and American Promise/Conflicted Icon
     # never side by side, the strip's wrap included (Juan, 2026-11-26)
     {"slug": "soma", "title": "SOMA",
-     "desc": "Text to be updated.",
+     "desc": "",
+     "subtitle": "",
      "meta": "2026 · Pigment print",
      "text": [
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante venenatis dapibus, posuere velit aliquet. Donec ullamcorper nulla non metus auctor fringilla, vitae elementum lacus vehicula. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui.",
@@ -27,6 +28,7 @@ PROJECTS = [
      ]},
     {"slug": "julius-ii", "title": "Julius II",
      "desc": "",
+     "subtitle": "",
      "meta": "2026 · Digital rendering",
      "text": [
       "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur.",
@@ -34,6 +36,7 @@ PROJECTS = [
      ]},
     {"slug": "parnell-residence", "title": "Parnell Residence",
      "desc": "A two-story residence composed of two intersecting bars, connected by a double-height living room. As in the Talbot Road Residence, the rooms are staggered to balance interior privacy with expansive views of the surrounding landscape.",
+     "subtitle": "One-Directional Corridors",
      "meta": "2021 · Graphite on paper, model",
      "text": [
       "Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor, sed diam eget risus varius blandit.",
@@ -42,6 +45,7 @@ PROJECTS = [
      ]},
     {"slug": "american-promise", "title": "American Promise",
      "desc": "A proposal for the Peace Corps National Monument Competition in Washington, D.C. In keeping with the spirit of service of the Peace Corps, the monument is designed to draw attention away from itself and toward the National Mall.",
+     "subtitle": "Peace Corps Monument Competition",
      "meta": "2013 · Photomontage and elevation drawings",
      "text": [
       "Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla, in ac dui quis mi consectetuer lacinia. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante.",
@@ -49,6 +53,7 @@ PROJECTS = [
      ]},
     {"slug": "march-of-the-silhouettes", "title": "March of the Silhouettes",
      "desc": "A series of abstract drawings inspired by Egyptian hieroglyphs and the movement of figures in procession.",
+     "subtitle": "Hieroglyphs & Silhouettes",
      "meta": "2012 · Charcoal and ink on paper",
      "text": [
       "Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam.",
@@ -56,6 +61,7 @@ PROJECTS = [
      ]},
     {"slug": "talbot-road-residence", "title": "Talbot Road Residence",
      "desc": "A single-story residence with a series of staggered rooms, designed to balance interior privacy with expansive views of the surrounding landscape.",
+     "subtitle": "One-Directional Corridors",
      "meta": "2020 · Ink and digital collage",
      "text": [
       "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Morbi leo risus, porta ac consectetur ac, vestibulum at eros, integer posuere erat a ante. Nulla vitae elit libero, a pharetra augue, duis mollis est non commodo luctus nisi erat porttitor ligula.",
@@ -63,6 +69,7 @@ PROJECTS = [
      ]},
     {"slug": "julius", "title": "Julius",
      "desc": "An architectural silhouette that wanders the countryside. Its patterned surfaces alter the perception of its form as it is viewed from different angles.",
+     "subtitle": "The Ever Moving Adornment",
      "meta": "2014 · Digital rendering",
      "text": [
       "Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum, aenean imperdiet. Etiam ultricies nisi vel augue, curabitur ullamcorper ultricies nisi. Nam eget dui, etiam rhoncus maecenas tempus tellus eget condimentum. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus, donec id elit non mi porta.",
@@ -71,6 +78,7 @@ PROJECTS = [
      ]},
     {"slug": "wedges", "title": "Wedges",
      "desc": "",
+     "subtitle": "",
      "meta": "2022 · Study models, photography",
      "text": [
       "Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus, aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Aenean eu leo quam, pellentesque ornare sem lacinia quam venenatis vestibulum, sed posuere consectetur.",
@@ -79,6 +87,7 @@ PROJECTS = [
      ]},
     {"slug": "the-conflicted-icon", "title": "The Conflicted Icon",
      "desc": "A reinterpretation of the traditional skyscraper, in which the architectural crown is relocated from the top of the tower to its base. The project shifts the emphasis from the skyline to the point where the tower meets the ground.",
+     "subtitle": "Inverted Vertical Typologies",
      "meta": "2014 · Digital rendering, line drawing",
      "text": [
       "Curabitur at lacus ac velit ornare lobortis. Curabitur a felis in nunc fringilla tristique. Morbi mattis ullamcorper velit, phasellus gravida semper nisi. Nullam vel sem, pellentesque libero tortor, tincidunt et tincidunt eget. Fusce dapibus tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.",
@@ -87,6 +96,7 @@ PROJECTS = [
      ]},
     {"slug": "frankls-purposive-intention", "title": "Frankl\u2019s Purposive Intention",
      "desc": "An experimental art gallery inspired by Paul Frankl\u2019s writings on purposive intention and the relationship between architectural spaces and the objects within them. Patterns of varying direction and density allow the architecture itself to become an active participant in the exhibition.",
+     "subtitle": "Site-less Art Gallery",
      "meta": "2011 · Axonometric drawings, model",
      "text": [
       "Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor, sed diam eget risus varius blandit.",
@@ -95,11 +105,12 @@ PROJECTS = [
      ]},
     # Added 2026-11-27 (Juan); images from the old juandemarco.us page
     {"slug": "family-of-curves", "title": "Family of Curves No. 1",
-     "desc": "A collection of related curves grown from a single line. Through different rates of expansion and distortion, each curve develops its own distinctive character.",
+     "desc": "A collection of related curves grown from a single line. Through different rates of expansion, each curve develops its own distinctive character.",
+     "subtitle": "The Wiggle Effect",
      "meta": "2006 · Line drawings",
      "text": ["Description coming soon."]},
 ]
-# Years are Juan's (2026-11-27). PLACEHOLDER Latin text and mediums (2026-11-07) until Juan sends the real ones.
+# Years are Juan's (2026-11-27), kept in "meta" but hidden on the site; rooms show "subtitle". PLACEHOLDER Latin text and mediums (2026-11-07) until Juan sends the real ones.
 # Optional text per project: add "meta" (e.g. "2024 · Pigment print") and
 # "text" (a list of paragraphs) to any entry above. Placeholders show until then.
 # How each image is trimmed, fitted and cropped: tools/image_rules.json, applied by tools/images.py.
@@ -133,7 +144,7 @@ ABOUT = [
 TEXT_POSITION = "top"
 
 # Settings box mode (Juan, 2026-11-26). ONE LINE TO SWITCH:
-#   "public"  = what visitors see: Dark mode, Framed, Full screen (and nothing else)
+#   "public"  = what visitors see: Dark mode, Framed (and nothing else); Full screen removed 2026-11-27
 #   "working" = the same, plus every Work layout listed to click, and the
 #               Strip 1B sliders, for designing together
 SETTINGS_MODE = "working"
@@ -240,7 +251,6 @@ def _page(title, section, body, body_class="", head_extra=""):
   <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="View mode" title="View mode"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   <div class="mode-pick" id="mode-pick" role="group" aria-label="View mode" hidden>
     <button type="button" class="pick-row" data-tog="mode">Dark mode: <span></span></button>
-    <button type="button" class="pick-row" data-tog="fs">Full screen: <span></span></button>
     <button type="button" class="pick-row pick-gal" data-tog="frame">Framed: <span></span></button>
 {working_rows}  </div>
 
@@ -417,7 +427,9 @@ def main():
             f'alt="{html.escape(p["title"])}, image {k + 1}" decoding="async"'
             f'{f" style=\"object-position:{focus[f]}\"" if f in focus else ""}>'
             for k, f in enumerate(files))
-        meta = html.escape(p.get("meta", "Year \u00b7 Medium"))
+        # The room shows the secondary title, not year/medium (Juan, 2026-11-27);
+        # "meta" (year · medium) stays in PROJECTS for later use (e.g. the Gallery).
+        sub = f'        <p class="meta">{html.escape(p["subtitle"])}</p>\n' if p.get("subtitle") else ""
         text = "\n".join(f"      <p>{html.escape(t)}</p>" for t in p.get("text", ["Description coming soon."]))
         # Project pages use the Gallery print-room format (Juan, 2026-11-26):
         # name and menu step away, one image at a time centred, its frame in the
@@ -448,8 +460,7 @@ def main():
       </div>
       <div class="room-text">
         <h1>{title}</h1>
-        <p class="meta">{meta}</p>
-{desc}        <nav class="project-nav room-pnav" aria-label="Projects">
+{sub}{desc}        <nav class="project-nav room-pnav" aria-label="Projects">
           <a href="/work/{prev_p["slug"]}/" title="{html.escape(prev_p["title"])}">&lsaquo; Prev</a>
           <a href="/work/{next_p["slug"]}/" title="{html.escape(next_p["title"])}">Next &rsaquo;</a>
         </nav>

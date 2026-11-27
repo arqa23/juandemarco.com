@@ -1030,7 +1030,7 @@ body.home .settings-btn, body.home .mode-pick { display: none !important; }
    blur; whole-pixel lines (site.js rounds every position), dark-mode grey a
    little lighter (was 50) */
 .wall-map { --map-ink: rgb(64, 64, 64); --map-line: 2px; }
-:root[data-mode="light"] .wall-map { --map-ink: #fff; }
+:root[data-mode="light"] .wall-map { --map-ink: var(--ink); }  /* text / settings ink (Juan, 2026-11-27) */
 :root[data-frame="off"] .wall-map-in i { background: none; border: 1px solid var(--map-ink); box-sizing: border-box; }
 .wall-map-view { position: absolute; border: var(--map-line) solid var(--map-ink); pointer-events: none; }
 .room .wall-map { display: none; }
