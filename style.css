@@ -1091,16 +1091,16 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 :root[data-design="edit"] .has-ed .about-sketch { display: none !important; }
 
 /* shared type: captions in the label style, text in the text style */
-.ed-home-cap, .edw-t, .eda-h, .eda-legal {
+.ed-home-cap, .edw-t, .eda-h, .eda-legal, .e2-label, .e2w-list {
   font-family: var(--label-font, var(--font)); font-weight: var(--label-w, 400);
   letter-spacing: var(--label-track, .2em); text-transform: var(--label-case, uppercase);
   font-size: max(10.5px, var(--nav-size));
 }
-.edw-s, .eda-lead, .eda-body, .eda-cred, .ed-about .about-ask, .ed-about .email {
+.edw-s, .eda-lead, .eda-body, .eda-cred, .e2w-s, :is(.ed-about, .e2-about) :is(.about-ask, .email) {
   font-family: var(--text-font, var(--font)); font-weight: var(--text-w, 300);
   letter-spacing: var(--text-track, 0); text-transform: none;
 }
-.ed a:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+:is(.ed, .ed2) a:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
 
 /* light paper and ink where the current Home has white type on the image */
 :root[data-design="edit"]:not([data-mode="dark"]) body.home {
@@ -1112,21 +1112,21 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 /* Work and About: content sits between the name and the settings strip and
    left of the menu, so nothing ever passes under them */
 @media (min-width: 701px) {
-  :root[data-design="edit"] body.inner.has-ed .scroller { top: var(--header-h); bottom: var(--ed-band); }
-  :root[data-design="edit"] body.inner.has-ed .site-header::before { display: none; }
+  :root[data-design] body.inner.has-ed .scroller { top: var(--header-h); bottom: var(--ed-band); }
+  :root[data-design] body.inner.has-ed .site-header::before { display: none; }
 }
 
 /* ---------- Home: one work, framed by the page, a caption and a way in ---------- */
 :root[data-design="edit"] body.home {
   --ed-foot: calc(var(--ed-1) + max(10.5px, var(--nav-size)) * 1.6 + var(--ed-band) + var(--ed-1));
   --ed-aw: min(var(--ed-w), max(min(var(--ed-w), 520px), calc((100vh - var(--header-h) - var(--ed-foot)) * 16 / 9)));
-  height: auto; min-height: 100vh; overflow: visible;
+  height: auto; min-height: 100vh; overflow: visible; padding-top: var(--header-h);
 }
 :root[data-design="edit"] .home::before, :root[data-design="edit"] .home::after { display: none; }
 :root[data-design="edit"] .home .cover {
   position: relative; inset: auto; z-index: 0; display: block;
   width: var(--ed-aw); height: auto; aspect-ratio: 16 / 9; object-fit: contain;   /* SOMA covers are 2400 x 1350 */
-  margin: var(--header-h) 0 0 var(--ed-l);
+  margin: 0 0 0 var(--ed-l);
 }
 :root[data-design="edit"] .has-ed .ed-home-cap {
   display: flex; justify-content: space-between; align-items: baseline; gap: var(--ed-1);
@@ -1141,8 +1141,9 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .ed-work { width: calc(var(--ed-l) + var(--ed-w)); padding: var(--ed-2) 0 var(--ed-3) var(--ed-l); }
 .edw-feat { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ed-3) var(--ed-2); align-items: start; }
 .edw-lead { grid-column: span 2; }
-.edw-rest {
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--ed-2) var(--ed-1); align-items: start;
+/* the smaller projects: one line above them, then the same 3-column grid */
+.edw-more {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ed-2) var(--ed-2); align-items: start;
   margin-top: var(--ed-3); padding-top: var(--ed-2);
   border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
 }
@@ -1152,14 +1153,11 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .edw-item:hover .edw-img img { opacity: .86; }
 .edw-t { display: block; margin-top: .95em; line-height: 1.35; }
 .edw-s { display: block; margin-top: .3em; color: var(--ink-dim); font-size: max(12px, calc(var(--text-size) * .88)); line-height: 1.4; }
-.edw-rest .edw-t { font-size: max(9.5px, calc(var(--nav-size) * .85)); }
-.edw-rest .edw-s { font-size: max(11px, calc(var(--text-size) * .8)); }
-@media (max-width: 1100px) { .edw-rest { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 900px) { .edw-feat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .edw-feat, .edw-more { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ---------- About: statement, approach, background, the drawing beside ---------- */
 :root[data-design="edit"] .has-ed .ed-about {
-  display: grid; width: calc(var(--ed-l) + var(--ed-w)); padding: var(--ed-2) 0 var(--ed-3) var(--ed-l);
+  display: grid; width: calc(var(--ed-l) + var(--ed-w)); padding: var(--ed-2) 0 var(--ed-2) var(--ed-l);
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); column-gap: var(--ed-3);
   grid-template-areas: "lead fig" "body fig" "cred fig" "contact fig";
   grid-template-rows: auto auto auto 1fr; align-items: start;
@@ -1176,9 +1174,9 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   max-height: calc(100vh - var(--header-h) - var(--ed-band) - var(--ed-2) * 2); }
 .eda-contact { grid-area: contact; margin-top: var(--ed-3); }
 .eda-h { margin: 0 0 var(--ed-1); font-size: max(10.5px, var(--nav-size)); color: var(--ink); }
-.ed-about .about-ask { margin: 0 0 .3em; color: var(--ink-dim); font-size: var(--text-size); line-height: 1.6; }
-.ed-about .email.email { margin: 0 !important; font-size: calc(var(--text-size) * 1.05) !important; }
-.ed-about .email a { color: var(--ink); border-bottom: 1px solid color-mix(in srgb, var(--ink) 35%, transparent); }
+:is(.ed-about, .e2-about) .about-ask { margin: 0 0 .3em; color: var(--ink-dim); font-size: var(--text-size); line-height: 1.6; }
+:is(.ed-about, .e2-about) .email.email { margin: 0 !important; font-size: calc(var(--text-size) * 1.05) !important; }
+:is(.ed-about, .e2-about) .email a { color: var(--ink); border-bottom: 1px solid color-mix(in srgb, var(--ink) 35%, transparent); }
 .eda-legal { margin: var(--ed-2) 0 0; color: var(--ink-dim); font-size: max(9px, calc(var(--nav-size) * .8)); }
 
 /* ---------- Phones: one column, the menu sits under the name ---------- */
@@ -1194,7 +1192,7 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 @media (max-width: 600px) {
   .edw-feat { grid-template-columns: minmax(0, 1fr); }
   .edw-lead { grid-column: auto; }
-  .edw-rest { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .edw-more { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ---------- Settings box: Design preview ---------- */
@@ -1208,4 +1206,63 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 @media (max-width: 700px) {
   body.home .settings-corner { left: var(--gutter); right: auto; }
   body.home .mode-pick { left: calc(var(--gutter) + 30px); right: auto; }
+}
+
+
+/* ======================================================================
+   EDITORIAL v2 (Claude's own proposal, Juan 2026-11-27): html data-design="edit2"
+   Home keeps the full-screen work, inset by a thin mat, with a wall label.
+   Work is an index: titles on the left, the one you point at shown large.
+   About puts the drawing first, tall, in the ink colour, the text beside it.
+   ====================================================================== */
+.ed2 { display: none; }
+:root[data-design="edit2"] .has-ed .ed2 { display: block; }
+:root[data-design="edit2"] .has-ed .work-page,
+:root[data-design="edit2"] .has-ed .stacked,
+:root[data-design="edit2"] .has-ed .about-sketch { display: none !important; }
+
+/* Home v2 */
+:root { --e2-mat: max(10px, calc(22 * var(--s))); }
+:root[data-design="edit2"] body.home { background: var(--bg); }
+:root[data-design="edit2"] .home .cover { inset: var(--e2-mat); width: calc(100% - 2 * var(--e2-mat)); height: calc(100dvh - 2 * var(--e2-mat)); }
+:root[data-design="edit2"] .home::before { top: var(--e2-mat); left: var(--e2-mat); right: var(--e2-mat); }
+:root[data-design="edit2"] .home::after { right: var(--e2-mat); bottom: var(--e2-mat); }
+.e2-label { position: fixed; z-index: 3; margin: 0; left: var(--edge);
+  bottom: calc(var(--gutter) + max(15px, calc(18 * var(--s))) + var(--ed-1));
+  color: rgba(255, 255, 255, .8); text-shadow: var(--shadow); font-size: max(9.5px, calc(var(--nav-size) * .85)); }
+
+/* Work v2: the index */
+:root[data-design="edit2"] .has-ed .e2-work {
+  display: grid; grid-template-columns: max(230px, calc(400 * var(--s))) minmax(0, 1fr); column-gap: var(--ed-3);
+  width: calc(var(--ed-l) + var(--ed-w)); height: 100%; padding: var(--ed-2) 0 var(--ed-2) var(--ed-l);
+}
+.e2w-list { list-style: none; margin: 0; padding: 0; align-self: start; }
+.e2w-list a { display: grid; grid-template-columns: 2.8em minmax(0, 1fr); padding: .62em 0; color: var(--ink-dim); text-decoration: none; transition: color .2s ease; }
+.e2w-list a.is-on, .e2w-list a:hover { color: var(--ink); }
+.e2w-n { opacity: .6; }
+.e2w-s { grid-column: 2; display: block; max-height: 0; overflow: hidden; opacity: 0; color: var(--ink-dim);
+  font-size: max(12px, calc(var(--text-size) * .88)); transition: max-height .3s ease, opacity .3s ease, margin .3s ease; }
+.e2w-list a.is-on .e2w-s { max-height: 3em; opacity: 1; margin-top: .4em; }
+.e2w-view { position: relative; height: 100%; min-height: 240px; }
+.e2w-view img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: left top;
+  opacity: 0; transition: opacity .35s ease; }
+.e2w-view img.is-on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .e2w-view img, .e2w-s { transition: none; } }
+
+/* About v2 */
+:root[data-design="edit2"] .has-ed .e2-about {
+  display: grid; grid-template-columns: auto minmax(0, 36em); column-gap: calc(var(--ed-3) * 1.5); align-items: start; justify-content: start;
+  width: calc(var(--ed-l) + var(--ed-w)); padding: var(--ed-2) 0 var(--ed-2) var(--ed-l);
+}
+.e2a-fig i { display: block; height: calc(100vh - var(--header-h) - var(--ed-band) - var(--ed-2) * 2); min-height: 320px; aspect-ratio: 707 / 1087;
+  background: var(--ink);
+  -webkit-mask: url("/images/about/sketch-02-707.webp") center / 100% 100% no-repeat;
+          mask: url("/images/about/sketch-02-707.webp") center / 100% 100% no-repeat; }
+.e2a-text .eda-lead { margin-bottom: var(--ed-2); }
+
+/* phones: kept simple for now (Juan: phone pass later) */
+@media (max-width: 700px) {
+  :root[data-design="edit2"] .has-ed .e2-work, :root[data-design="edit2"] .has-ed .e2-about { display: block; height: auto; padding: calc(var(--gutter) + var(--logo-size) * 2 + 70px) var(--gutter) 90px; }
+  .e2w-view { display: none; }
+  .e2a-fig i { height: 60vh; margin: 0 auto var(--ed-2); }
 }

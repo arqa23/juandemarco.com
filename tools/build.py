@@ -123,11 +123,17 @@ PROJECTS = [
 # "img" is which of the project's images stands as its cover. PROVISIONAL
 # choice made by Claude (architecture, drawings, objects), not Juan's ranking.
 # Every other project follows below in a quieter grid, in PROJECTS order.
+# Round 2 (Juan, 2026-11-27): Julius II, American Promise and Talbot Road
+# large; Wedges, Conflicted Icon and Julius to the smaller projects below;
+# March of the Silhouettes shows its usual first image.
 ED_FEATURED = [
-    [("soma", "lead", "02.webp"), ("march-of-the-silhouettes", "small", "07.webp")],
-    [("wedges", "small", "03.webp"), ("parnell-residence", "lead", "01.webp")],
-    [("julius", "lead", "03.webp"), ("the-conflicted-icon", "small", "04.webp")],
+    [("soma", "lead", "02.webp"), ("march-of-the-silhouettes", "small", "01.webp")],
+    [("parnell-residence", "small", "01.webp"), ("julius-ii", "lead", "01.webp")],
+    [("american-promise", "lead", "01.webp"), ("family-of-curves", "small", "01.webp")],
+    [("frankls-purposive-intention", "small", "01.webp"), ("talbot-road-residence", "lead", "01.webp")],
 ]
+# Smaller projects below the line, in this order
+ED_BELOW = [("julius", "03.webp"), ("wedges", "03.webp"), ("the-conflicted-icon", "04.webp")]
 # About: the drawing beside the text, on its own paper (Gallery sketch 02)
 ED_ABOUT_DRAWING = "/images/prints/sketches/02.webp"
 
@@ -254,7 +260,8 @@ def _page(title, section, body, body_class="", head_extra=""):
         '    <div class="pick-layouts pick-design" role="radiogroup" aria-label="Design preview">\n'
         '      <span class="pick-head">Design preview:</span>\n'
         '      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="true" data-dv="current">Current</button>\n'
-        '      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="false" data-dv="edit">Editorial test</button>\n'
+        '      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="false" data-dv="edit">Editorial</button>\n'
+        '      <button type="button" class="pick-row pick-opt" role="radio" aria-checked="false" data-dv="edit2">Editorial v2</button>\n'
         '      <span class="pick-note pick-note-ed">Applies to Home, Work and About.</span>\n'
         '      <span class="pick-note pick-note-same">This page is unchanged.</span>\n'
         '    </div>\n')
@@ -449,11 +456,47 @@ def ed_work():
     feat = [it for g in ED_FEATURED for it in g]
     shown = {slug for slug, _, _ in feat}
     assert len(shown) == len(feat) and shown <= set(by), "ED_FEATURED: each project once"
-    rest = [p["slug"] for p in PROJECTS if p["slug"] not in shown]
+    rest = ED_BELOW + [(p["slug"], "01.webp") for p in PROJECTS if p["slug"] not in shown and p["slug"] not in dict(ED_BELOW)]
+    assert len(feat) + len(rest) == len(PROJECTS), "every project exactly once"
     return ('  <main class="ed ed-work">\n    <h1 class="visually-hidden">Work</h1>\n'
             '    <div class="edw-feat">\n' + "\n".join(item(*it) for it in feat) + '\n    </div>\n'
-            '    <div class="edw-rest">\n' + "\n".join(item(s, "rest", "01.webp") for s in rest) + '\n    </div>\n'
+            '    <div class="edw-more">\n' + "\n".join(item(s, "sm", f) for s, f in rest) + '\n    </div>\n'
             '  </main>\n')
+
+
+def e2_work():
+    """Editorial v2, Work: an index. Every project listed as a line of type on
+    the left; the one under the cursor (or keyboard focus) shows large on the
+    right, in its own proportions. The page stands still; nothing to scroll."""
+    from PIL import Image
+    cover = {s: f for g in ED_FEATURED for s, _, f in g}
+    cover.update(dict(ED_BELOW))
+    rows, imgs = [], []
+    for i, p in enumerate(PROJECTS):
+        f = cover.get(p["slug"], "01.webp")
+        w, h = Image.open(ROOT / "images" / "work" / p["slug"] / f).size
+        sub = f'<span class="e2w-s">{html.escape(p["subtitle"])}</span>' if p.get("subtitle") else ""
+        rows.append(f'      <li><a href="/work/{p["slug"]}/" data-i="{i}"><span class="e2w-n">{i + 1:02d}</span>'
+                    f'<span class="e2w-t">{html.escape(p["title"])}</span>{sub}</a></li>')
+        src = f"/images/work/{p['slug']}/{f}"
+        imgs.append(f'      <img {"src" if i == 0 else "data-src"}="{src}" width="{w}" height="{h}" alt="" decoding="async" draggable="false"{" class=\"is-on\"" if i == 0 else ""}>')
+    return ('  <main class="ed2 e2-work">\n    <h1 class="visually-hidden">Work</h1>\n'
+            '    <ol class="e2w-list">\n' + "\n".join(rows) + '\n    </ol>\n'
+            '    <div class="e2w-view" aria-hidden="true">\n' + "\n".join(imgs) + '\n    </div>\n  </main>\n')
+
+
+def e2_about(contact, legal):
+    """Editorial v2, About: the drawing first, tall, in the ink colour as on the
+    current page; the text beside it with the same hierarchy as Editorial."""
+    contact = contact.replace(' id="email"', ' class="ed-email"').split("      <script>")[0]
+    return ('  <main class="ed2 e2-about">\n    <h1 class="visually-hidden">About</h1>\n'
+            '    <div class="e2a-fig" aria-hidden="true"><i></i></div>\n'
+            '    <div class="e2a-text">\n'
+            f'      <p class="eda-lead">{html.escape(ABOUT[0])}</p>\n'
+            f'      <p class="eda-body">{html.escape(ABOUT[1])}</p>\n'
+            '      <div class="eda-cred">\n' + "".join(f'        <p>{html.escape(t)}</p>\n' for t in ABOUT[2:]) + '      </div>\n'
+            '      <div class="eda-contact">\n' + contact.replace('<h2 class="about-contact">', '<h2 class="eda-h">')
+            + legal.replace('about-legal', 'eda-legal') + '      </div>\n    </div>\n  </main>\n')
 
 
 def ed_about(contact, legal):
@@ -484,7 +527,8 @@ def main():
                f'    <p class="edh-cap">{html.escape(soma["title"])}, {soma["meta"].split(" ")[0]}</p>\n'
                '    <a class="edh-go" href="/work/">Explore selected work <span aria-hidden="true">&rarr;</span></a>\n'
                '  </div>\n')
-    write("index.html", page("Home", "home", HOME_BODY + ed_home, "home has-ed"))
+    e2_home = f'  <p class="ed2 e2-label">{html.escape(soma["title"])}, {soma["meta"].split(" ")[0]}</p>\n'
+    write("index.html", page("Home", "home", HOME_BODY + ed_home + e2_home, "home has-ed"))
 
     cards = "\n".join(
         f'      <a class="card" href="/work/{p["slug"]}/"{" data-tall=\"1\"" if p["slug"] in TALL_TILES else ""}>\n'
@@ -493,7 +537,7 @@ def main():
         f'      </a>' for p in PROJECTS)
     write("work/index.html", page("Work", "work",
         f'  <main class="page page-wide work-page">\n    <h1 class="work-h">Work</h1>\n    <div class="grid">\n{cards}\n    </div>\n  </main>\n'
-        + ed_work(), "inner has-ed"))
+        + ed_work() + e2_work(), "inner has-ed"))
 
     for i, p in enumerate(PROJECTS):
         prev_p, next_p = PROJECTS[i - 1], PROJECTS[(i + 1) % len(PROJECTS)]
@@ -681,7 +725,7 @@ def main():
               '      pick();\n'
               '      addEventListener("resize", function () { clearTimeout(pick.t); pick.t = setTimeout(pick, 200); });\n'
               '    })();\n  </script>\n')
-    write("about/index.html", page("About", "about", stacked(about_block + contact + legal) + sketch + ed_about(contact, legal), "inner photo has-ed"))
+    write("about/index.html", page("About", "about", stacked(about_block + contact + legal) + sketch + ed_about(contact, legal) + e2_about(contact, legal), "inner photo has-ed"))
     # Old /contact/ links land on About.
     write("contact/index.html", '<!doctype html>\n<meta charset="utf-8">\n<title>About</title>\n'
           '<meta http-equiv="refresh" content="0; url=/about/">\n<link rel="canonical" href="/about/">\n'

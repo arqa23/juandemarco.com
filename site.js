@@ -140,9 +140,9 @@
       pick.querySelectorAll('button[data-tog]').forEach(function (b) { b.querySelector('span').textContent = val[b.dataset.tog]; });
       pick.classList.toggle('on-work', !!document.querySelector('.work-page'));
       // Design preview: Current / Editorial test, and whether this page has a test version
-      var ed = root.dataset.design === 'edit';
+      var ed = !!root.dataset.design;
       pick.querySelectorAll('button[data-dv]').forEach(function (b) {
-        var on = (b.dataset.dv === 'edit') === ed;
+        var on = b.dataset.dv === (root.dataset.design || 'current');
         b.classList.toggle('is-on', on); b.setAttribute('aria-checked', String(on));
       });
       pick.classList.toggle('on-ed', document.body.classList.contains('has-ed'));
@@ -160,14 +160,14 @@
         }
         var dv = e.target.closest('button[data-dv]');   // Design preview: Current / Editorial test
         if (dv) {
-          var was = root.dataset.design === 'edit', want = dv.dataset.dv === 'edit';
-          if (want) root.dataset.design = 'edit'; else delete root.dataset.design;
-          try { if (want) localStorage.setItem('jdm-design', 'edit'); else localStorage.removeItem('jdm-design'); } catch (err) {}
+          var was = root.dataset.design || '', want = dv.dataset.dv === 'current' ? '' : dv.dataset.dv;
+          if (want) root.dataset.design = want; else delete root.dataset.design;
+          try { if (want) localStorage.setItem('jdm-design', want); else localStorage.removeItem('jdm-design'); } catch (err) {}
           markPick();
           if (was === want || !document.body.classList.contains('has-ed')) return;
           // Work: the moving Squares / Float start (or stop) with a fresh load, as the Layout list does
           if (document.querySelector('.work-page')) { location.reload(); return; }
-          place(); dispatchEvent(new Event('resize'));   // About's sketch re-measures itself
+          place(); initE2Work(); dispatchEvent(new Event('resize'));   // About's sketch re-measures itself
           return;
         }
         var hv = e.target.closest('button[data-hv]');   // working mode: pick a Gallery layout
@@ -960,9 +960,32 @@
     initPress();
     startDrift();
     document.querySelectorAll('.yr').forEach(function (e) { e.textContent = new Date().getFullYear(); });   // the year updates itself
+    initE2Work();
     var em = document.getElementById('email');   // Editorial test About: the same address
     if (em) document.querySelectorAll('.ed-email').forEach(function (a) { a.href = em.href; a.textContent = em.textContent; });
     if (document.fonts) document.fonts.ready.then(function () { place(); layoutWall(); });
+  }
+
+  /* ---------- Editorial v2, Work: the index ----------
+     The project under the cursor (or keyboard focus) shows on the right.
+     Images load the first time they are needed, then all quietly after. */
+  function initE2Work() {
+    var pg = document.querySelector('.e2-work');
+    if (!pg || pg.dataset.ready || root.dataset.design !== 'edit2') return;
+    pg.dataset.ready = '1';
+    var imgs = pg.querySelectorAll('.e2w-view img'), links = pg.querySelectorAll('.e2w-list a');
+    var load = function (im) { if (im.dataset.src) { im.src = im.dataset.src; im.removeAttribute('data-src'); } };
+    var show = function (i) {
+      load(imgs[i]);
+      imgs.forEach(function (im, k) { im.classList.toggle('is-on', k === i); });
+      links.forEach(function (a, k) { a.classList.toggle('is-on', k === i); });
+    };
+    links.forEach(function (a, i) {
+      a.addEventListener('pointerenter', function () { show(i); });
+      a.addEventListener('focus', function () { show(i); });
+    });
+    show(0);
+    setTimeout(function () { imgs.forEach(load); }, 1500);
   }
 
   /* ---------- Image protection (deterrent; screenshots can't be blocked) ---------- */
@@ -1099,7 +1122,7 @@
     var pg = document.querySelector('.work-page'), v = workView();
     if (SQ && !SQ.pg.isConnected) sqDrop();
     if (!pg || (v !== 'squares' && v !== 'float') || pg.dataset.sq) return;
-    if (root.dataset.design === 'edit') return;   // Editorial test: the Work page stands still
+    if (root.dataset.design) return;   // Editorial / Editorial v2: the Work page stands still
     if (!matchMedia('(hover: hover) and (min-width: 761px)').matches) return;
     pg.dataset.sq = '1';
     var grid = pg.querySelector('.grid'), cards = shuffleCards(grid);
