@@ -1228,7 +1228,7 @@ body.home { background: var(--bg); }
 .home::before { top: var(--e2-mat); left: var(--e2-mat); right: var(--e2-mat); }
 .home::after { right: var(--e2-mat); bottom: var(--e2-mat); }
 .e2-label { position: fixed; z-index: 3; margin: 0; left: var(--edge);
-  bottom: calc(var(--gutter) + max(15px, calc(18 * var(--s))) + var(--ed-1));
+  bottom: var(--gutter);   /* where the settings button was, level with the foot of the menu */
   color: rgba(255, 255, 255, .8); text-shadow: var(--shadow); font-size: max(9.5px, calc(var(--nav-size) * .85)); }
 
 /* Work v2: the index */
@@ -1332,3 +1332,25 @@ body.home { background: var(--bg); }
 .gw-t { display: block; font-size: max(9.5px, calc(var(--nav-size) * .85)); }
 .gw-m { display: block; margin-top: .3em; font-size: max(11px, calc(var(--text-size) * .78)); }
 .gw-item:hover .gw-sheet img { opacity: .9; }
+
+
+/* ---------- Round 4 (Juan, 2026-11-27) ---------- */
+/* Work: no hard edge at the foot of the window; the page runs to the bottom */
+:root[data-design] body.inner.has-ed.pg-work .scroller, :root[data-design] body.inner.has-ed.pg-gal .scroller { bottom: 0; }   /* no hard edge at the foot */
+:root[data-design] body.pg-work .ed-work { padding-bottom: var(--ed-3); }
+/* About: the text 15% further right */
+:root[data-design="edit2"] .has-ed .e2-about { width: calc(100vw - var(--gutter)); grid-template-columns: max-content minmax(0, 1fr);
+  --fh: calc(100vh - var(--header-h) - var(--ed-band) - var(--ed-2) * 2); }
+/* text starts 62.6% across the window (it sat at ~47.6%; +15%) */
+.e2-about .e2a-text { max-width: 36em; margin-left: max(0px, calc(62.6vw - var(--ed-l) - var(--fh) * 707 / 1087 - var(--ed-3))); }
+/* About: Framed (settings) shows the drawing on its paper, the sheet fitted
+   to the very box the drawing alone fills */
+.e2a-fig { position: relative; }
+.e2a-sheet { display: none; }
+:root[data-aframe="on"] .e2a-fig i { visibility: hidden; }
+:root[data-aframe="on"] .e2a-sheet { display: block; position: absolute; inset: 0; margin: auto; width: 100%; height: auto; max-height: 100%;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent), 0 2px 10px rgba(0, 0, 0, .10); }
+/* Gallery Wall: the works hang on the window's own centre line; no scroll bar */
+:root[data-design="wall"] body.inner.has-ed.pg-gal .scroller { top: 0; bottom: 0; }
+.gw-page { scrollbar-width: none; }
+.gw-page::-webkit-scrollbar { display: none; }
