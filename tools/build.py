@@ -583,13 +583,25 @@ def main():
     # About (Juan, 2026-11-27, round 3): Gallery sketch 02 only, frameless,
     # its drawing (not the sheet) fitted to the box Juan marked right of the
     # text, in the text's own colour (style.css .about-sketch). It is drawn as
-    # a mask, so it fades in once the image has loaded.
+    # a mask, so it fades in once the image has loaded. The mask is a ready-
+    # shrunk copy near the shown size (tools/about_sketch.py, Juan 2026-11-27:
+    # the browser's own shrink of a mask broke the fine lines up).
     sketch = ('  <div class="about-sketch" aria-hidden="true"><i></i></div>\n'
               '  <script>\n    (function () {\n'
-              '      var el = document.querySelector(".about-sketch i"), im = new Image();\n'
+              '      var el = document.querySelector(".about-sketch i");\n'
               '      if (!el) return;\n'
-              '      im.onload = function () { el.classList.add("loaded"); };\n'
-              '      im.src = "/images/prints/sketches/bare/02.webp";\n'
+              '      // the ready-shrunk copy nearest the size shown (tools/about_sketch.py)\n'
+              '      var W = [300, 360, 440, 540, 707], cur = 0;\n'
+              '      function pick() {\n'
+              '        var need = el.getBoundingClientRect().width * (window.devicePixelRatio || 1), w = W[W.length - 1];\n'
+              '        for (var i = 0; i < W.length; i++) if (W[i] >= need * 0.97) { w = W[i]; break; }\n'
+              '        if (w === cur) return; cur = w;\n'
+              '        var src = "/images/about/sketch-02-" + w + ".webp", im = new Image();\n'
+              '        im.onload = function () { el.style.setProperty("--sk", \'url("\' + src + \'")\'); el.classList.add("loaded"); };\n'
+              '        im.src = src;\n'
+              '      }\n'
+              '      pick();\n'
+              '      addEventListener("resize", function () { clearTimeout(pick.t); pick.t = setTimeout(pick, 200); });\n'
               '    })();\n  </script>\n')
     write("about/index.html", page("About", "about", stacked(about_block + contact + legal) + sketch, "inner photo"))
     # Old /contact/ links land on About.
