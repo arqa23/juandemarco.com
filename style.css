@@ -1386,3 +1386,38 @@ body.home { background: var(--bg); }
   .ed-about .about-ask, .ed-about .email.email { font-size: var(--ts, var(--text-size)) !important; }
   .ed-about .eda-legal { margin-top: min(var(--ed-2), 4.4vh); }
 }
+
+/* ---------- Round 6 (Juan, 2026-11-27) ---------- */
+/* Gallery = Exhibition: no heading, starts under the name as the Current
+   Gallery did; each caption a fixed gap under its own sheet, as wide as the
+   sheet, [01] left and the title right, like the Current Index */
+@media (min-width: 701px) {
+  :root[data-design="exh"] .gx-page { padding-top: calc(var(--header-h) + var(--gutter)); }   /* just clear of the fade */
+}
+.gx-stage { flex-direction: column; justify-content: center; align-items: center; height: calc(var(--gx-row) + var(--gx-capg)); }
+.gx-page { --gx-capg: calc(.75em + max(9px, calc(var(--nav-size) * var(--caption-scale, .7))) * 1.4); }
+.gx-sheet { position: relative; height: min(var(--gx-row), calc(var(--gx-cell) / var(--r))); flex: none;
+  margin-bottom: var(--gx-capg); }   /* room for the caption under it; the sheet's centre stays on the row's centre line */
+.gx-cap {
+  position: absolute; left: 0; right: 0; top: 100%; display: block; margin-top: .75em; padding-left: 3.2em;
+  text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-dim);
+  font-family: var(--caption-font, var(--font)); font-weight: var(--caption-w, 400);
+  font-size: calc(var(--nav-size) * var(--caption-scale, .7)); letter-spacing: var(--caption-track, .2em);
+  text-transform: var(--caption-case, uppercase); line-height: 1.4;
+}
+.gx-cap::before { content: attr(data-no); position: absolute; left: 0; top: 0; }
+.gx-cap em { font-style: normal; color: var(--ink); }
+.gx-grid { row-gap: calc(var(--gx-gap) * 1.5); }
+/* About: the drawing from the top of the text to the foot of the copyright line */
+@media (min-width: 701px) {
+  .e2-about[style*="--e2fh"] .e2a-fig i { height: var(--e2fh); }
+}
+/* Framed: the paper alone, no soft shadow; top and foot on the same lines */
+:root[data-aframe="on"] .e2a-sheet { box-shadow: none; inset: 0 auto auto 0; margin: 0; width: auto; height: 100%; max-height: none; }
+/* test slider: the text moves sideways (vw), the drawing stays */
+.e2a-text { position: relative; left: var(--e2-shift, 0); }
+.mode-pick .pick-slide { display: flex; align-items: center; gap: 6px; cursor: default; }
+.mode-pick .pick-slide input { width: 120px; accent-color: var(--ink); }
+.mode-pick .pick-slide .pick-val { min-width: 9.5em; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+:root:not([data-design="edit2"]) .mode-pick .pick-slide { display: none; }
+:root[data-design="edit2"] .has-ed .e2-about { overflow-x: visible; overflow-y: clip; }   /* the slider can carry the text past the old right edge */

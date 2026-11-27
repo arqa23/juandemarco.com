@@ -178,6 +178,7 @@
           try { localStorage.setItem('jdm-hang', hv.dataset.hv); } catch (err) {}
           layoutWall(); markPick(); return;
         }
+        if (e.target.closest('.pick-slide')) return;
         var t = e.target.closest('button[data-tog]');
         if (!t) return;
         var k = t.dataset.tog;
@@ -1893,6 +1894,139 @@
     if (e.key === 'ArrowLeft') slideStep(-1);
     if (e.key === 'Escape' && document.body.classList.contains('room') && !zoomOff()) { var x = document.querySelector('.room-close'); if (x) x.click(); }
   });
+
+  // Text over images (Juan, 2026-11-27, round 6): wherever the name, menu,
+  // settings button or a room's labels pass over an image and their ink gets
+  // hard to read, they take the other ink (the light mode's dark ink or the
+  // dark mode's light one), as the text over the Squares did. Each image is
+  // read once as a small grid of brightness; the points under each piece are
+  // averaged (page colour where no image is) and the inks' contrast compared.
+  // Squares keeps its own finer twins (sq-on), so this stands aside there.
+  var UI_PIECES = '.logo, .nav a, .settings-corner, .room-close, .room-where, .e2-label, .to-top', UI_G = 24, uiGrid = {};
+  function uiRGB(str) {
+    str = (str || '').trim();
+    var m = str.match(/^#([0-9a-f]{6})$/i);
+    if (m) return [0, 2, 4].map(function (i) { return parseInt(m[1].substr(i, 2), 16); });
+    m = str.match(/rgba?\(([^)]+)\)/);
+    if (m) { var v = m[1].split(/[\s,\/]+/).map(Number); if (v.length > 3 && v[3] === 0) return null; return v.slice(0, 3); }
+    return null;
+  }
+  function uiLumOf(img) {
+    var k = img.currentSrc || img.src, g = uiGrid[k];
+    if (g !== undefined) return g;
+    if (!img.complete || !img.naturalWidth) return null;
+    try {
+      var cv = document.createElement('canvas'); cv.width = cv.height = UI_G;
+      var cx = cv.getContext('2d', { willReadFrequently: true });
+      cx.drawImage(img, 0, 0, UI_G, UI_G);
+      var d = cx.getImageData(0, 0, UI_G, UI_G).data; g = [];
+      for (var i = 0; i < UI_G * UI_G; i++) g.push(d[i * 4 + 3] < 128 ? -1 : sqLum([d[i * 4], d[i * 4 + 1], d[i * 4 + 2]]));
+    } catch (e) { g = null; }
+    return (uiGrid[k] = g);
+  }
+  function uiBox(img) {   // where the picture itself is drawn (object-fit contain / cover)
+    var r = img.getBoundingClientRect(), fit = getComputedStyle(img).objectFit, w = r.width, h = r.height;
+    var nr = img.naturalWidth / img.naturalHeight, x = r.left, y = r.top;
+    if ((fit === 'contain' || fit === 'cover') && nr) {
+      var wide = w / h > nr;
+      if ((fit === 'contain') === wide) { var nw = h * nr; x += (w - nw) / 2; w = nw; } else { var nh = w / nr; y += (h - nh) / 2; h = nh; }
+    }
+    var sc = img.closest('.scroller'), c = { l: -1e5, t: -1e5, r: 1e5, b: 1e5 };   // cut to the scrolling area it lives in
+    if (sc) { var q = sc.getBoundingClientRect(); c = { l: q.left, t: q.top, r: q.right, b: q.bottom }; }
+    return { x: x, y: y, w: w, h: h, cl: Math.max(x, c.l), ct: Math.max(y, c.t), cr: Math.min(x + w, c.r), cb: Math.min(y + h, c.b) };
+  }
+  function uiShown(el) {
+    if (el.checkVisibility && !el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) return false;
+    for (var n = el; n && n !== document.body; n = n.parentElement) if (parseFloat(getComputedStyle(n).opacity) < .5) return false;
+    return true;
+  }
+  var uiBusy = false;
+  function uiInk() {
+    uiBusy = false;
+    var pieces = document.querySelectorAll(UI_PIECES);
+    if (!pieces.length) return;
+    // Home keeps its white name and menu over the cover, as designed
+    if (root.classList.contains('sq-on') || document.body.classList.contains('home')) { pieces.forEach(uiClear); return; }
+    var bg = uiRGB(getComputedStyle(document.body).backgroundColor) || uiRGB(getComputedStyle(root).getPropertyValue('--bg')) || [31, 31, 30];
+    var bgL = sqLum(bg), imgs = null;
+    pieces.forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      if (!imgs) imgs = [].filter.call(document.images, function (im) {
+        if (im.closest('.sq-ink, .mode-pick, .settings, nav, header')) return false;
+        var q = im.getBoundingClientRect();
+        return q.width > 40 && q.height > 40 && q.bottom > 0 && q.top < innerHeight && q.right > 0 && q.left < innerWidth && uiShown(im);
+      }).map(function (im) { return { im: im, b: uiBox(im) }; });
+      var sum = 0, n = 0, hit = false;
+      for (var a = 0; a < 5; a++) for (var c = 0; c < 3; c++) {
+        var px = r.left + r.width * (a + .5) / 5, py = r.top + r.height * (c + .5) / 3, L = bgL;
+        for (var i = imgs.length - 1; i >= 0; i--) {
+          var o = imgs[i], b = o.b;
+          if (px < b.cl || px >= b.cr || py < b.ct || py >= b.cb) continue;
+          var g = uiLumOf(o.im); if (!g) continue;
+          var v = g[Math.min(UI_G - 1, Math.floor((py - b.y) / b.h * UI_G)) * UI_G + Math.min(UI_G - 1, Math.floor((px - b.x) / b.w * UI_G))];
+          if (v < 0) continue;
+          L = v; hit = true; break;
+        }
+        sum += L; n++;
+      }
+      if (!hit) { uiClear(el); return; }
+      L = sum / n;
+      var own = uiRGB(getComputedStyle(el.parentElement).getPropertyValue('--ink')) || uiRGB(getComputedStyle(el.parentElement).color) || [237, 232, 222];
+      var ownL = sqLum(own), alt = ownL > .2 ? 0 : 1, altL = SQ_INK_L[alt];
+      var con = function (li) { return (Math.max(li, L) + .05) / (Math.min(li, L) + .05); };
+      var on = el.dataset.uiInk === '1';
+      var want = on ? con(ownL) < 3.6 : (con(ownL) < 3 && con(altL) > con(ownL) * 1.3);   // a margin either way: no flicker at the turn
+      if (want && !on) {
+        var cs = SQ_INKS[alt].join(', ');
+        el.style.setProperty('--ink', 'rgb(' + cs + ')');
+        el.style.setProperty('--ink-dim', 'rgba(' + cs + ', .8)');
+        el.style.setProperty('--shadow', 'none');
+        el.style.textShadow = 'none';
+        el.dataset.uiInk = '1';
+      } else if (!want && on) uiClear(el);
+    });
+  }
+  function uiClear(el) {
+    if (el.dataset.uiInk !== '1') return;
+    ['--ink', '--ink-dim', '--shadow'].forEach(function (p) { el.style.removeProperty(p); });
+    el.style.textShadow = ''; delete el.dataset.uiInk;
+  }
+  function uiSoon() { if (!uiBusy) { uiBusy = true; requestAnimationFrame(uiInk); } }
+  document.addEventListener('scroll', uiSoon, true);
+  window.addEventListener('resize', uiSoon);
+  document.addEventListener('load', uiSoon, true);   // an image arriving
+  setInterval(uiSoon, 250);   // slides, fades and drifts
+
+  // About: the drawing runs from the top of the text to the foot of the
+  // copyright line (Juan, round 6); and a test slider moves the text sideways
+  function aboutFit() {
+    var ab = document.querySelector('.e2-about'), tx = ab && ab.querySelector('.e2a-text'), lg = ab && ab.querySelector('.eda-legal');
+    if (!ab || !lg || innerWidth <= 700 || !ab.offsetParent) { if (ab) ab.style.removeProperty('--e2fh'); return; }
+    for (var k = 0; k < 2; k++) {   // twice: the drawing's width can move the text
+      var t = tx.getBoundingClientRect().top, r = lg.getBoundingClientRect(), cs = getComputedStyle(lg);
+      var fs = parseFloat(cs.fontSize), lh = parseFloat(cs.lineHeight) || fs * 1.2;
+      var base = r.bottom - (lh - fs) / 2 - fs * .2;   // the foot of the capitals, not of the line box
+      ab.style.setProperty('--e2fh', Math.max(120, base - t).toFixed(1) + 'px');
+    }
+  }
+  function aboutSlide() {
+    var inp = document.querySelector('[data-aslide]'); if (!inp) return;
+    var v = parseFloat(root.style.getPropertyValue('--e2-shift')) || 0;
+    if (document.activeElement !== inp) inp.value = v;
+    var tx = document.querySelector('.e2a-text'), out = inp.parentElement.querySelector('.pick-val');
+    if (out) out.textContent = (v > 0 ? '+' : '') + v + ' (starts ' + (tx ? (tx.getBoundingClientRect().left / innerWidth * 100).toFixed(1) : '?') + '%)';
+  }
+  document.addEventListener('input', function (e) {
+    if (!e.target.matches || !e.target.matches('[data-aslide]')) return;
+    var v = parseFloat(e.target.value) || 0;
+    if (v) root.style.setProperty('--e2-shift', v + 'vw'); else root.style.removeProperty('--e2-shift');
+    try { localStorage.setItem('jdm-atext', String(v)); } catch (err) {}
+    aboutSlide();
+  });
+  window.addEventListener('resize', function () { aboutFit(); aboutSlide(); });
+  document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.settings-corner')) setTimeout(aboutSlide, 0); }, true);
+  var aboutWatch = setInterval(function () { if (document.fonts && document.fonts.status !== 'loaded') return; aboutFit(); aboutSlide(); }, 400);
 
   init();
 })();

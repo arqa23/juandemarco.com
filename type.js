@@ -44,8 +44,8 @@
     // Work = Editorial, About = Editorial v2, for good (Juan, 2026-11-27); their
     // other views are saved (VERSIONS.md): put them back in "ok" to choose again
     work:    { def: 'edit',  ok: [] },
-    about:   { def: 'edit2', ok: ['edit', 'edit2'] },
-    gallery: { def: '',      ok: ['exh'] }      // Current (Index / Cluster) stays the Gallery default
+    about:   { def: 'edit2', ok: [] },
+    gallery: { def: 'exh',   ok: [] }      // Current (Index / Cluster) stays the Gallery default
   };
   window.jdmPageOf = function (path) {
     return { '/work/': 'work', '/about/': 'about', '/prints/': 'gallery' }[String(path).replace(/index\.html$/, '')] || '';
@@ -78,6 +78,8 @@
     // dark mode on every new visit (Juan, 2026-11-26): a switch to light lasts
     // only for this visit (sessionStorage)
     if (localStorage.getItem('jdm-aframe') === 'on') d.aframe = 'on';   // About drawing on its paper
+    var ash = parseFloat(localStorage.getItem('jdm-atext'));   // About text shift (test slider), in vw
+    if (ash) document.documentElement.style.setProperty('--e2-shift', ash + 'vw');
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
     // public settings (build.py SETTINGS_MODE): frames always on, no Framed option
     var keys = document.documentElement.getAttribute('data-public') ? ['work', 'hang'] : ['frame', 'work', 'hang'];
