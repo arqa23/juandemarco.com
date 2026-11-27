@@ -6,7 +6,7 @@ It writes index.html, about/ (with contact), work/, work/project-N/, prints/ and
 Thumbnails for the Work grid are made from images/ into images/thumbs/.
 """
 import re
-import html, json, os, pathlib
+import hashlib, html, json, os, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 YEAR = "2026"
@@ -185,8 +185,9 @@ GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
 # Round 5 (Juan, 2026-11-27): About gets Editorial (v1) back beside v2; Gallery
 # Wall saved but off (VERSIONS.md), add ("wall", "Wall") back to bring it back.
 VIEWS = {
-    "about": [("edit2", "Editorial v2"), ("edit", "Editorial")],
-    "prints": [("current", "Current"), ("exh", "Exhibition")],
+    # About = Editorial v2 only again (Juan, round 6); Editorial (v1) saved.
+    # Gallery = Exhibition for good (Juan, round 6); Current (Index / Cluster)
+    # and Wall are saved (VERSIONS.md), their code stays.
 }
 # Stream saved but switched off (Juan, 2026-11-27, VERSIONS.md); its code stays,
 # add ("stream", "Stream") back here to bring it back.
@@ -273,6 +274,9 @@ def _page(title, section, body, body_class="", head_extra=""):
     # About: the drawing framed (on its paper) or not (Juan, 2026-11-27)
     if section == "about":
         frame_row += '    <button type="button" class="pick-row" data-tog="aframe">Framed: <span></span></button>\n'
+        # a test slider: move the About text left or right (Juan, round 6)
+        frame_row += ('    <label class="pick-row pick-slide">Text: <input type="range" min="-25" max="25" step="0.5" value="0" '
+                      'data-aslide aria-label="Text position"> <span class="pick-val"></span></label>\n')
     design_rows = "" if not views else (
         '    <div class="pick-layouts pick-design" role="radiogroup" aria-label="View">\n'
         '      <span class="pick-head">View:</span>\n'
@@ -404,7 +408,22 @@ HOME_BODY = """  <img id="cover" class="cover" alt="" decoding="async" fetchprio
 """
 
 
+_IMG_V = {}
+
+
+def img_v(m):
+    """/images/work/x.webp -> /images/work/x.webp?v=<content hash>, so a re-made
+    image (e.g. a trimmed edge) is never served from an old browser cache."""
+    path = m.group(0)
+    if path not in _IMG_V:
+        f = ROOT / path.lstrip("/")
+        _IMG_V[path] = hashlib.md5(f.read_bytes()).hexdigest()[:8] if f.exists() else ""
+    return path + ("?v=" + _IMG_V[path] if _IMG_V[path] else "")
+
+
 def write(rel, text):
+    if rel.endswith(".html"):
+        text = re.sub(r"/images/work/[\w./-]+?\.webp(?!\?)", img_v, text)
     p = ROOT / rel
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(text, encoding="utf-8")
@@ -533,14 +552,17 @@ def gallery_views():
         meta = " \u00b7 ".join(x for x in [years.get(slug), f"{fam} {orient}", f"{w} \u00d7 {h} {unit}" if w else None] if x)
         img = (f'<img src="{f}" width="{pw}" height="{ph}" alt="{html.escape(title)}" '
                f'loading="lazy" decoding="async" draggable="false">')
+        # captions as on the Current Index (Juan, round 6): [01] left, title right,
+        # a fixed gap under each sheet, as wide as the sheet
+        no = f"[{len(cells) + 1:02d}]"
         cells.append(f'      <li><a class="gx-cell" href="/prints/{slug}/#{k}"><span class="gx-stage">'
-                     f'<span class="gx-sheet" style="--r:{w / h:.4f}">{img}</span></span>'
-                     f'<span class="gx-t">{html.escape(title)}</span><span class="gx-m">{html.escape(meta)}</span></a></li>')
+                     f'<span class="gx-sheet" style="--r:{w / h:.4f}">{img}'
+                     f'<span class="gx-cap" data-no="{no}"><em>{html.escape(names[slug])}</em>, No. {k}</span></span></span></a></li>')
         wall.append(f'      <li><a class="gw-item" href="/prints/{slug}/#{k}" style="--w:{w};--h:{h}">'
                     f'<span class="gw-sheet">{img}</span>'
                     f'<span class="gw-label"><span class="gw-t">{html.escape(title)}</span>'
                     f'<span class="gw-m">{html.escape(meta)}</span></span></a></li>')
-    return ('  <main class="gx gx-page">\n    <h1 class="gx-h">Gallery</h1>\n    <ol class="gx-grid">\n'
+    return ('  <main class="gx gx-page">\n    <h1 class="visually-hidden">Gallery</h1>\n    <ol class="gx-grid">\n'
             + "\n".join(cells) + '\n    </ol>\n  </main>\n'
             f'  <main class="gw gw-page" style="--sumw:{sumw};--maxh:{maxh};--n:{len(hang)}">\n'
             '    <h1 class="visually-hidden">Gallery</h1>\n    <ol class="gw-row">\n'
