@@ -57,7 +57,7 @@
     // only for this visit (sessionStorage)
     // Design preview (Juan, 2026-11-27): "Editorial test" for Home, Work and
     // About, opt-in only; set here, before the page paints, so it never flashes
-    if (localStorage.getItem('jdm-design') === 'edit') d.design = 'edit';
+    var dz = localStorage.getItem('jdm-design'); if (dz === 'edit' || dz === 'edit2') d.design = dz;
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
     // public settings (build.py SETTINGS_MODE): frames always on, no Framed option
     var keys = document.documentElement.getAttribute('data-public') ? ['work', 'hang'] : ['frame', 'work', 'hang'];
