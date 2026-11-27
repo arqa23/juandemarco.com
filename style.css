@@ -1421,3 +1421,8 @@ body.home { background: var(--bg); }
 .mode-pick .pick-slide .pick-val { min-width: 9.5em; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
 :root:not([data-design="edit2"]) .mode-pick .pick-slide { display: none; }
 :root[data-design="edit2"] .has-ed .e2-about { overflow-x: visible; overflow-y: clip; }   /* the slider can carry the text past the old right edge */
+/* Round 7 tests (Juan): the drawing moves sideways too; the text can be set flush right */
+.e2a-fig { left: var(--e2-ishift, 0); }
+:root[data-aalign="right"] .e2a-text { text-align: right; }
+:root[data-aalign="right"] .e2a-text :is(.eda-lead, .eda-body, .eda-cred) { margin-left: auto; }   /* one shared right edge */
+.mode-pick .pick-slide input { width: 140px; }
