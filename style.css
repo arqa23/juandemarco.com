@@ -536,7 +536,8 @@ body {
   --wall-gap: max(36px, calc(66 * var(--s)));   /* 50% more than before (44) */
   position: relative;
   column-gap: var(--wall-gap);
-  margin: 0 0 0 calc(max(160px, calc(240 * var(--s))) + var(--gutter) - var(--edge));
+  /* 10% of the window more on either side (Juan, 2026-11-27) */
+  margin: 0 10vw 0 calc(max(160px, calc(240 * var(--s))) + var(--gutter) - var(--edge) + 10vw);
 }
 .prints .print { position: absolute; }
 .prints:not(.is-hung) { visibility: hidden; }
@@ -854,7 +855,7 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .page p.about-legal.about-legal.about-legal { margin-top: 2.6em; font-size: calc(var(--nav-size) * .85); letter-spacing: .12em; color: var(--ink-dim); }
 
 /* Gallery, Index layout: number left, title right, always shown under each print */
-:root .prints.is-index { --wall-gap: max(16px, calc(24 * var(--s))); }   /* doubled (Juan, 2026-11-26) */
+:root .prints.is-index { --wall-gap: max(24px, calc(36 * var(--s))); }   /* +50% (Juan, 2026-11-27; was 24) */
 .prints.is-index .print .print-cap {
   position: relative; inset: auto; display: block; margin: .75em 0 0; padding: 0 0 0 3.2em;
   background: none; opacity: 1; text-align: right; overflow: hidden; text-overflow: ellipsis;
@@ -898,11 +899,11 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .mode-pick-layout { display: none; }
 .mode-pick.on-work .mode-pick-layout { display: flex; }
 .mode-pick .mode-pick-work { display: none; }
-.mode-pick.on-work.on-1b .mode-pick-work { display: flex; }
 
-/* Filmstrip 1A (as before PR #50): equal squares, small even gaps, no growing */
-:root[data-work="1a"] .work-page { --tile-gap: max(6px, calc(10 * var(--s))); }
-:root[data-work="1a"] .work-page .grid { padding: 0; }
+/* Strip (was Strip 1A): equal squares, small even gaps, no growing; endless
+   and in a new order on every visit (site.js) */
+:root[data-work="strip"] .work-page { --tile-gap: max(6px, calc(10 * var(--s))); }
+:root[data-work="strip"] .work-page .grid { padding: 0; }
 
 @media (hover: hover) and (min-width: 761px) {
   /* Squares Grid V1 (as on juandemarco.us): four columns of squares, page
@@ -912,20 +913,25 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   :root[data-work="grid"] .work-page .card { width: auto; top: 0; }
   :root[data-work="grid"] .work-page .card img { aspect-ratio: 1; }
 
-  /* Squares (Tyler Hobbs-style): placed by site.js */
-  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .grid { display: block; overflow: visible; padding: 0; cursor: default; }
-  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card { position: fixed; width: var(--sq, 180px); top: 0; overflow: visible; visibility: hidden; }
-  :root:is([data-work="squares"],[data-work="squares2"]) .work-page.is-squares .card { visibility: visible; }
-  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card img { aspect-ratio: 1; }
-  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card:hover img { transform: none; opacity: .88; }
-  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card-title {
+  /* Squares: two rows drifting on an endless strip, moved by site.js */
+  :root[data-work="squares"] .work-page .grid { display: block; overflow: visible; padding: 0; cursor: default; }
+  :root[data-work="squares"] .work-page .card { position: fixed; width: var(--sq, 180px); left: 0; top: 0; overflow: visible; visibility: hidden; will-change: transform; }
+  :root[data-work="squares"] .work-page.is-squares { cursor: grab; user-select: none; -webkit-user-select: none; }
+  :root[data-work="squares"] .work-page.is-squares .card { cursor: pointer; }
+  :root[data-work="squares"] .work-page.is-dragging, :root[data-work="squares"] .work-page.is-dragging .card { cursor: grabbing; }
+  :root[data-work="squares"] .work-page.is-dragging .card { pointer-events: none; }
+  :root[data-work="squares"] .work-page .card.is-held { z-index: 2; }
+  :root[data-work="squares"] .work-page.is-squares .card { visibility: visible; }
+  :root[data-work="squares"] .work-page .card img { aspect-ratio: 1; }
+  :root[data-work="squares"] .work-page .card:hover img { transform: none; opacity: .88; }
+  :root[data-work="squares"] .work-page .card-title {
     position: static; display: block; opacity: 1; background: none; padding: 0; margin-top: .7em;
     text-align: left; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45; color: var(--ink-dim);
     font-family: var(--caption-font, var(--font)); font-weight: var(--caption-w, 400);
     font-size: calc(var(--nav-size) * var(--caption-scale, .7)) !important;
     letter-spacing: var(--caption-track, .2em); text-transform: var(--caption-case, uppercase);
   }
-  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card:hover .card-title { color: var(--ink); }
+  :root[data-work="squares"] .work-page .card:hover .card-title { color: var(--ink); }
 }
 
 /* Project pages in the print-room format: the project label to the right */
@@ -933,8 +939,8 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .room-text .room-pnav a { color: var(--ink); }
 /* phones: Squares and Grid V1 become two columns of squares, titles under them */
 @media (hover: none), (max-width: 760px) {
-  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .grid, :root[data-work="grid"] .work-page .grid, :root[data-work="grid2"] .work-page .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; overflow: visible; padding: 0 var(--gutter); }
-  :root:is([data-work="squares"],[data-work="squares2"]) .work-page .card, :root[data-work="grid"] .work-page .card, :root[data-work="grid2"] .work-page .card { width: auto; }
+  :root[data-work="squares"] .work-page .grid, :root[data-work="grid"] .work-page .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; overflow: visible; padding: 0 var(--gutter); }
+  :root[data-work="squares"] .work-page .card, :root[data-work="grid"] .work-page .card { width: auto; }
 }
 
 /* View box, simple (Juan, 2026-11-26, from his screen grab): a small solid
@@ -960,20 +966,6 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 /* About: the text column half as wide, so it runs longer down the page (Juan, 2026-11-26) */
 @media (min-width: 701px) { .page.stacked { max-width: max(416px, calc(533 * var(--s))); } }   /* +30%: fits one screen */
 
-/* Grid V2 (6a-style packing of squares of a few sizes), placed by site.js */
-@media (hover: hover) and (min-width: 761px) {
-  :root[data-work="grid2"] .work-page { position: static; display: block; padding: calc(var(--header-h) + var(--edge) * .35) calc(var(--gutter) + max(160px, calc(240 * var(--s)))) calc(var(--gutter) * 3) var(--edge) !important; }
-  /* two wall margins, as on the Gallery; gap 30% less than Grid V1 (Juan, 2026-11-26) */
-  :root[data-work="grid2"] .work-page .grid { display: block; position: relative; column-gap: max(5px, calc(11.8 * var(--s))); overflow: visible; padding: 0; cursor: default;
-    width: auto; margin: 0 0 0 calc(max(160px, calc(240 * var(--s))) + var(--gutter) - var(--edge)); }
-  :root[data-work="grid2"] .work-page .card { position: absolute; top: 0; visibility: hidden; }
-  :root[data-work="grid2"] .work-page .grid.is-g2 .card { visibility: visible; }
-  :root[data-work="grid2"] .work-page .card img { aspect-ratio: var(--ar, 1); }
-}
-
-.mode-pick .pick-shapes { display: none; }
-.mode-pick.on-work.on-g2 .pick-shapes { display: block; }
-
 /* ArtView2 (Juan, 2026-11-26): no title top left, no arrows beside the image
    (the cursor turns it); the image sits in a band from 8% to 91% of the
    window height, every image of a series the same width (site.js sets --aw
@@ -989,11 +981,11 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   }
   :root:not([data-art="1"]) .room-show { padding: 0; position: relative; opacity: 0; transition: opacity .45s ease; }
   :root:not([data-art="1"]) .room-layout.is-sized .room-show { opacity: 1; }
-  :root:not([data-art="1"]) .room-show .frame { width: var(--aw, 40vw); transition: opacity .2s ease; }
+  :root:not([data-art="1"]) .room-show .frame { width: var(--fw, var(--aw, 40vw)); transition: opacity .2s ease; }
   :root:not([data-art="1"]) .room-show .frame:not(.is-out) { transition: opacity .45s ease; }
   :root:not([data-art="1"]) .room-show .frame.is-out { opacity: 0; }
   :root:not([data-art="1"]) .room-show .slide { transition: none; }
-  :root:not([data-art="1"]) .room-under { position: absolute; top: 100%; left: 0; right: 0; width: auto; }
+  :root:not([data-art="1"]) .room-under { position: absolute; top: 100%; left: 50%; right: auto; width: var(--fw, var(--aw, 40vw)); transform: translateX(-50%); }
 }
 /* project links: one per line, so they don't read as next image */
 .room-text .room-pnav { flex-direction: column; align-items: flex-start; gap: .55em; }
@@ -1013,3 +1005,13 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .wall-map-in i { position: absolute; background: var(--ink); opacity: .32; }
 .wall-map-view { position: absolute; border: 1px solid var(--ink); opacity: .75; pointer-events: none; }
 .room .wall-map { display: none; }
+
+/* About: one Gallery sketch, frameless (lines only, white in dark mode), at
+   random on each visit, in the space right of the text (Juan, 2026-11-27, test) */
+.about-sketch { position: fixed; z-index: 1; pointer-events: none;
+  right: var(--gutter); top: calc(var(--header-h) + max(4px, calc(8 * var(--s)))); width: 25vw; height: 57vh;
+  display: flex; align-items: center; justify-content: center; }
+.about-sketch img { max-width: 100%; max-height: 100%; width: auto; height: auto; opacity: 0; transition: opacity .8s ease; }
+.about-sketch img.loaded { opacity: 1; }
+:root[data-mode="dark"] .about-sketch img { filter: invert(1); }
+@media (max-width: 1000px), (hover: none) { .about-sketch { display: none; } }

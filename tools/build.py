@@ -83,6 +83,10 @@ PROJECTS = [
       "Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien, intentio quaerit spatium et spatium respondet. Praesent commodo cursus magna, vel scelerisque nisl consectetur et, donec sed odio dui.",
       "Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Etiam porta sem malesuada magna mollis euismod, cras justo odio, dapibus ac facilisis in, egestas eget quam."
      ]},
+    # Added 2026-11-27 (Juan); images from the old juandemarco.us page
+    {"slug": "family-of-curves", "title": "Family of Curves",
+     "meta": "Year · Line drawings",
+     "text": ["Description coming soon."]},
 ]
 # PLACEHOLDER Latin text, years and mediums (2026-11-07) until Juan sends the real ones.
 # Optional text per project: add "meta" (e.g. "2024 · Pigment print") and
@@ -123,7 +127,10 @@ TEXT_POSITION = "top"
 #               Strip 1B sliders, for designing together
 SETTINGS_MODE = "working"
 GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
-WORK_LAYOUTS = [("squares", "Squares"), ("squares2", "Squares 2 rows"), ("grid", "Grid V1"), ("grid2", "Cluster"), ("1a", "Strip 1A"), ("1b", "Strip 1B")]
+# Retired 2026-11-27 (kept in VERSIONS.md, commit c3a070c): Squares (3 rows),
+# Cluster (grid2), Strip 1B. Squares = the old "Squares 2 rows", Grid = Grid V1,
+# Strip = Strip 1A.
+WORK_LAYOUTS = [("squares", "Squares"), ("grid", "Grid"), ("strip", "Strip")]
 
 EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
@@ -185,12 +192,7 @@ def _page(title, section, body, body_class="", head_extra=""):
         + "".join(f'      <button type="button" class="pick-row pick-opt" data-hv="{k}">{v}</button>\n' for k, v in GALLERY_LAYOUTS)
         + '    </div>\n'
         '    <button type="button" class="pick-row pick-art" data-tog="art">Art view: <span></span></button>\n'
-        '    <button type="button" class="pick-row pick-shapes" data-shapes>Tile shapes: <span></span></button>\n'
-        '    <div class="mode-pick-work">\n'
-        '      <label>Space <input type="range" data-wk="gap" min="0" max="120" step="1"><output></output></label>\n'
-        '      <label>Up <input type="range" data-wk="up" min="0" max="45" step="1"><output></output></label>\n'
-        '      <label>Down <input type="range" data-wk="down" min="0" max="45" step="1"><output></output></label>\n'
-        '    </div>\n')
+        )
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -544,7 +546,17 @@ def main():
 """
     # About and Contact are one page now: About text, then the contact text below.
     legal = f'      <p class="about-legal">&copy; Juan De Marco | <span class="yr">{YEAR}</span></p>\n'
-    write("about/index.html", page("About", "about", stacked(about_block + contact + legal), "inner photo"))
+    # Test (Juan, 2026-11-27): one of the Gallery sketches, frameless (lines
+    # only, white in dark mode), at random on each visit, right of the text.
+    bare = sorted(f.name for f in (ROOT / "images" / "prints" / "sketches" / "bare").glob("[0-9]*.webp"))
+    sketch = ('  <div class="about-sketch" aria-hidden="true"><img alt="" decoding="async" draggable="false"></div>\n'
+              '  <script>\n    (function () {\n'
+              f'      var list = {json.dumps(["/images/prints/sketches/bare/" + f for f in bare])}, img = document.querySelector(".about-sketch img");\n'
+              '      if (!img || !list.length) return;\n'
+              '      img.onload = function () { img.classList.add("loaded"); };\n'
+              '      img.src = list[Math.floor(Math.random() * list.length)];\n'
+              '    })();\n  </script>\n')
+    write("about/index.html", page("About", "about", stacked(about_block + contact + legal) + sketch, "inner photo"))
     # Old /contact/ links land on About.
     write("contact/index.html", '<!doctype html>\n<meta charset="utf-8">\n<title>About</title>\n'
           '<meta http-equiv="refresh" content="0; url=/about/">\n<link rel="canonical" href="/about/">\n'
