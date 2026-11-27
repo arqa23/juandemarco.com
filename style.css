@@ -1002,9 +1002,8 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 .mode-pick.on-work .pick-work, .mode-pick.on-gal .pick-gal.pick-layouts { display: flex !important; }
 .mode-pick.on-gal .pick-gal:not(.pick-layouts), .mode-pick.on-room .pick-art { display: block !important; }
 .mode-pick .pick-col { cursor: pointer; }
-/* Home: the settings button is back (Juan, 2026-11-27) to reach Design preview;
-   over the cover image its box keeps the dark-mode colours so it always reads */
-:root:not([data-design="edit"]) body.home .mode-pick { --bg: #171716; --ink: #EDE8DE; --ink-dim: rgba(237, 232, 222, .68); }
+/* Home has one view and no settings button (Juan, 2026-11-27, again) */
+body.home .settings-btn, body.home .mode-pick { display: none !important; }
 
 /* Art views: no < > beside the image on desktop, the cursor turns it (Juan, 2026-11-27) */
 @media (hover: hover) and (min-width: 761px) { .room-show .slide-btn { display: none !important; } }
@@ -1221,12 +1220,13 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 :root[data-design="edit2"] .has-ed .stacked,
 :root[data-design="edit2"] .has-ed .about-sketch { display: none !important; }
 
-/* Home v2 */
+/* Home (was Editorial v2; THE Home since Juan, 2026-11-27): the work inside a
+   thin mat of page colour, with a wall label. Previous homes: VERSIONS.md */
 :root { --e2-mat: max(10px, calc(22 * var(--s))); }
-:root[data-design="edit2"] body.home { background: var(--bg); }
-:root[data-design="edit2"] .home .cover { inset: var(--e2-mat); width: calc(100% - 2 * var(--e2-mat)); height: calc(100dvh - 2 * var(--e2-mat)); }
-:root[data-design="edit2"] .home::before { top: var(--e2-mat); left: var(--e2-mat); right: var(--e2-mat); }
-:root[data-design="edit2"] .home::after { right: var(--e2-mat); bottom: var(--e2-mat); }
+body.home { background: var(--bg); }
+.home .cover { inset: var(--e2-mat); width: calc(100% - 2 * var(--e2-mat)); height: calc(100dvh - 2 * var(--e2-mat)); }
+.home::before { top: var(--e2-mat); left: var(--e2-mat); right: var(--e2-mat); }
+.home::after { right: var(--e2-mat); bottom: var(--e2-mat); }
 .e2-label { position: fixed; z-index: 3; margin: 0; left: var(--edge);
   bottom: calc(var(--gutter) + max(15px, calc(18 * var(--s))) + var(--ed-1));
   color: rgba(255, 255, 255, .8); text-shadow: var(--shadow); font-size: max(9.5px, calc(var(--nav-size) * .85)); }
@@ -1251,7 +1251,8 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
 
 /* About v2 */
 :root[data-design="edit2"] .has-ed .e2-about {
-  display: grid; grid-template-columns: auto minmax(0, 36em); column-gap: calc(var(--ed-3) * 1.5); align-items: start; justify-content: start;
+  display: grid; grid-template-columns: auto minmax(0, 36em); column-gap: var(--ed-3); align-items: start;
+  height: 100%; overflow: hidden;   /* About never scrolls (Juan): the text sizes below follow the window height too */
   width: calc(var(--ed-l) + var(--ed-w)); padding: var(--ed-2) 0 var(--ed-2) var(--ed-l);
 }
 .e2a-fig i { display: block; height: calc(100vh - var(--header-h) - var(--ed-band) - var(--ed-2) * 2); min-height: 320px; aspect-ratio: 707 / 1087;
@@ -1266,3 +1267,68 @@ img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -we
   .e2w-view { display: none; }
   .e2a-fig i { height: 60vh; margin: 0 auto var(--ed-2); }
 }
+
+/* About v2 fits the window: type and spacing also follow the window height */
+:root[data-design="edit2"] .e2-about { --ts: min(var(--text-size), 1.62vh); }
+.e2-about .eda-lead { font-size: calc(var(--ts, var(--text-size)) * 1.8); }
+.e2-about .eda-body { font-size: calc(var(--ts, var(--text-size)) * 1.05); }
+.e2-about .eda-cred { font-size: calc(var(--ts, var(--text-size)) * .9); margin-top: min(var(--ed-2), 4.4vh); padding-top: min(var(--ed-1), 2.4vh); }
+.e2-about .eda-contact { margin-top: min(var(--ed-3), 6.5vh); }
+.e2-about .about-ask, .e2-about .email.email { font-size: var(--ts, var(--text-size)) !important; }
+.e2-about .eda-legal { margin-top: min(var(--ed-2), 4.4vh); }
+.e2-about .e2a-text .eda-lead { margin-bottom: min(var(--ed-2), 4.4vh); }
+.e2a-fig i { min-height: 0; }
+
+/* ======================================================================
+   GALLERY VIEWS (Juan, 2026-11-27): html data-design="exh" | "wall" on
+   /prints/ only. Current (Index / Cluster) is untouched and the default.
+   ====================================================================== */
+.gx, .gw { display: none; }
+:root[data-design="exh"] .has-ed .gx, :root[data-design="wall"] .has-ed .gw { display: block; }
+:root[data-design] .has-ed .prints-page, :root[data-design] .wall-map, :root[data-design] .has-ed .to-top { display: none !important; }
+.mode-pick.on-gal.is-ed .pick-gal.pick-layouts { display: none !important; }
+.gx-t, .gw-t, .gx-h {
+  font-family: var(--label-font, var(--font)); font-weight: var(--label-w, 400);
+  letter-spacing: var(--label-track, .2em); text-transform: var(--label-case, uppercase); font-size: max(10.5px, var(--nav-size));
+}
+.gx-m, .gw-m { font-family: var(--text-font, var(--font)); font-weight: var(--text-w, 300); color: var(--ink-dim);
+  font-size: max(12px, calc(var(--text-size) * .85)); letter-spacing: 0; text-transform: none; }
+/* the paper, told apart from the page by a soft edge (never a frame) */
+.gx-sheet img, .gw-sheet img { display: block; width: 100%; height: 100%; object-fit: contain;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent), 0 2px 10px rgba(0, 0, 0, .10); }
+.gx a:focus-visible, .gw a:focus-visible { outline: 1px solid var(--ink); outline-offset: 6px; }
+
+/* Exhibition (brief V3): three sheets a row, bottoms on one line, captions under */
+.gx-page {
+  --gx-cap: calc(max(10.5px, var(--nav-size)) * 1.5 + max(12px, calc(var(--text-size) * .85)) * 1.5 + var(--ed-1));
+  --gx-row: min(calc((var(--ed-w) - var(--ed-2) * 2) / 3 * 1.5), calc((100vh - var(--header-h) - var(--ed-band)) * .6));
+  width: calc(var(--ed-l) + var(--ed-w)); padding: var(--ed-1) 0 var(--ed-2) var(--ed-l);
+}
+.gx-h { margin: 0 0 var(--ed-2); font-size: max(10.5px, var(--nav-size)); color: var(--ink); }
+.gx-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ed-2) var(--ed-2); }
+.gx-cell { display: block; color: var(--ink); text-decoration: none; }
+.gx-stage { display: flex; align-items: flex-end; justify-content: center; height: var(--gx-row); }
+.gx-sheet { display: block; height: min(100%, calc((var(--ed-w) - var(--ed-2) * 2) / 3 / var(--r))); aspect-ratio: var(--r); }
+.gx-t { display: block; margin-top: var(--ed-1); text-align: center; }
+.gx-m { display: block; margin-top: .3em; text-align: center; }
+.gx-cell:hover .gx-sheet img { opacity: .9; }
+@media (max-width: 1000px) { .gx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Wall (Claude's own): one line of works hung on a common centre line, as on
+   a gallery wall, at their true sizes relative to each other; wall labels
+   under each, left aligned. More works than fit: the wall runs sideways. */
+.gw-page {
+  --gw-gap: calc(var(--ed-2) * 1.5);
+  --in: calc((100vh - var(--header-h) - var(--ed-band)) * .56 / var(--maxh));   /* px per inch: the tallest work at 56% of the wall */
+  height: 100%; width: 100%; padding: 0 var(--ed-r) 0 var(--ed-l);
+  align-items: center; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin;
+}
+.gw-row::after { content: ""; flex: none; width: var(--ed-r); }   /* room past the last work */
+:root[data-design="wall"] .has-ed .gw-page { display: flex; }
+.gw-row { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--gw-gap); align-items: center; }
+.gw-item { position: relative; display: block; color: var(--ink); text-decoration: none; }
+.gw-sheet { display: block; width: calc(var(--w) * var(--in)); height: calc(var(--h) * var(--in)); }
+.gw-label { position: absolute; left: 0; top: calc(100% + var(--ed-1)); white-space: nowrap; }
+.gw-t { display: block; font-size: max(9.5px, calc(var(--nav-size) * .85)); }
+.gw-m { display: block; margin-top: .3em; font-size: max(11px, calc(var(--text-size) * .78)); }
+.gw-item:hover .gw-sheet img { opacity: .9; }

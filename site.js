@@ -145,7 +145,6 @@
         var on = b.dataset.dv === (root.dataset.design || 'current');
         b.classList.toggle('is-on', on); b.setAttribute('aria-checked', String(on));
       });
-      pick.classList.toggle('on-ed', document.body.classList.contains('has-ed'));
       pick.classList.toggle('is-ed', ed);
     };
     if (pick) {
@@ -160,13 +159,15 @@
         }
         var dv = e.target.closest('button[data-dv]');   // Design preview: Current / Editorial test
         if (dv) {
+          var pgk = window.jdmPageOf(location.pathname);
+          if (!pgk) return;
           var was = root.dataset.design || '', want = dv.dataset.dv === 'current' ? '' : dv.dataset.dv;
           if (want) root.dataset.design = want; else delete root.dataset.design;
-          try { if (want) localStorage.setItem('jdm-design', want); else localStorage.removeItem('jdm-design'); } catch (err) {}
+          try { localStorage.setItem('jdm-view-' + pgk, dv.dataset.dv); } catch (err) {}
           markPick();
-          if (was === want || !document.body.classList.contains('has-ed')) return;
-          // Work: the moving Squares / Float start (or stop) with a fresh load, as the Layout list does
-          if (document.querySelector('.work-page')) { location.reload(); return; }
+          if (was === want) return;
+          // Work and Gallery: the moving / hung layouts start (or stop) with a fresh load, as the Layout list does
+          if (pgk === 'work' || pgk === 'gallery') { location.reload(); return; }
           place(); initE2Work(); dispatchEvent(new Event('resize'));   // About's sketch re-measures itself
           return;
         }
@@ -440,7 +441,7 @@
   // hanging orders are tried and the one with the fewest large holes is kept.
   function layoutWall() {
     var wall = document.querySelector('.prints');
-    if (!wall) return;
+    if (!wall || root.dataset.design) return;   // Exhibition / Wall views: no hanging
     var W = wall.clientWidth, g = parseFloat(getComputedStyle(wall).columnGap) || 60;
     var narrow = W < 600, base = W * (narrow ? 0.4 : 0.185), cx = W / 2;
     var hang = document.documentElement.dataset.hang || PREF_DEFAULTS.hang;
@@ -987,6 +988,13 @@
     show(0);
     setTimeout(function () { imgs.forEach(load); }, 1500);
   }
+
+  /* Gallery, Wall view: the wheel walks along the wall */
+  document.addEventListener('wheel', function (e) {
+    var w = root.dataset.design === 'wall' && document.querySelector('.gw-page');
+    if (!w || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    w.scrollLeft += e.deltaY; e.preventDefault();
+  }, { passive: false });
 
   /* ---------- Image protection (deterrent; screenshots can't be blocked) ---------- */
   document.addEventListener('contextmenu', function (e) {
@@ -1641,7 +1649,7 @@
   function drawMap() {
     var wall = document.querySelector('.prints'), sc = document.querySelector('.scroller');
     var map = document.querySelector('.wall-map');
-    if (!wall || !sc || !wall.classList.contains('is-hung') || !matchMedia('(hover: hover) and (min-width: 761px)').matches) { if (map) map.remove(); return; }
+    if (!wall || !sc || root.dataset.design || !wall.classList.contains('is-hung') || !matchMedia('(hover: hover) and (min-width: 761px)').matches) { if (map) map.remove(); return; }
     if (!map) {
       map = document.createElement('div'); map.className = 'wall-map'; map.setAttribute('aria-hidden', 'true');
       map.innerHTML = '<div class="wall-map-in"></div><div class="wall-map-view"></div>';
@@ -1846,6 +1854,9 @@
           location.href = url; return;
         }
         document.title = doc.title;
+        // this page's own view (Work, About, Gallery), set before it shows
+        var dz = window.jdmDesign(window.jdmPageOf(new URL(url, location.href).pathname));
+        if (dz) root.dataset.design = dz; else delete root.dataset.design;
         document.body.className = doc.body.className;
         document.body.innerHTML = doc.body.innerHTML;
         runScripts(document.body);

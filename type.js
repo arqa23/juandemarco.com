@@ -39,6 +39,22 @@
     }
   }
   function save(T) { try { localStorage.setItem('jdm-type', JSON.stringify(T)); } catch (e) {} }
+  // Views per page. '' = the page's original layout ("Current").
+  var VIEWS = {
+    work:    { def: 'edit',  ok: ['edit', 'edit2'] },   // Editorial is Work's default (Juan, 2026-11-27)
+    about:   { def: 'edit2', ok: ['edit', 'edit2'] },   // Editorial v2 is About's default (Juan, 2026-11-27)
+    gallery: { def: '',      ok: ['exh', 'wall'] }      // Current (Index / Cluster) stays the Gallery default
+  };
+  window.jdmPageOf = function (path) {
+    return { '/work/': 'work', '/about/': 'about', '/prints/': 'gallery' }[String(path).replace(/index\.html$/, '')] || '';
+  };
+  window.jdmDesign = function (pg) {
+    if (!VIEWS[pg]) return '';
+    var v = null;
+    try { v = localStorage.getItem('jdm-view-' + pg); } catch (e) {}
+    if (v === 'current') return '';
+    return VIEWS[pg].ok.indexOf(v) >= 0 ? v : VIEWS[pg].def;
+  };
   window.jdmType = { FONTS: FONTS, DEFAULTS: DEFAULTS, load: load, apply: apply, save: save };
   // Settings switched off (data-settings="off" on <html>): defaults only.
   var off = document.documentElement.getAttribute('data-settings') === 'off';
@@ -51,13 +67,14 @@
     // Work page layout (Juan, 2026-11-27): squares | float | grid | strip
     d.work = 'squares';   // Grid and Strip switched off (Juan, 2026-11-27)
     d.art = '2';          // project / print pages: ArtView2 only (Juan, 2026-11-27); ArtView1 retired, see VERSIONS.md
+    // Page views (Juan, 2026-11-27): each of Work, About and Gallery has its own
+    // "View" choice in the settings box, kept in this browser (jdm-view-<page>).
+    // Set here, before the page paints, so the wrong view never flashes.
+    var dz = window.jdmDesign(window.jdmPageOf(location.pathname)); if (dz) d.design = dz;
     if (off) return;
     // project text: off for good (Juan, 2026-11-26); the Text option is gone
     // dark mode on every new visit (Juan, 2026-11-26): a switch to light lasts
     // only for this visit (sessionStorage)
-    // Design preview (Juan, 2026-11-27): "Editorial test" for Home, Work and
-    // About, opt-in only; set here, before the page paints, so it never flashes
-    var dz = localStorage.getItem('jdm-design'); if (dz === 'edit' || dz === 'edit2') d.design = dz;
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
     // public settings (build.py SETTINGS_MODE): frames always on, no Framed option
     var keys = document.documentElement.getAttribute('data-public') ? ['work', 'hang'] : ['frame', 'work', 'hang'];
