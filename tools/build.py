@@ -87,7 +87,7 @@ PROJECTS = [
      ]},
     {"slug": "the-conflicted-icon", "title": "The Conflicted Icon",
      "desc": "A reinterpretation of the traditional skyscraper, in which the architectural crown is relocated from the top of the tower to its base. The project shifts the emphasis from the skyline to the point where the tower meets the ground.",
-     "subtitle": "Inverted Vertical Typologies",
+     "subtitle": "Inverted Monumentality",
      "meta": "2014 · Digital rendering, line drawing",
      "text": [
       "Curabitur at lacus ac velit ornare lobortis. Curabitur a felis in nunc fringilla tristique. Morbi mattis ullamcorper velit, phasellus gravida semper nisi. Nullam vel sem, pellentesque libero tortor, tincidunt et tincidunt eget. Fusce dapibus tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.",
