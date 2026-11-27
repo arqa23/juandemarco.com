@@ -1415,14 +1415,25 @@ body.home { background: var(--bg); }
 /* Framed: the paper alone, no soft shadow; top and foot on the same lines */
 :root[data-aframe="on"] .e2a-sheet { box-shadow: none; inset: 0 auto auto 0; margin: 0; width: auto; height: 100%; max-height: none; }
 /* test slider: the text moves sideways (vw), the drawing stays */
-.e2a-text { position: relative; left: var(--e2-shift, 0); }
+.e2a-text { position: relative; }
+   /* Juan's pick from the test slider (round 7) */
 .mode-pick .pick-slide { display: flex; align-items: center; gap: 6px; cursor: default; }
 .mode-pick .pick-slide input { width: 120px; accent-color: var(--ink); }
 .mode-pick .pick-slide .pick-val { min-width: 9.5em; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
 :root:not([data-design="edit2"]) .mode-pick .pick-slide { display: none; }
 :root[data-design="edit2"] .has-ed .e2-about { overflow-x: visible; overflow-y: clip; }   /* the slider can carry the text past the old right edge */
 /* Round 7 tests (Juan): the drawing moves sideways too; the text can be set flush right */
-.e2a-fig { left: var(--e2-ishift, 0); }
+
 :root[data-aalign="right"] .e2a-text { text-align: right; }
 :root[data-aalign="right"] .e2a-text :is(.eda-lead, .eda-body, .eda-cred) { margin-left: auto; }   /* one shared right edge */
 .mode-pick .pick-slide input { width: 140px; }
+
+/* About, final (Juan, round 7: image +11, text -13 on his 1920 screen): the
+   drawing starts 13.7% across, the text follows it at the same gap at every
+   window size, so the two never overlap */
+@media (min-width: 701px) {
+  :root[data-design="edit2"] .has-ed .e2-about {
+    grid-template-columns: max-content minmax(0, 36em); justify-content: start;
+    column-gap: 2.97vw; padding-left: 13.7vw; width: 100%;
+  }
+}

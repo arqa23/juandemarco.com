@@ -78,11 +78,6 @@
     // dark mode on every new visit (Juan, 2026-11-26): a switch to light lasts
     // only for this visit (sessionStorage)
     if (localStorage.getItem('jdm-aframe') === 'on') d.aframe = 'on';   // About drawing on its paper
-    var ash = parseFloat(localStorage.getItem('jdm-atext'));   // About text shift (test slider), in vw
-    if (ash) document.documentElement.style.setProperty('--e2-shift', ash + 'vw');
-    var aim = parseFloat(localStorage.getItem('jdm-aimg'));    // About drawing shift (test slider), in vw
-    if (aim) document.documentElement.style.setProperty('--e2-ishift', aim + 'vw');
-    if (localStorage.getItem('jdm-aalign') === 'right') d.aalign = 'right';   // About text set flush right (test)
     var sm = sessionStorage.getItem('jdm-mode'); if (sm === 'light' || sm === 'dark') d.mode = sm;
     // public settings (build.py SETTINGS_MODE): frames always on, no Framed option
     var keys = document.documentElement.getAttribute('data-public') ? ['work', 'hang'] : ['frame', 'work', 'hang'];

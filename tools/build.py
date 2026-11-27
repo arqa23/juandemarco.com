@@ -274,13 +274,7 @@ def _page(title, section, body, body_class="", head_extra=""):
     # About: the drawing framed (on its paper) or not (Juan, 2026-11-27)
     if section == "about":
         frame_row += '    <button type="button" class="pick-row" data-tog="aframe">Framed: <span></span></button>\n'
-        # a test slider: move the About text left or right (Juan, round 6)
-        # (round 7) the drawing gets its own slider, and the text can align left or right
-        frame_row += ('    <label class="pick-row pick-slide">Text: <input type="range" min="-40" max="40" step="0.5" value="0" '
-                      'data-aslide="text" aria-label="Text position"> <span class="pick-val"></span></label>\n'
-                      '    <label class="pick-row pick-slide">Image: <input type="range" min="-10" max="70" step="0.5" value="0" '
-                      'data-aslide="image" aria-label="Image position"> <span class="pick-val"></span></label>\n'
-                      '    <button type="button" class="pick-row" data-tog="aalign">Text align: <span></span></button>\n')
+        # About test sliders/align (rounds 6-7) removed: Juan picked image +11vw, text -13vw (style.css)
     design_rows = "" if not views else (
         '    <div class="pick-layouts pick-design" role="radiogroup" aria-label="View">\n'
         '      <span class="pick-head">View:</span>\n'
