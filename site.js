@@ -963,14 +963,38 @@
   // Work (Editorial): a new hang on every visit (Juan, 2026-11-27). The rows
   // (one large + one small, or three small) keep their make-up; their order,
   // and which side each project sits on, are drawn at random.
-  // Phone version (Juan, 2026-11-28): one plain column, nothing moves or reshuffles
-  function isPhone() { return matchMedia('(max-width: 700px)').matches; }
+  // Phone version (Juan, 2026-11-28): one plain column, nothing moves or reshuffles.
+  // The same media query as the PHONE VERSION block in style.css.
+  var PHONE_Q = '(max-width: 700px), (hover: none) and (pointer: coarse) and (max-height: 500px)';
+  function isPhone() { return matchMedia(PHONE_Q).matches; }
   function phoneRooms() {   // project and print pages: every image, one under another
     if (!isPhone()) return;
-    document.querySelectorAll('.room-show .slide').forEach(function (s) {
+    var slides = document.querySelectorAll('.room-show .slide'), n = slides.length;
+    slides.forEach(function (s, k) {
       if (s.dataset.r) s.style.setProperty('--sr', s.dataset.r);
       if (s.dataset.src) { s.loading = 'lazy'; s.src = s.dataset.src; s.removeAttribute('data-src'); }
+      if (!s.parentNode.classList.contains('ph-plate')) {   // each image on its own plate, with its number (Phone B)
+        var f = document.createElement('figure'), c = document.createElement('figcaption');
+        f.className = 'ph-plate'; c.textContent = (k + 1) + ' / ' + n;
+        s.parentNode.insertBefore(f, s); f.appendChild(s); f.appendChild(c);
+      }
+      // tap an image to open it alone, full size, where it can be zoomed freely
+      s.onclick = function () { if (isPhone()) location.href = s.currentSrc || s.src; };
     });
+  }
+  function phoneInit() {
+    phoneRooms();
+    root.classList.remove('ph-open');
+    ['.edw-feat', '.gx-grid'].forEach(function (q) {   // plate numbers: "01 / 11"
+      var g = document.querySelector(q); if (!g) return;
+      [].forEach.call(g.children, function (c) { c.setAttribute('data-of', String(g.children.length).padStart(2, '0')); });
+    });
+    if (document.body.classList.contains('inner') && !document.querySelector('.ph-menu-btn')) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ph-menu-btn'; b.textContent = 'Menu';
+      b.onclick = function () { var o = root.classList.toggle('ph-open'); b.textContent = o ? 'Close' : 'Menu'; };
+      document.body.appendChild(b);
+    }
   }
   function shuffleWork() {
     // Work (Editorial): a new hang on every visit (Juan, 2026-11-27). The four
@@ -985,7 +1009,9 @@
     function mix(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     var all = [].slice.call(feat.querySelectorAll('.edw-item'));
     var big = mix(all.filter(function (a) { return a.classList.contains('edw-lead'); }));
-    var sm = mix(all.filter(function (a) { return !a.classList.contains('edw-lead'); }));
+    // Wedges always comes last, in the bottom row (Juan, 2026-11-28)
+    var isW = function (a) { return /\/work\/wedges\//.test(a.getAttribute('href') || ''); };
+    var sm = mix(all.filter(function (a) { return !a.classList.contains('edw-lead') && !isW(a); })).concat(all.filter(isW));
     var side = Math.random() < .5 ? 0 : 1, out = [];
     function pair() {
       var M = big.shift(), m = sm.shift();
@@ -1009,7 +1035,7 @@
     place();
     initSettings();
     initSlideshow();
-    phoneRooms();
+    phoneInit();
     initFilmstrip();
     initSquares();
     initWallGlide();

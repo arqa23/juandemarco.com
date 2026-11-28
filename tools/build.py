@@ -134,7 +134,7 @@ ED_FEATURED = [
     [("parnell-residence", "small", "01.webp"), ("julius-ii", "lead", "01.webp")],
     [("american-promise", "lead", "01.webp"), ("family-of-curves", "small", "01.webp")],
     [("frankls-purposive-intention", "small", "01.webp"), ("talbot-road-residence", "lead", "01.webp")],
-    [("julius", "small", "03.webp"), ("wedges", "small", "01.webp"), ("the-conflicted-icon", "small", "01.webp")],
+    [("julius", "small", "03.webp"), ("the-conflicted-icon", "small", "01.webp"), ("wedges", "small", "01.webp")],   # Wedges always last (Juan, 2026-11-28)
 ]
 ED_BELOW = []   # the smaller grid under a line (round 2), now empty
 # About: the drawing beside the text, on its own paper (Gallery sketch 02)

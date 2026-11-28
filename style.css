@@ -1457,32 +1457,38 @@ body.home { background: var(--bg); }
 @media (max-width: 700px) { :root[data-nosettings="1"] .to-top.to-top { bottom: calc(18px - var(--icon) * .125); } }
 
 /* =====================================================================
-   PHONE VERSION (Juan, 2026-11-28). Everything below applies only at
-   phone widths (700px and under); the desktop site is untouched.
-   Always light. One centred column, one image after another, plain
-   vertical scroll: no staggers, shuffles, size changes or motion.
+   PHONE VERSION (Juan, 2026-11-28). Applies only to phones: 700px wide
+   and under, or a touch screen held sideways (under 500px tall). The
+   desktop site is untouched. Always light. Two designs:
+     Phone A (default): one centred column, plain scroll.
+     Phone B (?phone=b, back with ?phone=a): "plates", one work per
+     screen, like turning the pages of a monograph.
+   site.js isPhone() uses the same media query.
    ===================================================================== */
-@media (max-width: 700px) {
-  :root { color-scheme: light; --ph-side: 28px; --ph-gap: 64px; --ph-top: 150px; }
-  html, body { overflow-x: hidden; }
+@media (max-width: 700px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  :root { color-scheme: light; --ph-side: 28px; --ph-gap: 64px; --ph-top: 150px; --ph-img-h: 100%; }
+  body { overflow-x: clip; }
   *, *::before, *::after { animation: none !important; }
 
+  /* the page itself scrolls (no inner scroll box), so pinch-zoom and pan work */
+  .inner { height: auto; min-height: 100%; overflow: visible; position: relative; }
+  .inner .scroller, :root[data-design] body.inner.has-ed .scroller { position: relative; inset: auto; top: auto; bottom: auto; overflow: visible; min-height: 100vh; }
+  .inner .site-header::before, .inner .site-footer, .about-sketch, .to-top, .wall-map { display: none !important; }
+
   /* Name centred at the top; the menu as one centred row under it */
-  .inner .site-header { position: absolute; left: 0; right: 0; top: 30px; padding: 0; text-align: center; }
-  .inner .logo { display: inline-block; font-size: 19px; letter-spacing: .36em; margin-right: -.36em; }
-  .inner .nav { position: absolute; top: 74px; left: 0; right: 0; bottom: auto; flex-direction: row; justify-content: center; gap: 0 22px; }
+  .inner .site-header { position: absolute; left: 0; right: 0; top: 30px; padding: 0; text-align: center; z-index: 4; }
+  .inner .logo, .home .logo { display: inline-block; font-size: 19px; letter-spacing: .36em; margin-right: -.36em; }
+  .inner .nav { position: absolute; top: 74px; left: 0; right: 0; bottom: auto; flex-direction: row; justify-content: center; gap: 0 22px; z-index: 4; }
   .inner .nav a { flex-direction: row; }
-  .inner .nav .nav-label { font-size: 11px; letter-spacing: .2em; }
+  .inner .nav .nav-label { font-size: 11px !important; letter-spacing: .2em; }
   .inner .nav a[aria-current="page"] .nav-label { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
-  .inner .site-footer, .about-sketch { display: none !important; }
 
   /* Home: the cover stays; the menu sits in the middle, larger and bold */
   .home .site-header { left: 0; right: 0; text-align: center; }
-  .home .logo { display: inline-block; font-size: 19px; letter-spacing: .36em; margin-right: -.36em; }
   .home .nav { position: fixed; inset: 0; margin: auto; height: max-content; width: 100%;
     flex-direction: column; align-items: center; justify-content: center; gap: 26px; }
   .home .nav a { flex-direction: row; justify-content: center; }
-  .home .nav .nav-label { font-family: "Jost Phone", var(--menu-font, var(--font)); font-weight: 600; font-size: 22px;
+  .home .nav .nav-label, .ph-open .nav .nav-label { font-family: "Jost Phone", var(--menu-font, var(--font)); font-weight: 600; font-size: 22px !important;
     letter-spacing: .28em; margin-right: -.28em; opacity: 1; text-decoration: none; }
   .home .e2-label { left: 0; right: 0; text-align: center; }
 
@@ -1518,17 +1524,109 @@ body.home { background: var(--bg); }
   .e2-about .about-ask, .e2-about .email.email { font-size: 15px !important; }
   .e2-about .eda-legal { margin-top: 40px; }
 
-  /* Project and print pages: title, then every image one under another */
+  /* Project and print pages: title, then every image one under another.
+     Tap an image to open it on its own, full size, to zoom in. */
   .room-page { display: block; min-height: 0; padding: 26px var(--ph-side) 90px; }
   .room-top { position: relative; justify-content: center; text-align: center; min-height: 28px; }
-  .room-close { position: absolute; right: -6px; top: 50%; transform: translateY(-50%); }
+  .room-close { position: absolute; right: -6px; top: 50%; transform: translateY(-50%); font-size: 32px; }
   .room-layout { display: flex; flex-direction: column; padding: 0; gap: 0; height: auto; }
-  .room-text { order: -1; text-align: center; margin: 44px 0 40px; align-self: stretch; max-width: none; }
+  .room-text { order: -1; text-align: center; margin: 44px 0 44px; align-self: stretch; max-width: none; }
   .room-text .project-nav, .room-pnav { justify-content: center; }
-  .room-show .frame { width: 100% !important; aspect-ratio: auto; height: auto; display: flex; flex-direction: column; gap: 28px; box-shadow: none; }
-  .room-show .slide, .room-show .slide.is-on { position: static; display: block; width: 100%; height: auto; opacity: 1; transition: none; }
-  .room-show .slide { aspect-ratio: var(--sr, auto); }
   .room-show { padding: 0; width: 100%; }
+  .room-show .frame { width: 100% !important; aspect-ratio: auto; height: auto; display: flex; flex-direction: column; align-items: center; gap: 72px; box-shadow: none; overflow: visible; }
+  .room-show .slide, .room-show .slide.is-on { position: static; display: block; width: 100%; height: auto; opacity: 1; transition: none; aspect-ratio: var(--sr, auto); cursor: zoom-in; }
   .room-show .slide-btn, .room-under { display: none !important; }
-  .to-top { display: none !important; }
+  .ph-plate { margin: 0; width: 100%; }
+}
+
+/* Phone held sideways: each image as large as the screen's height allows */
+@media (hover: none) and (pointer: coarse) and (max-height: 500px) and (min-width: 701px) {
+  :root { --ph-top: 130px; --ph-side: 48px; }
+  .edw-img img, .gx-sheet, :root .e2-about .e2a-sheet, .room-show .slide, .room-show .slide.is-on { width: auto; max-width: 100%; max-height: 84svh; margin: 0 auto; }
+  .gx-sheet { height: 84svh; max-height: 84svh; }
+  .gx-sheet img { object-fit: contain; }
+  .edw-img { display: flex; justify-content: center; }
+  .e2-about .e2a-fig { display: flex; justify-content: center; }
+  .room-show .slide, .room-show .slide.is-on { height: 84svh; width: auto; }
+  .home .nav { gap: 14px; }
+}
+
+/* ---------- Phone B: plates ---------- */
+@media (max-width: 700px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  :root[data-phone="b"] { --bar: 58px; --plate-h: calc(100svh - var(--bar)); --plate-img: 64svh; scroll-padding-top: var(--bar); }
+  :root[data-phone="b"]:has(body.pg-work, body.pg-gal, body.room) { scroll-snap-type: y mandatory; }
+
+  /* a slim paper bar: name left, Menu right; Menu opens the full menu */
+  :root[data-phone="b"] .inner .site-header { position: fixed; top: 0; left: 0; right: 0; height: var(--bar); display: flex; align-items: center;
+    padding: 0 22px; background: var(--bg); text-align: left; z-index: 6; }
+  :root[data-phone="b"] .inner .logo { font-size: 13px; letter-spacing: .34em; margin: 0; }
+  :root[data-phone="b"] .inner .ph-menu-btn { display: block; position: fixed; top: 0; right: 10px; height: var(--bar); padding: 0 12px; z-index: 8;
+    border: 0; background: none; color: var(--ink); font: 400 11px/1 var(--label-font, var(--font)); letter-spacing: .2em; text-transform: uppercase; cursor: pointer; }
+  :root[data-phone="b"] .inner .nav { display: none; position: fixed; inset: 0; z-index: 7; background: var(--bg);
+    flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+  :root[data-phone="b"].ph-open .inner .nav { display: flex; }
+  :root[data-phone="b"].ph-open .inner .nav a[aria-current="page"] .nav-label { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 1px; }
+  :root[data-phone="b"].ph-open, :root[data-phone="b"].ph-open body { overflow: hidden; }
+
+  /* Home: as on the desktop, the cover in its paper margin; the menu low on the left, large and light */
+  :root[data-phone="b"] .home .site-header { text-align: left; left: 0; right: auto; padding: 26px 24px; }
+  :root[data-phone="b"] .home .logo { font-size: 15px; letter-spacing: .36em; margin: 0; }
+  :root[data-phone="b"] .home .nav { inset: auto auto 74px 24px; margin: 0; width: auto; align-items: flex-start; gap: 14px; }
+  :root[data-phone="b"] .home .nav .nav-label { font-family: var(--menu-font, var(--font)); font-weight: 300; font-size: 30px !important; letter-spacing: .16em; margin: 0; text-shadow: 0 1px 14px rgba(0,0,0,.28); }
+  :root[data-phone="b"] .home .nav a[aria-current="page"] { display: none; }
+  :root[data-phone="b"] .home .e2-label { left: 24px; right: auto; bottom: 30px; text-align: left; }
+
+  /* Work and Gallery: one plate per screen, numbered, label below on the left */
+  :root[data-phone="b"] :is(body.pg-work .ed-work, .gx-page) { padding: var(--bar) 0 0; counter-reset: plate; }
+  :root[data-phone="b"] :is(.edw-feat, .gx-grid) { gap: 0 !important; }
+  :root[data-phone="b"] :is(.edw-item, .gx-grid > li) { min-height: var(--plate-h); scroll-snap-align: start; display: flex; flex-direction: column; justify-content: center;
+    padding: 0 26px; box-sizing: border-box; text-align: left; counter-increment: plate; position: relative; }
+  :root[data-phone="b"] :is(.edw-item, .gx-grid > li)::before { content: counter(plate, decimal-leading-zero) " / " attr(data-of); }
+  :root[data-phone="b"] :is(.edw-item, .gx-grid > li)::before { position: absolute; top: 18px; left: 26px; font: 400 10px/1 var(--label-font, var(--font)); letter-spacing: .2em; color: var(--ink-dim); }
+  :root[data-phone="b"] .edw-img { display: flex; justify-content: center; }
+  :root[data-phone="b"] .edw-img img { width: auto; max-width: 100%; max-height: var(--plate-img); }
+  :root[data-phone="b"] .edw-t { margin-top: 22px; font-size: 13px; }
+  :root[data-phone="b"] .edw-s { font-size: 13px; }
+  :root[data-phone="b"] .gx-sheet { width: auto; height: var(--plate-img); max-width: 100%; margin: 0 auto; }
+  :root[data-phone="b"] .gx-cap { text-align: left; margin-top: 22px; font-size: 10px; }
+  :root[data-phone="b"] .gx-cap::before { content: none; }
+
+  /* About: a reading page, text on the left, the drawing as a plate first */
+  :root[data-phone="b"] .has-ed .e2-about.e2-about { padding: calc(var(--bar) + 24px) 26px 70px; text-align: left; }
+  :root[data-phone="b"] .e2-about .e2a-fig { margin: 0 0 44px; display: flex; justify-content: center; }
+  :root[data-phone="b"] .e2-about .e2a-sheet { width: auto; max-width: 100%; max-height: 64svh; }
+  :root[data-phone="b"] .e2-about .e2a-text :is(.eda-lead, .eda-body, .eda-cred) { margin-left: 0; }
+  :root[data-phone="b"] .e2-about .eda-lead { font-size: 24px; line-height: 1.3; }
+  :root[data-phone="b"] .e2-about .eda-cred { border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); padding-top: 20px; }
+
+  /* Project and print rooms: an opening plate with the title, then one image per plate with its number */
+  :root[data-phone="b"] .room-page { padding: var(--bar) 0 0; }
+  :root[data-phone="b"] .room-top { position: fixed; top: 0; left: 0; right: 0; height: var(--bar); padding: 0 22px; justify-content: flex-start; background: var(--bg); z-index: 6; }
+  :root[data-phone="b"] .room-close { right: 16px; }
+  :root[data-phone="b"] .room-text { min-height: var(--plate-h); margin: 0; padding: 0 26px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;
+    text-align: left; scroll-snap-align: start; }
+  :root[data-phone="b"] .room-text h1 { font-size: 26px; letter-spacing: .14em; line-height: 1.3; }
+  :root[data-phone="b"] .room-text .project-nav, :root[data-phone="b"] .room-pnav { justify-content: flex-start; }
+  :root[data-phone="b"] .room-text::after { content: "Scroll \2193"; margin-top: 40px; font: 400 10px/1 var(--label-font, var(--font)); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); }
+  :root[data-phone="b"] .room-show .frame { gap: 0; }
+  :root[data-phone="b"] .ph-plate { min-height: var(--plate-h); width: 100%; padding: 0 26px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;
+    scroll-snap-align: start; margin: 0; }
+  :root[data-phone="b"] .ph-plate .slide { width: auto; max-width: 100%; max-height: var(--plate-img); height: auto; aspect-ratio: auto; }
+  :root[data-phone="b"] .ph-plate figcaption { align-self: stretch; margin-top: 18px; font: 400 10px/1 var(--label-font, var(--font)); letter-spacing: .2em; color: var(--ink-dim); text-align: left; }
+}
+.ph-plate figcaption, .ph-menu-btn { display: none; }
+@media (max-width: 700px) {
+  :root[data-phone="b"] .gx-sheet[style*="1.5"] { height: auto; width: 100%; }   /* wide sheets: full width when upright */
+}
+@media (max-width: 700px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  :root[data-phone="b"] .room .site-header, :root[data-phone="b"] .room .ph-menu-btn { display: none !important; }
+  :root[data-phone="b"] .room-top { display: flex; }
+}
+@media (max-width: 700px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  :root[data-phone="b"] .ph-plate figcaption { display: block; }
+}
+@media (hover: none) and (pointer: coarse) and (max-height: 500px) and (min-width: 701px) {
+  :root[data-phone="b"] { --plate-img: 56svh; }
+  :root[data-phone="b"] .home .nav { bottom: 56px; gap: 6px; }
+  :root[data-phone="b"] .home .nav .nav-label { font-size: 22px !important; }
 }
