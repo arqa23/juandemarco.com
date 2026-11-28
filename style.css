@@ -1534,7 +1534,7 @@ body.home { background: var(--bg); }
   .room-text .project-nav, .room-pnav { justify-content: center; }
   .room-show { padding: 0; width: 100%; }
   .room-show .frame { width: 100% !important; aspect-ratio: auto; height: auto; display: flex; flex-direction: column; align-items: center; gap: 72px; box-shadow: none; overflow: visible; }
-  .room-show .slide, .room-show .slide.is-on { position: static; display: block; width: 100%; height: auto; opacity: 1; transition: none; aspect-ratio: var(--sr, auto); cursor: zoom-in; }
+  .room-show .slide, .room-show .slide.is-on { position: static; display: block; width: 100%; height: auto; opacity: 1; transition: none; aspect-ratio: var(--sr, auto); }
   .room-show .slide-btn, .room-under { display: none !important; }
   .ph-plate { margin: 0; width: 100%; }
 }
@@ -1593,11 +1593,14 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .has-ed .e2-about.e2-about { padding: calc(var(--bar) + 20px) var(--ph-side) 90px; text-align: left; }
   :root[data-phone="b"] .e2-about .e2a-fig { margin: 0 0 40px; }
   :root[data-phone="b"] .e2-about .e2a-sheet.e2a-sheet { display: none; }
-  :root[data-phone="b"] .e2-about .e2a-fig i { display: block; visibility: visible; width: 100%; height: auto; min-height: 0; margin: 0; aspect-ratio: 707 / 1087;
+  :root[data-phone="b"] .e2-about .e2a-fig i { display: block; visibility: visible; width: 80%; height: auto; min-height: 0; margin: 0; aspect-ratio: 707 / 1087;
     background: url("/images/about/sketch-02-707.webp") center / contain no-repeat; }
   :root[data-phone="b"] .e2-about .e2a-text :is(.eda-lead, .eda-body, .eda-cred) { margin-left: 0; }
-  :root[data-phone="b"] .e2-about .eda-lead { font-size: 24px; line-height: 1.3; }
-  :root[data-phone="b"] .e2-about .eda-cred { border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); padding-top: 20px; }
+  /* round 4 (Juan): the three paragraphs one size; the line sits between the education paragraph and Contact */
+  :root[data-phone="b"] .e2-about :is(.eda-lead, .eda-body, .eda-cred) { font-size: 16px; line-height: 1.6; }
+  :root[data-phone="b"] .e2-about .eda-lead { margin-bottom: 1em; }
+  :root[data-phone="b"] .e2-about .eda-cred { border-top: 0; padding-top: 0; margin-top: 1em; }
+  :root[data-phone="b"] .e2-about .eda-contact { border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); margin-top: 36px; padding-top: 28px; }
 
   /* Project and print pages: title and text, the first image right under
      them, every image margin to margin; Prev / Next at the end */

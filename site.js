@@ -978,8 +978,6 @@
         f.className = 'ph-plate'; c.textContent = (k + 1) + ' / ' + n;
         s.parentNode.insertBefore(f, s); f.appendChild(s); f.appendChild(c);
       }
-      // tap an image to open it alone, full size, where it can be zoomed freely
-      s.onclick = function () { if (isPhone()) location.href = s.currentSrc || s.src; };
     });
   }
   function phoneInit() {
