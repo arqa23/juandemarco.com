@@ -1569,9 +1569,10 @@ body.home { background: var(--bg); }
   /* Home: the cover in its paper margin; the menu low on the left, bold */
   :root[data-phone="b"] .home .site-header { text-align: left; left: 0; right: auto; padding: 26px var(--ph-side); }
   :root[data-phone="b"] .home .logo { font-size: 15px; letter-spacing: .36em; margin: 0; }
-  :root[data-phone="b"] .home .nav { inset: auto auto 120px var(--ph-side); margin: 0; width: auto; align-items: flex-start; gap: 24px; }
+  :root[data-phone="b"] .home .nav { inset: auto auto 170px var(--ph-side); margin: 0; width: auto; align-items: flex-start; gap: 24px; }   /* round 8: one line higher */
   :root[data-phone="b"] .home .nav a { justify-content: flex-start; }
-  :root[data-phone="b"] .home .nav .nav-label { margin-right: 0; text-shadow: 0 1px 14px rgba(0,0,0,.22); }
+  :root[data-phone="b"] .home .nav .nav-label { margin-right: 0; text-shadow: 0 1px 14px rgba(0,0,0,.22);
+    font-family: var(--menu-font, var(--font)); font-weight: 300; }   /* round 8 test: not bold (bold = "Jost Phone" 600) */
   :root[data-phone="b"] .home .nav a[href="/"] { display: none; }
   :root[data-phone="b"] .home .e2-label { left: var(--ph-side); right: auto; bottom: 30px; text-align: left; }
 
@@ -1620,13 +1621,19 @@ body.home { background: var(--bg); }
 
   /* back to top: a small circle, bottom right, once you have scrolled */
   :root[data-phone="b"] .ph-top { display: flex; position: fixed; right: var(--ph-side);
-    /* round 7: plain fixed to the bottom; the browser itself moves it with its bars, smoothly */
-    bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 6; width: 40px; height: 40px; border-radius: 50%;
+    /* round 7: plain fixed to the bottom; the browser itself moves it with its bars, smoothly.
+       round 8: the same gap below as to the right (24px) */
+    bottom: var(--ph-side); z-index: 6; width: 40px; height: 40px; border-radius: 50%;
     align-items: center; justify-content: center; padding: 0; border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); background: color-mix(in srgb, var(--bg) 88%, transparent);
     color: var(--ink); opacity: 0; pointer-events: none; transition: opacity .25s ease; cursor: pointer; }
   :root[data-phone="b"] .ph-top.is-on { opacity: 1; pointer-events: auto; }
 }
 .ph-plate figcaption, .ph-menu-btn, .ph-top { display: none; }
+/* iPhone Safari keeps a strip below the page for its bar and the home line, so the
+   circle sits lower there to look 24px from the bottom edge, like from the right */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 700px) { :root[data-phone="b"] .ph-top { bottom: 6px; } }
+}
 /* round 6 test (Juan): the top bar ends in a soft fade, as on the desktop, instead of a hard edge.
    Before: a solid paper bar (main 4c8eb1a). */
 @media (max-width: 700px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
