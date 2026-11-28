@@ -198,6 +198,11 @@
           try { localStorage.setItem('jdm-aframe', root.dataset.aframe || 'off'); } catch (err) {}
           markPick(); return;
         }
+        if (k === 'text') {   // round 15 (Juan): open the text options panel from the small box
+          pick.hidden = true;
+          panel.hidden = false; btn.classList.add('is-open'); btn.setAttribute('aria-expanded', 'true');
+          markSettings(); return;
+        }
         if (k === 'fs') {
           var de = document.documentElement;
           if (document.fullscreenElement) document.exitFullscreen && document.exitFullscreen();
