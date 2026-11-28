@@ -1561,7 +1561,7 @@ body.home { background: var(--bg); }
   /* a slim paper bar: name left, Menu right (Menu = back to Home) */
   :root[data-phone="b"] .inner .site-header { position: fixed; top: 0; left: 0; right: 0; height: var(--bar); display: flex; align-items: center;
     padding: 0 var(--ph-side); background: var(--bg); text-align: left; z-index: 6; }
-  :root[data-phone="b"] .inner .logo { font-size: 13px; letter-spacing: .34em; margin: 0; }
+  :root[data-phone="b"] .inner .logo { font-size: 15.6px; letter-spacing: .34em; margin: 0; }   /* round 7: +20% */
   :root[data-phone="b"] .inner .ph-menu-btn { display: flex; align-items: center; position: fixed; top: 0; right: calc(var(--ph-side) - 12px); height: var(--bar); padding: 0 12px; z-index: 8;
     color: var(--ink); text-decoration: none; font: 400 11px/1 var(--label-font, var(--font)); letter-spacing: .2em; text-transform: uppercase; }
   :root[data-phone="b"] .inner .nav { display: none; }
@@ -1619,11 +1619,9 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .ph-plate .slide { width: 100%; height: auto; }
 
   /* back to top: a small circle, bottom right, once you have scrolled */
-  :root[data-phone="b"] .ph-top { display: flex; position: fixed; right: var(--ph-side); bottom: auto;
-    /* round 6: sits just above the visible bottom of the page; 100dvh shrinks while the
-       browser's address/tab bar shows (Safari, Chrome), so it rises above it, and drops
-       back to the bottom when the bar hides; site.js keeps --ph-vb right where dvh lags */
-    top: calc(var(--ph-vb, 100dvh) - 40px - 14px - env(safe-area-inset-bottom, 0px)); z-index: 6; width: 40px; height: 40px; border-radius: 50%;
+  :root[data-phone="b"] .ph-top { display: flex; position: fixed; right: var(--ph-side);
+    /* round 7: plain fixed to the bottom; the browser itself moves it with its bars, smoothly */
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 6; width: 40px; height: 40px; border-radius: 50%;
     align-items: center; justify-content: center; padding: 0; border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); background: color-mix(in srgb, var(--bg) 88%, transparent);
     color: var(--ink); opacity: 0; pointer-events: none; transition: opacity .25s ease; cursor: pointer; }
   :root[data-phone="b"] .ph-top.is-on { opacity: 1; pointer-events: auto; }
@@ -1635,7 +1633,7 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .inner .site-header, :root[data-phone="b"] .room-top { background: none; }
   :root[data-phone="b"] .inner .site-header::after, :root[data-phone="b"] .room-top::after {
     content: ""; position: absolute; left: 0; right: 0; top: 0; height: calc(var(--bar) + 34px); z-index: -1; pointer-events: none;
-    background: linear-gradient(var(--bg) 0, var(--bg) calc(var(--bar) - 12px), color-mix(in srgb, var(--bg) 0%, transparent) 100%); }
+    background: linear-gradient(var(--fade), var(--fade-0)); }   /* round 7: the desktop's fade, 50% paper to clear; images show through */
 }
 /* Phone B held sideways: images as large as the screen's height allows */
 @media (hover: none) and (pointer: coarse) and (max-height: 500px) and (min-width: 701px) {
