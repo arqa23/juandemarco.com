@@ -1951,6 +1951,7 @@
         document.body.innerHTML = doc.body.innerHTML;
         runScripts(document.body);
         if (push) history.pushState({}, '', url);
+        if (push && isPhone()) window.scrollTo(0, 0);   // phone: a new page always opens at its top
         init();
         busy = false;
       })

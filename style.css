@@ -1587,13 +1587,14 @@ body.home { background: var(--bg); }
   /* Gallery: every sheet margin to margin, whole (drawings are never cut); [01] caption under */
   :root[data-phone="b"] .gx-stage { display: block; }
   :root[data-phone="b"] .gx-sheet { position: static; width: 100%; height: auto; aspect-ratio: var(--r); }
+  :root[data-phone="b"] .gx-sheet img { box-shadow: none; }   /* round 5: plain images, no paper shadow (as in the series pages) */
   :root[data-phone="b"] .gx-cap { position: static; margin-top: 16px; text-align: left; white-space: normal; font-size: 10px; }
 
   /* About: the drawing without its paper, then the text, all on the left */
   :root[data-phone="b"] .has-ed .e2-about.e2-about { padding: calc(var(--bar) + 20px) var(--ph-side) 90px; text-align: left; }
   :root[data-phone="b"] .e2-about .e2a-fig { margin: 0 0 40px; }
   :root[data-phone="b"] .e2-about .e2a-sheet.e2a-sheet { display: none; }
-  :root[data-phone="b"] .e2-about .e2a-fig i { display: block; visibility: visible; width: 80%; height: auto; min-height: 0; margin: 0; aspect-ratio: 707 / 1087;
+  :root[data-phone="b"] .e2-about .e2a-fig i { display: block; visibility: visible; width: 80%; height: auto; min-height: 0; margin: 0 auto; aspect-ratio: 707 / 1087;
     background: url("/images/about/sketch-02-707.webp") center / contain no-repeat; }
   :root[data-phone="b"] .e2-about .e2a-text :is(.eda-lead, .eda-body, .eda-cred) { margin-left: 0; }
   /* round 4 (Juan): the three paragraphs one size; the line sits between the education paragraph and Contact */
