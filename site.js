@@ -1001,15 +1001,7 @@
       document.body.appendChild(t);
     }
   }
-  // the visible bottom of the page (browser bars count as covered), for the back-to-top circle
-  function phoneVB() {
-    var v = window.visualViewport;
-    if (v && isPhone()) root.style.setProperty('--ph-vb', (v.height + v.offsetTop) + 'px');
-  }
-  if (window.visualViewport) { visualViewport.addEventListener('resize', phoneVB); visualViewport.addEventListener('scroll', phoneVB); }
-  addEventListener('resize', phoneVB);
   addEventListener('scroll', function () {
-    phoneVB();
     var t = document.querySelector('.ph-top');
     if (t) t.classList.toggle('is-on', (document.scrollingElement || document.documentElement).scrollTop > innerHeight * 0.5);
   }, { passive: true });
@@ -1994,7 +1986,7 @@
   // read once as a small grid of brightness; the points under each piece are
   // averaged (page colour where no image is) and the inks' contrast compared.
   // Squares keeps its own finer twins (sq-on), so this stands aside there.
-  var UI_PIECES = '.logo, .nav a, .settings-corner, .room-close, .room-where, .e2-label, .to-top', UI_G = 24, uiGrid = {};
+  var UI_PIECES = '.logo, .nav a, .settings-corner, .room-close, .room-where, .e2-label, .to-top, .ph-menu-btn', UI_G = 24, uiGrid = {};
   function uiRGB(str) {
     str = (str || '').trim();
     var m = str.match(/^#([0-9a-f]{6})$/i);
