@@ -1632,6 +1632,7 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .ph-top.is-on { opacity: 1; pointer-events: auto; }
 }
 .ph-plate figcaption, .ph-menu-btn, .ph-top { display: none; }
+:root[data-phone="b"] .ph-top { display: none !important; }   /* round 11 (Juan): no back-to-top on the phone */
 /* iPhone Safari keeps a strip below the page for its bar and the home line, so the
    circle sits lower there to look 24px from the bottom edge, like from the right */
 @supports (-webkit-touch-callout: none) {
@@ -1657,12 +1658,8 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .e2-about .e2a-fig { display: block; }
   :root[data-phone="b"] .e2-about .e2a-fig i { width: 72%; height: auto; margin: 0 auto; }
   :root[data-phone="b"] { --ph-side: max(24px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)); }   /* clear of the notch */
-  /* Home sideways (round 10, Juan): the upright Home, unchanged, at the full width; the page
-     becomes as tall as an upright phone screen, so you scroll down to the menu */
-  :root[data-phone="b"]:has(body.home), :root[data-phone="b"] body.home { height: auto; overflow: visible; }
-  :root[data-phone="b"] body.home { position: relative; min-height: calc(100vw * 844 / 390); }
-  :root[data-phone="b"] .home .cover { position: absolute; height: calc(100% - 2 * var(--e2-mat)); }
-  :root[data-phone="b"] .home::before, :root[data-phone="b"] .home::after { position: absolute; }
-  :root[data-phone="b"] .home :is(.site-header, .nav, .e2-label) { position: absolute; }
+  /* Home sideways (round 11, Juan): the cover fills the screen again; the menu smaller so it breathes */
+  :root[data-phone="b"] .home .nav { bottom: 62px; gap: 12px; }
+  :root[data-phone="b"] .home .nav .nav-label { font-size: 14px !important; letter-spacing: .24em; }
 }
 }
