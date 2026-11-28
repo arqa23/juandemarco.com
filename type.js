@@ -2,6 +2,12 @@
 // the page paints. Six styles: name, title, text, label, caption, menu. Temporary, for
 // choosing the type with Juan; delete with the Settings panel when done.
 (function () {
+  // Phone design: A (default) or B, chosen with ?phone=a / ?phone=b and kept (Juan, 2026-11-28)
+  try {
+    var pm = location.search.match(/[?&]phone=(a|b)\b/i);
+    if (pm) localStorage.setItem('jdm-phone', pm[1].toLowerCase());
+    if (localStorage.getItem('jdm-phone') === 'b') document.documentElement.dataset.phone = 'b';
+  } catch (e) {}
   var FONTS = {
     jost: '"Jost"', inter: '"inter"', instrument: '"instrument-sans"', geist: '"geist-sans"',
     host: '"host-grotesk"', franklin: '"libre-franklin"', albert: '"albert-sans"'
