@@ -69,7 +69,7 @@ PROJECTS = [
      ]},
     {"slug": "julius", "title": "Julius",
      "desc": "An architectural silhouette that wanders the countryside. Its patterned surfaces alter the perception of its form as it is viewed from different angles.",
-     "subtitle": "The Ever Moving Adornment",
+     "subtitle": "The Traveling Ornament",
      "meta": "2014 · Digital rendering",
      "text": [
       "Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum, aenean imperdiet. Etiam ultricies nisi vel augue, curabitur ullamcorper ultricies nisi. Nam eget dui, etiam rhoncus maecenas tempus tellus eget condimentum. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus, donec id elit non mi porta.",
