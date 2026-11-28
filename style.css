@@ -1457,10 +1457,10 @@ body.home { background: var(--bg); }
 :root[data-nosettings="1"] .to-top.to-top { bottom: calc(var(--gutter) - var(--icon) * .125); }
 @media (max-width: 700px) { :root[data-nosettings="1"] .to-top.to-top { bottom: calc(18px - var(--icon) * .125); } }
 
-/* Desktop Home (Juan, 2026-11-28): the menu and the cover label 20% larger; the name stays */
+/* Desktop (Juan, 2026-11-28): the menu 20% larger on every page, and the Home cover label too; the name stays */
 @media (min-width: 701px) and (hover: hover) {
-  .home .nav { gap: calc(var(--text-size) * 1.25 * var(--menu-scale, 1) * 1.05 * 1.2); }
-  .home .nav a { font-size: calc(var(--text-size) * 1.25 * var(--menu-scale, 1) * 1.2) !important; }
+  .nav { gap: calc(var(--text-size) * 1.25 * var(--menu-scale, 1) * 1.05 * 1.2); }
+  .nav a { font-size: calc(var(--text-size) * 1.25 * var(--menu-scale, 1) * 1.2) !important; }
   .home .e2-label { font-size: max(11.4px, calc(var(--nav-size) * .85 * 1.2)); }
 }
 
@@ -1604,7 +1604,8 @@ body.home { background: var(--bg); }
   /* About: the drawing without its paper, then the text, all on the left */
   :root[data-phone="b"] .has-ed .e2-about.e2-about { padding: calc(var(--bar) + 20px) var(--ph-side) 90px; text-align: left; }
   :root[data-phone="b"] .e2-about .e2a-fig { margin: 0 0 40px; }
-  :root[data-phone="b"] .e2-about .eda-contact .e2a-fig { margin: 48px 0 0; }   /* round 12: the drawing after Contact, before the copyright */
+  :root[data-phone="b"] .e2-about .eda-contact .e2a-fig { margin: 48px 0 0; }
+  :root[data-phone="b"] .e2-about .eda-contact .eda-legal { margin-top: 72px; }   /* round 13: one more line of space under the drawing */
   :root[data-phone="b"] .e2-about .e2a-sheet.e2a-sheet { display: none; }
   :root[data-phone="b"] .e2-about .e2a-fig i { display: block; visibility: visible; width: 72%; height: auto; min-height: 0; margin: 0 auto; aspect-ratio: 707 / 1087;
     background: url("/images/about/sketch-02-707.webp") center / contain no-repeat; }
@@ -1613,7 +1614,8 @@ body.home { background: var(--bg); }
   /* round 12 (Juan): the size hierarchy back (as phone-about-v1): lead 24, body 15, education 13 */
   :root[data-phone="b"] .e2-about .eda-lead { font-size: 24px; line-height: 1.3; }
   :root[data-phone="b"] .e2-about .eda-body { font-size: 15px; line-height: 1.65; }
-  :root[data-phone="b"] .e2-about .eda-cred { font-size: 13px; line-height: 1.6; }
+  :root[data-phone="b"] .e2-about .eda-cred { font-size: 15px; line-height: 1.65; }   /* round 13: 'He holds' matches 'His work' */
+  :root[data-phone="b"] .e2-about .eda-cred p { font-size: inherit; line-height: inherit; font-weight: inherit; letter-spacing: inherit; }
   :root[data-phone="b"] .e2-about .eda-lead { margin-bottom: 1em; }
   :root[data-phone="b"] .e2-about .eda-cred { border-top: 0; padding-top: 0; margin-top: 1em; }
   :root[data-phone="b"] .e2-about :is(.eda-lead, .eda-body, .eda-cred, .eda-cred p) { color: var(--ink); }   /* round 6: one colour for all three paragraphs */
