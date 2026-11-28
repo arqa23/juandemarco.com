@@ -1558,17 +1558,19 @@ body.home { background: var(--bg); }
    Menu goes to Home; back-to-top circle bottom right. */
 @media (max-width: 700px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
   :root[data-phone="b"] { --bar: 58px; --ph-side: 24px; --ph-gap: 72px; scroll-padding-top: var(--bar); }
+  /* the page reaches the screen edges (viewport-fit=cover): keep text clear of the notch and clock */
+  :root[data-phone="b"] .inner .site-header, :root[data-phone="b"] .room-top { padding-top: env(safe-area-inset-top, 0px); height: calc(var(--bar) + env(safe-area-inset-top, 0px)); box-sizing: border-box; }
 
   /* a slim paper bar: name left, Menu right (Menu = back to Home) */
   :root[data-phone="b"] .inner .site-header { position: fixed; top: 0; left: 0; right: 0; height: var(--bar); display: flex; align-items: center;
     padding: 0 var(--ph-side); background: var(--bg); text-align: left; z-index: 6; }
   :root[data-phone="b"] .inner .logo { font-size: 15.6px; letter-spacing: .34em; margin: 0; }   /* round 7: +20% */
-  :root[data-phone="b"] .inner .ph-menu-btn { display: flex; align-items: center; position: fixed; top: 0; right: calc(var(--ph-side) - 12px); height: var(--bar); padding: 0 12px; z-index: 8;
+  :root[data-phone="b"] .inner .ph-menu-btn { display: flex; align-items: center; position: fixed; top: env(safe-area-inset-top, 0px); right: calc(var(--ph-side) - 12px); height: var(--bar); padding: 0 12px; z-index: 8;
     color: var(--ink); text-decoration: none; font: 400 11px/1 var(--label-font, var(--font)); letter-spacing: .2em; text-transform: uppercase; }
   :root[data-phone="b"] .inner .nav { display: none; }
 
   /* Home: the cover in its paper margin; the menu low on the left, bold */
-  :root[data-phone="b"] .home .site-header { text-align: left; left: 0; right: auto; padding: 26px var(--ph-side); }
+  :root[data-phone="b"] .home .site-header { text-align: left; left: 0; right: auto; padding: calc(26px + env(safe-area-inset-top, 0px)) var(--ph-side) 26px; }
   :root[data-phone="b"] .home .logo { font-size: 15px; letter-spacing: .36em; margin: 0; }
   :root[data-phone="b"] .home .nav { inset: auto auto 170px var(--ph-side); margin: 0; width: auto; align-items: flex-start; gap: 24px; }   /* round 8: one line higher */
   :root[data-phone="b"] .home .nav a { justify-content: flex-start; }
@@ -1596,7 +1598,7 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .has-ed .e2-about.e2-about { padding: calc(var(--bar) + 20px) var(--ph-side) 90px; text-align: left; }
   :root[data-phone="b"] .e2-about .e2a-fig { margin: 0 0 40px; }
   :root[data-phone="b"] .e2-about .e2a-sheet.e2a-sheet { display: none; }
-  :root[data-phone="b"] .e2-about .e2a-fig i { display: block; visibility: visible; width: 80%; height: auto; min-height: 0; margin: 0 auto; aspect-ratio: 707 / 1087;
+  :root[data-phone="b"] .e2-about .e2a-fig i { display: block; visibility: visible; width: 72%; height: auto; min-height: 0; margin: 0 auto; aspect-ratio: 707 / 1087;
     background: url("/images/about/sketch-02-707.webp") center / contain no-repeat; }
   :root[data-phone="b"] .e2-about .e2a-text :is(.eda-lead, .eda-body, .eda-cred) { margin-left: 0; }
   /* round 4 (Juan): the three paragraphs one size; the line sits between the education paragraph and Contact */
@@ -1633,9 +1635,9 @@ body.home { background: var(--bg); }
 /* iPhone Safari keeps a strip below the page for its bar and the home line, so the
    circle sits lower there to look 24px from the bottom edge, like from the right */
 @supports (-webkit-touch-callout: none) {
-  /* round 9, from Juan's iPhone screenshot: Safari's layout ends ~60px above the glass edge,
-     so -36px puts the circle 24px from the bottom of the screen, as from the right */
-  @media (max-width: 700px) { :root[data-phone="b"] .ph-top { bottom: -36px; } }
+  /* round 10: -36px (round 9) was clipped by Safari. The page now reaches the screen edge
+     (viewport-fit=cover in the page head), so a plain 24px is 24px from the glass */
+  @media (max-width: 700px) { :root[data-phone="b"] .ph-top { bottom: 24px; } }
 }
 /* round 6 test (Juan): the top bar ends in a soft fade, as on the desktop, instead of a hard edge.
    Before: a solid paper bar (main 4c8eb1a). */
@@ -1653,8 +1655,14 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .room-show .frame, :root[data-phone="b"] .ph-plate { align-items: stretch; }
   :root[data-phone="b"] .room-show .slide, :root[data-phone="b"] .room-show .slide.is-on { width: 100%; height: auto; max-height: none; margin: 0; }
   :root[data-phone="b"] .e2-about .e2a-fig { display: block; }
-  :root[data-phone="b"] .e2-about .e2a-fig i { width: 80%; height: auto; margin: 0 auto; }
-  :root[data-phone="b"] .home .nav { bottom: 64px; gap: 12px; }
-  :root[data-phone="b"] .home .nav .nav-label { font-size: 18px !important; }
+  :root[data-phone="b"] .e2-about .e2a-fig i { width: 72%; height: auto; margin: 0 auto; }
+  :root[data-phone="b"] { --ph-side: max(24px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)); }   /* clear of the notch */
+  /* Home sideways (round 10, Juan): the upright Home, unchanged, at the full width; the page
+     becomes as tall as an upright phone screen, so you scroll down to the menu */
+  :root[data-phone="b"]:has(body.home), :root[data-phone="b"] body.home { height: auto; overflow: visible; }
+  :root[data-phone="b"] body.home { position: relative; min-height: calc(100vw * 844 / 390); }
+  :root[data-phone="b"] .home .cover { position: absolute; height: calc(100% - 2 * var(--e2-mat)); }
+  :root[data-phone="b"] .home::before, :root[data-phone="b"] .home::after { position: absolute; }
+  :root[data-phone="b"] .home :is(.site-header, .nav, .e2-label) { position: absolute; }
 }
 }
