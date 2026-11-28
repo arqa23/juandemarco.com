@@ -176,7 +176,7 @@ TEXT_POSITION = "top"
 SETTINGS_MODE = "public"
 # Settings button removed from every page (Juan, 2026-11-27): the site shows
 # its defaults only (light mode, About framed). True brings the button back.
-SETTINGS_BUTTON = False
+SETTINGS_BUTTON = True   # back on desktop for testing (Juan, 2026-11-28); phones never show it (type.js)
 GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
 # Page views in the settings box (Juan, 2026-11-27). "current" = the page's
 # original layout; defaults live in type.js (VIEWS).
@@ -309,6 +309,7 @@ def _page(title, section, body, body_class="", head_extra=""):
   <button class="settings-btn settings-corner" type="button" aria-expanded="false" aria-controls="settings" aria-label="View mode" title="View mode"><svg class="settings-icon" viewBox="2.4 2.4 15.2 15.2" aria-hidden="true"><path d="M3 5.5h7.6M14.4 5.5H17M3 10h1.6M8.4 10H17M3 14.5h6.1M12.9 14.5H17" stroke="currentColor" stroke-width=".75" fill="none"/><circle cx="12.5" cy="5.5" r="1.9"/><circle cx="6.5" cy="10" r="1.9"/><circle cx="11" cy="14.5" r="1.9"/></svg></button>
   <div class="mode-pick" id="mode-pick" role="group" aria-label="View mode" hidden>
     <button type="button" class="pick-row" data-tog="mode">Dark mode: <span></span></button>
+    <button type="button" class="pick-row" data-tog="text">Text options</button>
 {frame_row}{design_rows}{working_rows}  </div>
 
   <div class="settings" id="settings" hidden>

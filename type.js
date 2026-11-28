@@ -21,7 +21,7 @@
     // Print captions on the Prints wall: own size, 30% smaller than the labels
     caption: { font: 'jost', w: 400, size: 70, track: 0.2,  'case': 'uppercase' },
     // The menu (bottom right): 100% = the size of the email on the About page
-    menu:    { font: 'jost', w: 300, size: 60,  track: 0.2,  'case': 'uppercase' }
+    menu:    { font: 'jost', w: 600, size: 60,  track: 0.2,  'case': 'uppercase' }
   };
   function load() {
     var saved = {};
@@ -67,6 +67,8 @@
   // Settings switched off (data-settings="off" on <html>): defaults only.
   // No settings button any more (Juan, 2026-11-27): every visitor sees the
   // defaults; choices saved in this browser earlier are ignored
+  // Phones never get the settings (Juan, 2026-11-28): defaults only, as signed off
+  try { if (matchMedia('(max-width: 700px), (hover: none) and (pointer: coarse) and (max-height: 500px)').matches) document.documentElement.setAttribute('data-nosettings', '1'); } catch (e) {}
   var noBtn = document.documentElement.getAttribute('data-nosettings') === '1';
   var off = noBtn || document.documentElement.getAttribute('data-settings') === 'off';
   apply(off ? DEFAULTS : load());
