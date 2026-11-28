@@ -154,7 +154,7 @@ def project_images(slug):
 ABOUT = [
     "Juan De Marco is a licensed architect and artist who makes architecture, "
     "objects and drawings.",
-    "His work is guided by history, by cultures, and by the people who inhabit the "
+    "His work is guided by history, by nature, by cultures, and by the people who inhabit the "
     "world we live in, with a deep appreciation and curiosity for the ways "
     "artists and designers have engaged with the built environment in the past.",
     "He holds a Master of Architecture from Princeton University and a Bachelor of "
@@ -176,7 +176,7 @@ TEXT_POSITION = "top"
 SETTINGS_MODE = "public"
 # Settings button removed from every page (Juan, 2026-11-27): the site shows
 # its defaults only (light mode, About framed). True brings the button back.
-SETTINGS_BUTTON = True   # back on desktop for testing (Juan, 2026-11-28); phones never show it (type.js)
+SETTINGS_BUTTON = False   # removed for good (Juan, 2026-11-28: "commit to everything"); True brings it back (round 15 test = PR #101)
 GALLERY_LAYOUTS = [("index", "Index"), ("cluster", "Cluster")]
 # Page views in the settings box (Juan, 2026-11-27). "current" = the page's
 # original layout; defaults live in type.js (VIEWS).
