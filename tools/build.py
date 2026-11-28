@@ -287,7 +287,7 @@ def _page(title, section, body, body_class="", head_extra=""):
 <html lang="en"{' data-public="1"' if SETTINGS_MODE == "public" else ""}{"" if SETTINGS_BUTTON else ' data-nosettings="1"'}>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{html.escape(full_title)}</title>
   <meta name="description" content="Juan De Marco">
   <meta name="robots" content="noai, noimageai">
