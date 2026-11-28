@@ -984,18 +984,29 @@
   }
   function phoneInit() {
     phoneRooms();
-    root.classList.remove('ph-open');
-    ['.edw-feat', '.gx-grid'].forEach(function (q) {   // plate numbers: "01 / 11"
-      var g = document.querySelector(q); if (!g) return;
-      [].forEach.call(g.children, function (c) { c.setAttribute('data-of', String(g.children.length).padStart(2, '0')); });
-    });
     if (document.body.classList.contains('inner') && !document.querySelector('.ph-menu-btn')) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.className = 'ph-menu-btn'; b.textContent = 'Menu';
-      b.onclick = function () { var o = root.classList.toggle('ph-open'); b.textContent = o ? 'Close' : 'Menu'; };
+      var b = document.createElement('a');   // Phone B: "Menu" takes you to Home (Juan, 2026-11-28)
+      b.className = 'ph-menu-btn'; b.href = '/'; b.textContent = 'Menu';
       document.body.appendChild(b);
     }
+    var pn = document.querySelector('.room-pnav');   // Prev / Next after the last image
+    if (pn && isPhone() && root.dataset.phone === 'b' && !document.querySelector('.ph-pnav')) {
+      var c = pn.cloneNode(true); c.classList.add('ph-pnav'); c.classList.remove('room-pnav');
+      var show = document.querySelector('.room-show'); if (show) show.appendChild(c);
+      pn.style.display = 'none';
+    }
+    if (document.body.classList.contains('inner') && !document.querySelector('.ph-top')) {
+      var t = document.createElement('button');
+      t.type = 'button'; t.className = 'ph-top'; t.setAttribute('aria-label', 'Back to top');
+      t.innerHTML = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 15V5M5 10l5-5 5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
+      t.onclick = function () { window.scrollTo({ top: 0, behavior: 'smooth' }); };
+      document.body.appendChild(t);
+    }
   }
+  addEventListener('scroll', function () {
+    var t = document.querySelector('.ph-top');
+    if (t) t.classList.toggle('is-on', (document.scrollingElement || document.documentElement).scrollTop > innerHeight * 0.5);
+  }, { passive: true });
   function shuffleWork() {
     // Work (Editorial): a new hang on every visit (Juan, 2026-11-27). The four
     // major projects (large) and the minor ones (small) are each shuffled, then
