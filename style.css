@@ -1460,8 +1460,8 @@ body.home { background: var(--bg); }
    PHONE VERSION (Juan, 2026-11-28). Applies only to phones: 700px wide
    and under, or a touch screen held sideways (under 500px tall). The
    desktop site is untouched. Always light. Two designs:
-     Phone A (default): one centred column, plain scroll.
-     Phone B (?phone=b, back with ?phone=a): "plates", one work per
+     Phone A (?phone=a): one centred column, plain scroll.
+     Phone B (default since 2026-11-28, ?phone=b): "plates", one work per
      screen, like turning the pages of a monograph.
    site.js isPhone() uses the same media query.
    ===================================================================== */
@@ -1565,14 +1565,16 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .inner .nav { display: none; position: fixed; inset: 0; z-index: 7; background: var(--bg);
     flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
   :root[data-phone="b"].ph-open .inner .nav { display: flex; }
+  :root[data-phone="b"] .nav a[href="/"] { display: none; }   /* B: no Home in the menu; the name goes home */
   :root[data-phone="b"].ph-open .inner .nav a[aria-current="page"] .nav-label { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 1px; }
   :root[data-phone="b"].ph-open, :root[data-phone="b"].ph-open body { overflow: hidden; }
 
   /* Home: as on the desktop, the cover in its paper margin; the menu low on the left, large and light */
   :root[data-phone="b"] .home .site-header { text-align: left; left: 0; right: auto; padding: 26px 24px; }
   :root[data-phone="b"] .home .logo { font-size: 15px; letter-spacing: .36em; margin: 0; }
-  :root[data-phone="b"] .home .nav { inset: auto auto 74px 24px; margin: 0; width: auto; align-items: flex-start; gap: 14px; }
-  :root[data-phone="b"] .home .nav .nav-label { font-family: var(--menu-font, var(--font)); font-weight: 300; font-size: 30px !important; letter-spacing: .16em; margin: 0; text-shadow: 0 1px 14px rgba(0,0,0,.28); }
+  :root[data-phone="b"] .home .nav { inset: auto 24px 120px auto; margin: 0; width: auto; align-items: flex-end; gap: 24px; }
+  :root[data-phone="b"] .home .nav a { justify-content: flex-end; }
+  :root[data-phone="b"] .home .nav .nav-label { margin-right: 0; text-shadow: 0 1px 14px rgba(0,0,0,.22); }
   :root[data-phone="b"] .home .nav a[aria-current="page"] { display: none; }
   :root[data-phone="b"] .home .e2-label { left: 24px; right: auto; bottom: 30px; text-align: left; }
 
@@ -1581,15 +1583,15 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] :is(.edw-feat, .gx-grid) { gap: 0 !important; }
   :root[data-phone="b"] :is(.edw-item, .gx-grid > li) { min-height: var(--plate-h); scroll-snap-align: start; display: flex; flex-direction: column; justify-content: center;
     padding: 0 26px; box-sizing: border-box; text-align: left; counter-increment: plate; position: relative; }
-  :root[data-phone="b"] :is(.edw-item, .gx-grid > li)::before { content: counter(plate, decimal-leading-zero) " / " attr(data-of); }
-  :root[data-phone="b"] :is(.edw-item, .gx-grid > li)::before { position: absolute; top: 18px; left: 26px; font: 400 10px/1 var(--label-font, var(--font)); letter-spacing: .2em; color: var(--ink-dim); }
   :root[data-phone="b"] .edw-img { display: flex; justify-content: center; }
   :root[data-phone="b"] .edw-img img { width: auto; max-width: 100%; max-height: var(--plate-img); }
   :root[data-phone="b"] .edw-t { margin-top: 22px; font-size: 13px; }
   :root[data-phone="b"] .edw-s { font-size: 13px; }
   :root[data-phone="b"] .gx-sheet { width: auto; height: var(--plate-img); max-width: 100%; margin: 0 auto; }
-  :root[data-phone="b"] .gx-cap { text-align: left; margin-top: 22px; font-size: 10px; }
-  :root[data-phone="b"] .gx-cap::before { content: none; }
+  /* the caption hangs just under its sheet, on the sheet's left edge: [01]  Sketches, No. 5 */
+  :root[data-phone="b"] .gx-stage { display: flex; justify-content: center; }
+  :root[data-phone="b"] .gx-sheet { position: relative; }
+  :root[data-phone="b"] .gx-cap { position: absolute; top: 100%; left: 0; right: auto; margin-top: 16px; text-align: left; white-space: nowrap; font-size: 10px; }
 
   /* About: a reading page, text on the left, the drawing as a plate first */
   :root[data-phone="b"] .has-ed .e2-about.e2-about { padding: calc(var(--bar) + 24px) 26px 70px; text-align: left; }
@@ -1627,6 +1629,6 @@ body.home { background: var(--bg); }
 }
 @media (hover: none) and (pointer: coarse) and (max-height: 500px) and (min-width: 701px) {
   :root[data-phone="b"] { --plate-img: 56svh; }
-  :root[data-phone="b"] .home .nav { bottom: 56px; gap: 6px; }
-  :root[data-phone="b"] .home .nav .nav-label { font-size: 22px !important; }
+  :root[data-phone="b"] .home .nav { bottom: 64px; gap: 12px; }
+  :root[data-phone="b"] .home .nav .nav-label { font-size: 18px !important; }
 }
