@@ -984,9 +984,12 @@
     phoneRooms();
     if (document.body.classList.contains('inner') && !document.querySelector('.ph-menu-btn')) {
       var b = document.createElement('a');   // Phone B: "Menu" takes you to Home (Juan, 2026-11-28)
-      b.className = 'ph-menu-btn'; b.href = '/'; b.textContent = 'Menu';
+      b.className = 'ph-menu-btn'; b.href = '/'; b.innerHTML = '&times;'; b.setAttribute('aria-label', 'Close and go back to Home');
       document.body.appendChild(b);
     }
+    // About (round 12, Juan): text first, the drawing after Contact and before the copyright
+    var fig = document.querySelector('.e2-about .e2a-fig'), leg = document.querySelector('.e2-about .eda-legal');
+    if (fig && leg && isPhone() && root.dataset.phone === 'b') leg.parentNode.insertBefore(fig, leg);
     var pn = document.querySelector('.room-pnav');   // Prev / Next after the last image
     if (pn && isPhone() && root.dataset.phone === 'b' && !document.querySelector('.ph-pnav')) {
       var c = pn.cloneNode(true); c.classList.add('ph-pnav'); c.classList.remove('room-pnav');
