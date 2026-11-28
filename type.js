@@ -21,7 +21,7 @@
     // Print captions on the Prints wall: own size, 30% smaller than the labels
     caption: { font: 'jost', w: 400, size: 70, track: 0.2,  'case': 'uppercase' },
     // The menu (bottom right): 100% = the size of the email on the About page
-    menu:    { font: 'jost', w: 300, size: 60,  track: 0.2,  'case': 'uppercase' }
+    menu:    { font: 'jost', w: 400, size: 60,  track: 0.2,  'case': 'uppercase' }
   };
   function load() {
     var saved = {};
