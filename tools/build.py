@@ -204,7 +204,7 @@ VIEWS = {
 # code stays, add them back here to bring them back.
 WORK_LAYOUTS = [("squares", "Squares"), ("float", "Float")]
 
-EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.us"   # .com mail not set up yet (Juan, 2026-11-27)
+EMAIL_USER, EMAIL_DOMAIN = "juan", "juandemarco.com"
 
 NAV = [("home", "Home", "/"), ("work", "Work", "/work/"), ("prints", "Gallery", "/prints/"),
        ("about", "About", "/about/")]

@@ -1,5 +1,6 @@
 @font-face { font-family: "Jost"; src: url("/fonts/jost-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
 @font-face { font-family: "Jost"; src: url("/fonts/jost-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Jost Phone"; src: url("/fonts/jost-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }   /* phone menu only, so desktop never changes */
 /* Font test (Settings > Font): free OFL fonts, self-hosted in /fonts. Temporary, for choosing a font. */
 @font-face { font-family: "inter"; src: url("/fonts/inter-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
 @font-face { font-family: "inter"; src: url("/fonts/inter-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
@@ -1454,3 +1455,80 @@ body.home { background: var(--bg); }
    it takes the button's place, centred on the same spot in the lower left */
 :root[data-nosettings="1"] .to-top.to-top { bottom: calc(var(--gutter) - var(--icon) * .125); }
 @media (max-width: 700px) { :root[data-nosettings="1"] .to-top.to-top { bottom: calc(18px - var(--icon) * .125); } }
+
+/* =====================================================================
+   PHONE VERSION (Juan, 2026-11-28). Everything below applies only at
+   phone widths (700px and under); the desktop site is untouched.
+   Always light. One centred column, one image after another, plain
+   vertical scroll: no staggers, shuffles, size changes or motion.
+   ===================================================================== */
+@media (max-width: 700px) {
+  :root { color-scheme: light; --ph-side: 28px; --ph-gap: 64px; --ph-top: 150px; }
+  html, body { overflow-x: hidden; }
+  *, *::before, *::after { animation: none !important; }
+
+  /* Name centred at the top; the menu as one centred row under it */
+  .inner .site-header { position: absolute; left: 0; right: 0; top: 30px; padding: 0; text-align: center; }
+  .inner .logo { display: inline-block; font-size: 19px; letter-spacing: .36em; margin-right: -.36em; }
+  .inner .nav { position: absolute; top: 74px; left: 0; right: 0; bottom: auto; flex-direction: row; justify-content: center; gap: 0 22px; }
+  .inner .nav a { flex-direction: row; }
+  .inner .nav .nav-label { font-size: 11px; letter-spacing: .2em; }
+  .inner .nav a[aria-current="page"] .nav-label { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; }
+  .inner .site-footer, .about-sketch { display: none !important; }
+
+  /* Home: the cover stays; the menu sits in the middle, larger and bold */
+  .home .site-header { left: 0; right: 0; text-align: center; }
+  .home .logo { display: inline-block; font-size: 19px; letter-spacing: .36em; margin-right: -.36em; }
+  .home .nav { position: fixed; inset: 0; margin: auto; height: max-content; width: 100%;
+    flex-direction: column; align-items: center; justify-content: center; gap: 26px; }
+  .home .nav a { flex-direction: row; justify-content: center; }
+  .home .nav .nav-label { font-family: "Jost Phone", var(--menu-font, var(--font)); font-weight: 600; font-size: 22px;
+    letter-spacing: .28em; margin-right: -.28em; opacity: 1; text-decoration: none; }
+  .home .e2-label { left: 0; right: 0; text-align: center; }
+
+  /* Work: the projects one under another, all the same width */
+  :root[data-design] body.pg-work .ed-work, .ed-work { width: auto; margin: 0; padding: var(--ph-top) var(--ph-side) 110px; }
+  .edw-feat, .edw-feat:not(.is-shuffled) { display: flex; flex-direction: column; gap: var(--ph-gap); visibility: visible; }
+  .edw-item { width: 100%; text-align: center; }
+  .edw-img { background: none; }
+  .edw-img img { width: 100%; height: auto; transition: none; }
+  .edw-t { margin-top: 16px; font-size: 12px; }
+  .edw-s { margin-top: 4px; font-size: 13px; }
+
+  /* Gallery: one sheet at a time, every sheet the same width */
+  :root[data-design="exh"] .gx-page, .gx-page { margin: 0; width: auto; padding: var(--ph-top) var(--ph-side) 110px; }
+  .gx-grid, .gx-grid.gx-grid { display: flex; flex-direction: column; gap: var(--ph-gap); }
+  .gx-cell { width: 100%; }
+  .gx-stage { height: auto; display: block; }
+  .gx-sheet { width: 100%; height: auto; aspect-ratio: var(--r); margin: 0; }
+  .gx-cap { position: static; margin-top: 16px; padding: 0; text-align: center; white-space: normal; font-size: 10px; }
+  .gx-cap::before { position: static; content: attr(data-no) "\00a0\00a0\00a0"; }
+
+  /* About: the drawing, then the text, all centred */
+  :root[data-design="edit2"] .has-ed .e2-about { display: block; height: auto; padding: var(--ph-top) var(--ph-side) 80px; text-align: center; }
+  .e2-about .e2a-fig { width: 100%; margin: 0 0 48px; }
+  .e2-about .e2a-fig i { display: none; }
+  :root .e2-about .e2a-sheet { display: block; position: static; width: 100%; height: auto; max-height: none; margin: 0; box-shadow: none; }
+  .e2-about .e2a-text { left: 0 !important; transform: none !important; }
+  .e2-about .e2a-text :is(.eda-lead, .eda-body, .eda-cred) { margin-left: auto; margin-right: auto; max-width: 30em; }
+  .e2-about .eda-lead { font-size: 21px; line-height: 1.4; }
+  .e2-about .eda-body { font-size: 15px; line-height: 1.65; }
+  .e2-about .eda-cred { font-size: 13px; line-height: 1.6; border-top: 0; margin-top: 28px; padding-top: 0; }
+  .e2-about .eda-contact { margin-top: 48px; }
+  .e2-about .about-ask, .e2-about .email.email { font-size: 15px !important; }
+  .e2-about .eda-legal { margin-top: 40px; }
+
+  /* Project and print pages: title, then every image one under another */
+  .room-page { display: block; min-height: 0; padding: 26px var(--ph-side) 90px; }
+  .room-top { position: relative; justify-content: center; text-align: center; min-height: 28px; }
+  .room-close { position: absolute; right: -6px; top: 50%; transform: translateY(-50%); }
+  .room-layout { display: flex; flex-direction: column; padding: 0; gap: 0; height: auto; }
+  .room-text { order: -1; text-align: center; margin: 44px 0 40px; align-self: stretch; max-width: none; }
+  .room-text .project-nav, .room-pnav { justify-content: center; }
+  .room-show .frame { width: 100% !important; aspect-ratio: auto; height: auto; display: flex; flex-direction: column; gap: 28px; box-shadow: none; }
+  .room-show .slide, .room-show .slide.is-on { position: static; display: block; width: 100%; height: auto; opacity: 1; transition: none; }
+  .room-show .slide { aspect-ratio: var(--sr, auto); }
+  .room-show { padding: 0; width: 100%; }
+  .room-show .slide-btn, .room-under { display: none !important; }
+  .to-top { display: none !important; }
+}
