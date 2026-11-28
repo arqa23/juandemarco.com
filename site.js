@@ -1001,7 +1001,15 @@
       document.body.appendChild(t);
     }
   }
+  // the visible bottom of the page (browser bars count as covered), for the back-to-top circle
+  function phoneVB() {
+    var v = window.visualViewport;
+    if (v && isPhone()) root.style.setProperty('--ph-vb', (v.height + v.offsetTop) + 'px');
+  }
+  if (window.visualViewport) { visualViewport.addEventListener('resize', phoneVB); visualViewport.addEventListener('scroll', phoneVB); }
+  addEventListener('resize', phoneVB);
   addEventListener('scroll', function () {
+    phoneVB();
     var t = document.querySelector('.ph-top');
     if (t) t.classList.toggle('is-on', (document.scrollingElement || document.documentElement).scrollTop > innerHeight * 0.5);
   }, { passive: true });

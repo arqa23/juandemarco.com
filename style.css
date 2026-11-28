@@ -1601,6 +1601,7 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .e2-about :is(.eda-lead, .eda-body, .eda-cred) { font-size: 16px; line-height: 1.6; }
   :root[data-phone="b"] .e2-about .eda-lead { margin-bottom: 1em; }
   :root[data-phone="b"] .e2-about .eda-cred { border-top: 0; padding-top: 0; margin-top: 1em; }
+  :root[data-phone="b"] .e2-about :is(.eda-lead, .eda-body, .eda-cred, .eda-cred p) { color: var(--ink); }   /* round 6: one colour for all three paragraphs */
   :root[data-phone="b"] .e2-about .eda-contact { border-top: 1px solid color-mix(in srgb, var(--ink) 18%, transparent); margin-top: 36px; padding-top: 28px; }
 
   /* Project and print pages: title and text, the first image right under
@@ -1618,12 +1619,24 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .ph-plate .slide { width: 100%; height: auto; }
 
   /* back to top: a small circle, bottom right, once you have scrolled */
-  :root[data-phone="b"] .ph-top { display: flex; position: fixed; right: var(--ph-side); bottom: 24px; z-index: 6; width: 40px; height: 40px; border-radius: 50%;
+  :root[data-phone="b"] .ph-top { display: flex; position: fixed; right: var(--ph-side); bottom: auto;
+    /* round 6: sits just above the visible bottom of the page; 100dvh shrinks while the
+       browser's address/tab bar shows (Safari, Chrome), so it rises above it, and drops
+       back to the bottom when the bar hides; site.js keeps --ph-vb right where dvh lags */
+    top: calc(var(--ph-vb, 100dvh) - 40px - 14px - env(safe-area-inset-bottom, 0px)); z-index: 6; width: 40px; height: 40px; border-radius: 50%;
     align-items: center; justify-content: center; padding: 0; border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); background: color-mix(in srgb, var(--bg) 88%, transparent);
     color: var(--ink); opacity: 0; pointer-events: none; transition: opacity .25s ease; cursor: pointer; }
   :root[data-phone="b"] .ph-top.is-on { opacity: 1; pointer-events: auto; }
 }
 .ph-plate figcaption, .ph-menu-btn, .ph-top { display: none; }
+/* round 6 test (Juan): the top bar ends in a soft fade, as on the desktop, instead of a hard edge.
+   Before: a solid paper bar (main 4c8eb1a). */
+@media (max-width: 700px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  :root[data-phone="b"] .inner .site-header, :root[data-phone="b"] .room-top { background: none; }
+  :root[data-phone="b"] .inner .site-header::after, :root[data-phone="b"] .room-top::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: calc(var(--bar) + 34px); z-index: -1; pointer-events: none;
+    background: linear-gradient(var(--bg) 0, var(--bg) calc(var(--bar) - 12px), color-mix(in srgb, var(--bg) 0%, transparent) 100%); }
+}
 /* Phone B held sideways: images as large as the screen's height allows */
 @media (hover: none) and (pointer: coarse) and (max-height: 500px) and (min-width: 701px) {
   :root[data-phone="b"] .edw-img { width: min(100%, 84svh); }
