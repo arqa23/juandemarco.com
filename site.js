@@ -989,7 +989,8 @@
     }
     // About (round 12, Juan): text first, the drawing after Contact and before the copyright
     var fig = document.querySelector('.e2-about .e2a-fig'), leg = document.querySelector('.e2-about .eda-legal');
-    if (fig && leg && isPhone() && root.dataset.phone === 'b') leg.parentNode.insertBefore(fig, leg);
+    var PHONE_ABOUT_TEXT_FIRST = false;   // round 14 (Juan): drawing first again on phone; true = text first, drawing after Contact (PR #98)
+    if (PHONE_ABOUT_TEXT_FIRST && fig && leg && isPhone() && root.dataset.phone === 'b') leg.parentNode.insertBefore(fig, leg);
     var pn = document.querySelector('.room-pnav');   // Prev / Next after the last image
     if (pn && isPhone() && root.dataset.phone === 'b' && !document.querySelector('.ph-pnav')) {
       var c = pn.cloneNode(true); c.classList.add('ph-pnav'); c.classList.remove('room-pnav');
