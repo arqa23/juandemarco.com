@@ -1,5 +1,6 @@
 @font-face { font-family: "Jost"; src: url("/fonts/jost-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
 @font-face { font-family: "Jost"; src: url("/fonts/jost-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Jost Phone"; src: url("/fonts/jost-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }   /* phone Home menu (semi-bold) */
 @font-face { font-family: "Jost Phone"; src: url("/fonts/jost-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }   /* phone menu only, so desktop never changes */
 /* Font test (Settings > Font): free OFL fonts, self-hosted in /fonts. Temporary, for choosing a font. */
 @font-face { font-family: "inter"; src: url("/fonts/inter-latin-300-normal.woff2") format("woff2"); font-weight: 300; font-display: swap; }
@@ -1572,7 +1573,7 @@ body.home { background: var(--bg); }
   :root[data-phone="b"] .home .nav { inset: auto auto 170px var(--ph-side); margin: 0; width: auto; align-items: flex-start; gap: 24px; }   /* round 8: one line higher */
   :root[data-phone="b"] .home .nav a { justify-content: flex-start; }
   :root[data-phone="b"] .home .nav .nav-label { margin-right: 0; text-shadow: 0 1px 14px rgba(0,0,0,.22);
-    font-family: var(--menu-font, var(--font)); font-weight: 300; }   /* round 8 test: not bold (bold = "Jost Phone" 600) */
+    font-family: "Jost Phone", var(--menu-font, var(--font)); font-weight: 500; }   /* round 9: semi-bold (light was 300, bold 600) */
   :root[data-phone="b"] .home .nav a[href="/"] { display: none; }
   :root[data-phone="b"] .home .e2-label { left: var(--ph-side); right: auto; bottom: 30px; text-align: left; }
 
@@ -1632,7 +1633,9 @@ body.home { background: var(--bg); }
 /* iPhone Safari keeps a strip below the page for its bar and the home line, so the
    circle sits lower there to look 24px from the bottom edge, like from the right */
 @supports (-webkit-touch-callout: none) {
-  @media (max-width: 700px) { :root[data-phone="b"] .ph-top { bottom: 6px; } }
+  /* round 9, from Juan's iPhone screenshot: Safari's layout ends ~60px above the glass edge,
+     so -36px puts the circle 24px from the bottom of the screen, as from the right */
+  @media (max-width: 700px) { :root[data-phone="b"] .ph-top { bottom: -36px; } }
 }
 /* round 6 test (Juan): the top bar ends in a soft fade, as on the desktop, instead of a hard edge.
    Before: a solid paper bar (main 4c8eb1a). */
@@ -1642,14 +1645,16 @@ body.home { background: var(--bg); }
     content: ""; position: absolute; left: 0; right: 0; top: 0; height: calc(var(--bar) + 34px); z-index: -1; pointer-events: none;
     background: linear-gradient(var(--fade), var(--fade-0)); }   /* round 7: the desktop's fade, 50% paper to clear; images show through */
 }
-/* Phone B held sideways: images as large as the screen's height allows */
+/* Phone B held sideways (round 9, Juan): the same layout as upright, images margin to margin, just wider */
 @media (hover: none) and (pointer: coarse) and (max-height: 500px) and (min-width: 701px) {
-  :root[data-phone="b"] .edw-img { width: min(100%, 84svh); }
-  :root[data-phone="b"] .gx-sheet { width: auto; height: 84svh; max-width: 100%; }
-  :root[data-phone="b"] .ph-plate .slide { width: auto; max-width: 100%; max-height: 84svh; }
-  :root[data-phone="b"] .ph-plate, :root[data-phone="b"] .room-show .frame { align-items: flex-start; }
-  :root[data-phone="b"] .gx-sheet { margin: 0; }
-  :root[data-phone="b"] .e2-about .e2a-fig i { width: auto; height: 84svh; }
+  :root[data-phone="b"] .edw-img { display: block; width: 100%; }
+  :root[data-phone="b"] .edw-img img { width: 100%; height: 100%; max-height: none; margin: 0; }
+  :root[data-phone="b"] .gx-sheet { width: 100%; height: auto; max-height: none; margin: 0; }
+  :root[data-phone="b"] .room-show .frame, :root[data-phone="b"] .ph-plate { align-items: stretch; }
+  :root[data-phone="b"] .room-show .slide, :root[data-phone="b"] .room-show .slide.is-on { width: 100%; height: auto; max-height: none; margin: 0; }
+  :root[data-phone="b"] .e2-about .e2a-fig { display: block; }
+  :root[data-phone="b"] .e2-about .e2a-fig i { width: 80%; height: auto; margin: 0 auto; }
   :root[data-phone="b"] .home .nav { bottom: 64px; gap: 12px; }
   :root[data-phone="b"] .home .nav .nav-label { font-size: 18px !important; }
+}
 }
