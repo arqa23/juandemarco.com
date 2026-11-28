@@ -993,7 +993,7 @@
       var show = document.querySelector('.room-show'); if (show) show.appendChild(c);
       pn.style.display = 'none';
     }
-    if (document.body.classList.contains('inner') && !document.querySelector('.ph-top')) {
+    if (false && document.body.classList.contains('inner') && !document.querySelector('.ph-top')) {   // back-to-top removed (Juan, round 11)
       var t = document.createElement('button');
       t.type = 'button'; t.className = 'ph-top'; t.setAttribute('aria-label', 'Back to top');
       t.innerHTML = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 15V5M5 10l5-5 5 5" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
