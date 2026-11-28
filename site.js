@@ -963,6 +963,15 @@
   // Work (Editorial): a new hang on every visit (Juan, 2026-11-27). The rows
   // (one large + one small, or three small) keep their make-up; their order,
   // and which side each project sits on, are drawn at random.
+  // Phone version (Juan, 2026-11-28): one plain column, nothing moves or reshuffles
+  function isPhone() { return matchMedia('(max-width: 700px)').matches; }
+  function phoneRooms() {   // project and print pages: every image, one under another
+    if (!isPhone()) return;
+    document.querySelectorAll('.room-show .slide').forEach(function (s) {
+      if (s.dataset.r) s.style.setProperty('--sr', s.dataset.r);
+      if (s.dataset.src) { s.loading = 'lazy'; s.src = s.dataset.src; s.removeAttribute('data-src'); }
+    });
+  }
   function shuffleWork() {
     // Work (Editorial): a new hang on every visit (Juan, 2026-11-27). The four
     // major projects (large) and the minor ones (small) are each shuffled, then
@@ -972,6 +981,7 @@
     // the large one above it, never straight on top of it.
     var feat = document.querySelector('.edw-feat');
     if (!feat || feat.classList.contains('is-shuffled')) return;
+    if (isPhone()) { feat.classList.add('is-shuffled'); return; }   // phone: the set order, always
     function mix(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     var all = [].slice.call(feat.querySelectorAll('.edw-item'));
     var big = mix(all.filter(function (a) { return a.classList.contains('edw-lead'); }));
@@ -999,6 +1009,7 @@
     place();
     initSettings();
     initSlideshow();
+    phoneRooms();
     initFilmstrip();
     initSquares();
     initWallGlide();
